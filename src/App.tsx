@@ -56,7 +56,9 @@ import {
   createOpenSharedProjectPageUrl,
   createNewPageUrl,
   createTestingModelPageUrl,
+  createFeaturesPageUrl,
 } from "./urls";
+import FeaturesPage from "./pages/FeaturesPage";
 
 export interface ProviderLayoutProps {
   children: ReactNode;
@@ -174,6 +176,9 @@ const createRouter = () => {
           element: <DataSamplesPage />,
         },
         {
+          path: createFeaturesPageUrl(),
+          element: <FeaturesPage />,
+        },        {
           path: createTestingModelPageUrl(),
           element: <TestingModelPage />,
         },

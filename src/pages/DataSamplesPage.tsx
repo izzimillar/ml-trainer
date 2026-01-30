@@ -20,7 +20,7 @@ import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useHasSufficientDataForTraining, useStore } from "../store";
 import { tourElClassname } from "../tours";
-import { createTestingModelPageUrl } from "../urls";
+import { createFeaturesPageUrl, createTestingModelPageUrl } from "../urls";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
@@ -44,7 +44,7 @@ const DataSamplesPage = () => {
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
 
   const handleNavigateToModel = useCallback(() => {
-    navigate(createTestingModelPageUrl());
+    navigate(createFeaturesPageUrl());
   }, [navigate]);
 
   const trainButtonRef = useRef(null);
