@@ -1,33 +1,24 @@
-import { Button, HStack } from "@chakra-ui/react";
-import { useCallback, useRef } from "react";
-import { useHasSufficientDataForTraining, useStore } from "../store";
-import { useNavigate } from "react-router";
-import { createTestingModelPageUrl } from "../urls";
-import { FormattedMessage } from "react-intl";
+import { Flex } from "@chakra-ui/react";
+import DefaultPageLayout, {
+  ProjectMenuItems,
+  ProjectToolbarItems,
+} from "../components/DefaultPageLayout";
+import FeaturesTable from "../components/FeaturesTable";
 
 const FeaturesPage = () => {
-  const navigate = useNavigate();
-
-  const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
-  const handleNavigateToModel = useCallback(() => {
-    navigate(createTestingModelPageUrl());
-  }, [navigate]);
-  const hasSufficientData = useHasSufficientDataForTraining();
-
-  const trainButtonRef = useRef(null);
-
   return (
     <>
-      <HStack>
-        <Button
-          ref={trainButtonRef}
-          className={"train-model-button"}
-          onClick={() => trainModelFlowStart(handleNavigateToModel)}
-          variant={hasSufficientData ? "primary" : "secondary-disabled"}
-        >
-          <FormattedMessage id="train-model" />
-        </Button>
-      </HStack>
+      <DefaultPageLayout
+      // localise this
+        titleId="features"
+        showPageTitle
+        menuItems={<ProjectMenuItems />}
+        toolbarItemsRight={<ProjectToolbarItems />}
+      >
+        <Flex as="main" flexGrow={1} flexDir="column">
+          <FeaturesTable />
+        </Flex>
+      </DefaultPageLayout>
     </>
   );
 };

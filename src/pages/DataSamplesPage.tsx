@@ -44,6 +44,10 @@ const DataSamplesPage = () => {
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
 
   const handleNavigateToModel = useCallback(() => {
+    navigate(createTestingModelPageUrl());
+  }, [navigate]);
+
+  const handleNavigateToFeatures = useCallback(() => {
     navigate(createFeaturesPageUrl());
   }, [navigate]);
 
@@ -97,6 +101,16 @@ const DataSamplesPage = () => {
                 <FormattedMessage id="add-action-action" />
               </Button>
             </HStack>
+
+            {/* navigate to features page button */}
+            <Button
+              onClick={handleNavigateToFeatures}
+              className={tourElClassname.trainModelButton}
+              variant="primary"
+            >
+              <FormattedMessage id="features" />
+            </Button>
+
             <HStack>
               {model ? (
                 <Button
