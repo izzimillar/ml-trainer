@@ -19,6 +19,7 @@ export const trainModel = async (
   dataWindow: DataWindow,
   onProgress?: (progress: number) => void
 ): Promise<TrainingResult> => {
+  // Gets a set of 24 values for each recording. Each set of features is labelled with a one-hot encoding
   const { features, labels } = prepareFeaturesAndLabels(data, dataWindow);
   const model: tf.LayersModel = createModel(data);
   const totalNumEpochs = mlSettings.numEpochs;
@@ -93,7 +94,7 @@ const createModel = (actions: ActionData[]): tf.LayersModel => {
   return model;
 };
 
-const normalize = (value: number, min: number, max: number) => {
+export const normalize = (value: number, min: number, max: number) => {
   const newMin = 0;
   const newMax = 1;
   return ((newMax - newMin) * (value - min)) / (max - min) + newMin;

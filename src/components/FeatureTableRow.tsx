@@ -1,10 +1,9 @@
-import { Box, Card, Grid, GridItem, HStack } from "@chakra-ui/react";
-import { ActionData, XYZData } from "../model";
-import ActionNameCard, { ActionCardNameViewMode } from "./ActionNameCard";
-import { applyFilters } from "../ml";
+import { Box, Card, GridItem, HStack, VStack } from "@chakra-ui/react";
+import { ActionData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
-import RecordingFingerprint from "./RecordingFingerprint";
+import { getFeaturesFromAction } from "../feature-visualisation";
+import ActionNameCardWithGraphs from "./ActionNameCardWithGraphs";
 
 interface FeaturesTableRowProps {
   action: ActionData;
@@ -15,45 +14,64 @@ const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
     <>
       <Box>
         <HStack>
-        <GridItem>
-          <ActionNameCard
-            value={action}
-            viewMode={ActionCardNameViewMode.Preview}
-          />
-=        </GridItem>
-
-        <GridItem h={`90px`}>
-          <HStack h={`90px`} spacing={2}>
-          {action.recordings.map((recording, idx) => (
-            <RecordingFingerprint key={idx} data={recording.data} size="md" />
-            // <FeaturesGraphic key={idx} data={recording.data} />
-          ))}
-          </HStack>
-        </GridItem>
+          <GridItem>
+            <ActionNameCardWithGraphs action={action} />
+          </GridItem>
+          <GridItem h="100%">
+            <FeaturesGraphic action={action} />
+          </GridItem>
         </HStack>
       </Box>
     </>
   );
 };
 
-const FeaturesGraphic = ({ data }: { data: XYZData }) => {
+const FeaturesGraphic = ({ action }: { action: ActionData }) => {
   const dataWindow = useStore((s) => s.dataWindow);
-  const dataFeatures = applyFilters(data, dataWindow, { normalize: true });
+  const dataFeatures = getFeaturesFromAction(action, dataWindow, {
+    normalize: true,
+  });
 
   return (
     <>
-      <Grid
-        w={`92px`}
-        h="100%"
-        position="relative">
-        {Object.keys(dataFeatures).map((k, idx) => (
-          <GridItem
-            key={idx}
-            w="100%"
-            backgroundColor={calculateGradientColor("#0f7344", dataFeatures[k])}
-          />
+      <HStack w={`100%`} h="100%">
+        {Object.keys(dataFeatures).map((feature, idx) => (
+          <Card key={idx} flex={1} h="100%" w="100%">
+            <HStack>
+              <VStack w="100%">
+                {dataFeatures[feature].x.map((value, i) => (
+                  <GridItem
+                    key={i}
+                    h="100%"
+                    w="100%"
+                    backgroundColor={calculateGradientColor("#007DBC", value)}
+                  />
+                ))}
+              </VStack>
+              <VStack>
+                {dataFeatures[feature].y.map((value, i) => (
+                  <GridItem
+                    key={i}
+                    h="100%"
+                    w="100%"
+                    backgroundColor={calculateGradientColor("#007DBC", value)}
+                  />
+                ))}
+              </VStack>
+              <VStack>
+                {dataFeatures[feature].z.map((value, i) => (
+                  <GridItem
+                    key={i}
+                    h="100%"
+                    w="100%"
+                    backgroundColor={calculateGradientColor("#007DBC", value)}
+                  />
+                ))}
+              </VStack>
+            </HStack>
+          </Card>
         ))}
-      </Grid>
+      </HStack>
     </>
   );
 };

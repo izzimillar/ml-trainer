@@ -23,12 +23,16 @@ import { useSettings } from "../store";
 interface RecordingGraphProps extends BoxProps {
   data: XYZData;
   responsive?: boolean;
+  w?: number;
+  h?: number;
 }
 
 const RecordingGraph = ({
   data,
   responsive = false,
   children,
+  w = 156,
+  h = 92,
   ...rest
 }: RecordingGraphProps) => {
   const [{ graphColorScheme, graphLineScheme, graphLineWeight }] =
@@ -59,13 +63,13 @@ const RecordingGraph = ({
       borderRadius="md"
       borderWidth={1}
       borderColor="gray.200"
-      w="158px"
+      w={(w+2)}
       height="100%"
       position="relative"
       {...rest}
     >
       {/* canvas dimensions must account for parent border width */}
-      <canvas width="156px" height="92px" ref={canvasRef} />
+      <canvas width={w} height={h} ref={canvasRef} />
       {children}
     </Box>
   );

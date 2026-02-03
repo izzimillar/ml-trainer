@@ -1,9 +1,21 @@
-import { Grid, VStack } from "@chakra-ui/react";
+import {
+  Card,
+  Grid,
+  GridItem,
+  GridProps,
+  HStack,
+  VStack,
+} from "@chakra-ui/react";
 import FeaturesTableRow from "./FeatureTableRow";
 import { useStore } from "../store";
+import { FormattedMessage } from "react-intl";
+import { mlSettings } from "../mlConfig";
 
-// interface FeaturesTableProps {
-// }
+export const gridCommonProps: Partial<GridProps> = {
+  gap: 3,
+  px: 5,
+  w: "100%",
+};
 
 const FeaturesTable = () => {
   const actions = useStore((s) => s.actions);
@@ -11,18 +23,45 @@ const FeaturesTable = () => {
   return (
     <>
       {/* list of classes along the side, list of the features along the top*/}
-      <Grid>
+      <Grid
+        {...gridCommonProps}
+        py={2}
+        alignItems={"start"}
+        autoRows={"max-content"}
+        overflow={"auto"}
+        flexGrow={1}
+        h={0}
+      >
+        <GridItem>
+          <HStack>
+            {Array.from(mlSettings.includedFilters).map((filter, idx) => (
+              <FeatureHeader key={idx} feature={filter} />
+            ))}
+          </HStack>
+        </GridItem>
+
         {actions.map((action, idx) => (
           <FeaturesTableRow key={idx} action={action} />
         ))}
       </Grid>
+    </>
+  );
+};
 
-      {/* list of features down the side 
-        class to choose from at the top
-        all the graphs from that class along the top underneath
-        each feature shown in the correct position 
-        highlight on the graph what this feature is when it is clicked on/mouse over?????
-        */}
+const FeatureHeader = ({ feature }: { feature: string }) => {
+  // add tick box to this to allow/disable it
+  return (
+    <>
+      <Card>
+        <VStack>
+          <FormattedMessage id={feature} />
+          <HStack>
+            <FormattedMessage id={`x`} />
+            <FormattedMessage id={`y`} />
+            <FormattedMessage id={`z`} />
+          </HStack>
+        </VStack>
+      </Card>
     </>
   );
 };
