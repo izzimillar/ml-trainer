@@ -1,15 +1,13 @@
 import {
-  Card,
+  Box,
   Grid,
   GridItem,
   GridProps,
-  HStack,
-  VStack,
 } from "@chakra-ui/react";
 import FeaturesTableRow from "./FeatureTableRow";
 import { useStore } from "../store";
 import { FormattedMessage } from "react-intl";
-import { mlSettings } from "../mlConfig";
+import { Filter, mlSettings } from "../mlConfig";
 
 export const gridCommonProps: Partial<GridProps> = {
   gap: 3,
@@ -20,48 +18,66 @@ export const gridCommonProps: Partial<GridProps> = {
 const FeaturesTable = () => {
   const actions = useStore((s) => s.actions);
 
+  const totalRecordings = actions.reduce((acc, action) => {
+    return action.recordings.length + acc;
+  }, 0);
+  const totalFilters = mlSettings.includedFilters.size * 3;
+
   return (
     <>
-      {/* list of classes along the side, list of the features along the top*/}
       <Grid
         {...gridCommonProps}
         py={2}
-        alignItems={"start"}
-        autoRows={"max-content"}
-        overflow={"auto"}
+        alignItems="start"
+        autoRows="max-content"
+        overflow="auto"
         flexGrow={1}
         h={0}
+        templateColumns={`repeat(${totalFilters + 2}, 1fr)`}
+        teamplateRows={`repeat(${totalRecordings + 2}, max-content)`}
       >
-        <GridItem>
-          <HStack>
-            {Array.from(mlSettings.includedFilters).map((filter, idx) => (
-              <FeatureHeader key={idx} feature={filter} />
-            ))}
-          </HStack>
-        </GridItem>
+        <GridItem colSpan={2} />
+        {/* feature headings */}
+        {/* <HStack> */}
+        {Array.from(mlSettings.includedFilters).map((filter, idx) => (
+          <FeatureHeader key={idx} feature={filter} />
+        ))}
+        {/* </HStack> */}
 
+        {/* rows */}
         {actions.map((action, idx) => (
-          <FeaturesTableRow key={idx} action={action} />
+          <Box key={idx} display="contents">
+            <GridItem fontWeight="bold" rowSpan={action.recordings.length}>
+              {action.name}
+            </GridItem>
+            {action.recordings.map((recording, idx) => (
+              <FeaturesTableRow key={idx} data={recording.data} />
+            ))}
+          </Box>
         ))}
       </Grid>
     </>
   );
 };
 
-const FeatureHeader = ({ feature }: { feature: string }) => {
+const FeatureHeader = ({ feature }: { feature: Filter }) => {
+  const axes = ["x", "y", "z"];
   // add tick box to this to allow/disable it
   return (
     <>
-      <Card>
-        <VStack>
-          <FormattedMessage id={feature} />
-          <HStack>
-            <FormattedMessage id={`x`} />
-            <FormattedMessage id={`y`} />
-            <FormattedMessage id={`z`} />
-          </HStack>
-        </VStack>
-      </Card>
+      {axes.map((axis, idx) => (
+        <GridItem key={idx}>
+          <FormattedMessage id={`${feature}-${axis}`} />
+        </GridItem>
+      ))}
+
+      {/* <Card
+        h="100%"
+        w="100%"
+        p={2}
+        display={"flex"}
+        borderWidth={1}
+        position={"relative"} */}
     </>
   );
 };

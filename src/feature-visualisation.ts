@@ -1,8 +1,15 @@
 import { normalize } from "./ml";
 import { getMlFilters, mlSettings } from "./mlConfig";
-import { ActionData, XYZData } from "./model";
+import { ActionData } from "./model";
 import { DataWindow } from "./store";
 
+
+export interface XYZFeatures {
+  x: number[];
+  y: number[];
+  z: number[];
+  count: number;
+}
 
 
 // Get a list of values for each feature from all the recordings of a single action --> this is how we want them displayed in the visualisation
@@ -10,8 +17,8 @@ export const getFeaturesFromAction = (
   action: ActionData, 
   dataWindow: DataWindow, 
   opts: { normalize?: boolean } = {}
-): Record<string, XYZData> => {
-  const features: Record<string, XYZData> = {};
+): Record<string, XYZFeatures> => {
+  const features: Record<string, XYZFeatures> = {};
   const filters = getMlFilters(dataWindow);
   
   // for each of the included filters
@@ -26,7 +33,8 @@ export const getFeaturesFromAction = (
           features[`${filter}`] = { 
             x: [normalize(strategy(x, dataWindow), min, max)], 
             y: [normalize(strategy(y, dataWindow), min, max)], 
-            z: [normalize(strategy(z, dataWindow), min, max)] 
+            z: [normalize(strategy(z, dataWindow), min, max)],
+            count: action.recordings.length,
           };
         } else {
           features[`${filter}`].x.push(
@@ -44,7 +52,8 @@ export const getFeaturesFromAction = (
           features[`${filter}`] = { 
             x: [strategy(x, dataWindow)], 
             y: [strategy(y, dataWindow)], 
-            z: [strategy(z, dataWindow)] 
+            z: [strategy(z, dataWindow)],
+            count: action.recordings.length,
           };
         } else {
           features[`${filter}`].x.push(strategy(x, dataWindow));

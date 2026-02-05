@@ -1,78 +1,40 @@
-import { Box, Card, GridItem, HStack, VStack } from "@chakra-ui/react";
-import { ActionData } from "../model";
+import { GridItem } from "@chakra-ui/react";
+import { XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
-import { getFeaturesFromAction } from "../feature-visualisation";
-import ActionNameCardWithGraphs from "./ActionNameCardWithGraphs";
+import { applyFilters } from "../ml";
+import RecordingGraph from "./RecordingGraph";
 
 interface FeaturesTableRowProps {
-  action: ActionData;
+  data: XYZData;
 }
 
-const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
+const FeaturesTableRow = ({ data }: FeaturesTableRowProps) => {
+  const dataWindow = useStore((s) => s.dataWindow);
+  const dataFeatures = applyFilters(data, dataWindow, { normalize: true });
+
   return (
     <>
-      <Box>
-        <HStack>
-          <GridItem>
-            <ActionNameCardWithGraphs action={action} />
-          </GridItem>
-          <GridItem h="100%">
-            <FeaturesGraphic action={action} />
-          </GridItem>
-        </HStack>
-      </Box>
+      <GridItem>
+        <RecordingGraph data={data} h={56} w={96} />
+      </GridItem>
+
+      {Object.keys(dataFeatures).map((feature, idx) => (
+        <GridItem key={idx}>
+          <ColourBlock value={dataFeatures[feature]} />
+        </GridItem>
+      ))}
     </>
   );
 };
 
-const FeaturesGraphic = ({ action }: { action: ActionData }) => {
-  const dataWindow = useStore((s) => s.dataWindow);
-  const dataFeatures = getFeaturesFromAction(action, dataWindow, {
-    normalize: true,
-  });
-
+const ColourBlock = ({ value }: { value: number }) => {
   return (
-    <>
-      <HStack w={`100%`} h="100%">
-        {Object.keys(dataFeatures).map((feature, idx) => (
-          <Card key={idx} flex={1} h="100%" w="100%">
-            <HStack>
-              <VStack w="100%">
-                {dataFeatures[feature].x.map((value, i) => (
-                  <GridItem
-                    key={i}
-                    h="100%"
-                    w="100%"
-                    backgroundColor={calculateGradientColor("#007DBC", value)}
-                  />
-                ))}
-              </VStack>
-              <VStack>
-                {dataFeatures[feature].y.map((value, i) => (
-                  <GridItem
-                    key={i}
-                    h="100%"
-                    w="100%"
-                    backgroundColor={calculateGradientColor("#007DBC", value)}
-                  />
-                ))}
-              </VStack>
-              <VStack>
-                {dataFeatures[feature].z.map((value, i) => (
-                  <GridItem
-                    key={i}
-                    h="100%"
-                    w="100%"
-                    backgroundColor={calculateGradientColor("#007DBC", value)}
-                  />
-                ))}
-              </VStack>
-            </HStack>
-          </Card>
-        ))}
-      </HStack>
-    </>
+    <GridItem
+      h={"56px"}
+      w="56px"
+      backgroundColor={calculateGradientColor("#007DBC", value)}
+    />
   );
 };
 
