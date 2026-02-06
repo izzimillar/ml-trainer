@@ -29,16 +29,17 @@ const FeaturesTable = () => {
         overflow="auto"
         flexGrow={1}
         h={0}
-        templateColumns={`auto auto repeat(${totalFilters * 3}, 1fr)`}
+        // change this to not be 3
+        templateColumns={`auto auto repeat(${totalFilters}, 1fr)`}
         templateRows={`auto auto repeat(${totalRecordings}, 1fr)`}
       >
-        <GridItem colSpan={2} rowSpan={2} />
+        {/* <GridItem colSpan={2} rowSpan={2} /> */}
         {/* feature headings */}
-        {Array.from(mlSettings.includedFilters).map((filter, idx) => (
+        {/* {Array.from(mlSettings.includedFilters).map((filter, idx) => (
           <GridItem key={idx} colSpan={3} rowSpan={2}>
             <FeatureHeader key={idx} feature={filter} />
           </GridItem>
-        ))}
+        ))} */}
 
         {/* rows */}
         {actions.map((action, idx) => (

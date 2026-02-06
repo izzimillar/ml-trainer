@@ -5,11 +5,17 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { ChartConfiguration, ChartTypeRegistry } from "chart.js";
+import {
+  ChartConfiguration,
+  ChartTypeRegistry,
+  ScriptableContext,
+} from "chart.js";
 import { GraphLineStyles } from "./hooks/use-graph-line-styles";
 import { maxAccelerationScaleForGraphs } from "./mlConfig";
 import { XYZData } from "./model";
 import { GraphLineWeight } from "./settings";
+import { min } from "d3";
+import { border } from "@chakra-ui/react";
 
 const smoothen = (d: number[]): number[] => {
   if (d.length === 0) {
@@ -75,6 +81,7 @@ export const getConfig = (
           borderColor: colors.x,
           borderDash: lineStyles.x ?? [],
           data: x,
+          pointRadius: getMaxPoint,
         },
         {
           ...common,
@@ -89,6 +96,12 @@ export const getConfig = (
           borderColor: colors.z,
           borderDash: lineStyles.z ?? [],
           data: z,
+        },
+        {
+          ...common,
+          label: "mean",
+          borderColor: "#d507b3",
+          data: getMean(x),
         },
       ],
     },
@@ -146,3 +159,55 @@ export const getConfig = (
     },
   };
 };
+//     Filter.MAX,
+// Filter.MEAN,
+// Filter.MIN,
+// Filter.STD,
+// Filter.PEAKS,
+// Filter.ACC,
+// Filter.ZCR,
+// Filter.RMS,
+
+// get the indices of the max values in the x,y, and z directions
+function getMaxPoint(context: ScriptableContext<"line">) {
+  const points = context.dataset.data as { x: number; y: number }[];
+
+  const data: number[] = [];
+  points.map((point) => {
+    data.push(point.y);
+  }, [] as number[]);
+
+  const maxIndex = data.indexOf(Math.max(...data));
+  const isMax = context.dataIndex == maxIndex;
+  return isMax ? 10 : 0;
+  return 0;
+}
+
+function getMinPoint(context: ScriptableContext<"line">) {
+  const points = context.dataset.data as { x: number; y: number }[];
+
+  const data: number[] = [];
+  points.map((point) => {
+    data.push(point.y);
+  }, [] as number[]);
+
+  const minIndex = data.indexOf(Math.min(...data));
+  const isMin = context.dataIndex == minIndex;
+  return isMin ? 10 : 0;
+  return 0;
+}
+
+function getMean(points: Pos[]): Pos[] {
+  const sum = points.reduce((sum, point) => {
+    return point.y + sum;
+  }, 0);
+
+  const mean = sum / points.length;
+
+  return [
+    { x: 0, y: mean },
+    { x: points.length, y: mean },
+  ];
+}
+
+

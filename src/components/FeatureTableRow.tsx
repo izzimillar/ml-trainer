@@ -1,11 +1,10 @@
-import { Box, Card, Grid, GridItem } from "@chakra-ui/react";
-import { ActionData, XYZData } from "../model";
+import { Card, Grid, GridItem } from "@chakra-ui/react";
+import { ActionData, RecordingData, XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
 import { applyFilters } from "../ml";
 import RecordingGraph from "./RecordingGraph";
 import { FormattedMessage } from "react-intl";
-import { Form } from "react-router-dom";
 
 interface FeaturesTableRowProps {
   action: ActionData;
@@ -19,7 +18,10 @@ const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
       </GridItem>
 
       {action.recordings.map((recording, idx) => (
-        <RecordingFeaturesRow key={idx} data={recording.data} />
+        <GridItem key={idx}>
+          <RecordingGraphFeatureValues key={idx} recording={recording} />
+        </GridItem>
+        // <FeatureValuesRow key={idx} data={recording.data} />
       ))}
     </>
   );
@@ -48,7 +50,7 @@ const FeatureHeaderRow = ({ action }: { action: ActionData }) => {
   );
 };
 
-const RecordingFeaturesRow = ({ data }: { data: XYZData }) => {
+const FeatureValuesRow = ({ data }: { data: XYZData }) => {
   const dataWindow = useStore((s) => s.dataWindow);
   const dataFeatures = applyFilters(data, dataWindow, { normalize: true });
 
@@ -84,6 +86,14 @@ const NumberBlock = ({ value }: { value: number }) => {
       {`${rounded}`}
     </GridItem>
   );
+};
+
+const RecordingGraphFeatureValues = ({
+  recording,
+}: {
+  recording: RecordingData;
+}) => {
+  return <RecordingGraph data={recording.data} h={300} w={450} />;
 };
 
 export default FeaturesTableRow;
