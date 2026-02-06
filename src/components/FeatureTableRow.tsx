@@ -1,10 +1,11 @@
-import { Card, Grid, GridItem } from "@chakra-ui/react";
+import { Box, Card, Grid, GridItem } from "@chakra-ui/react";
 import { ActionData, XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
 import { applyFilters } from "../ml";
 import RecordingGraph from "./RecordingGraph";
 import { FormattedMessage } from "react-intl";
+import { Form } from "react-router-dom";
 
 interface FeaturesTableRowProps {
   action: ActionData;
@@ -54,7 +55,7 @@ const RecordingFeaturesRow = ({ data }: { data: XYZData }) => {
   return (
     <>
       {Object.keys(dataFeatures).map((feature, idx) => (
-        <ColourBlock key={idx} value={dataFeatures[feature]} />
+        <NumberBlock key={idx} value={dataFeatures[feature]} />
       ))}
     </>
   );
@@ -67,6 +68,21 @@ const ColourBlock = ({ value }: { value: number }) => {
       w="56px"
       backgroundColor={calculateGradientColor("#007DBC", value)}
     />
+  );
+};
+
+const NumberBlock = ({ value }: { value: number }) => {
+  const dp = 1000;
+  const rounded = Math.round(value * dp) / dp;
+  return (
+    <GridItem
+      h={"56px"}
+      w="56px"
+      textAlign={"center"}
+      backgroundColor={calculateGradientColor("#007DBC", value)}
+    >
+      {`${rounded}`}
+    </GridItem>
   );
 };
 
