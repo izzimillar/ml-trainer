@@ -1,8 +1,9 @@
-import { Box, Card, Grid, GridItem, GridProps, VStack } from "@chakra-ui/react";
+import { Box, Card, Grid, GridItem, GridProps, Text } from "@chakra-ui/react";
 import FeaturesTableRow from "./FeatureTableRow";
 import { useStore } from "../store";
 import { FormattedMessage } from "react-intl";
 import { Filter, mlSettings } from "../mlConfig";
+import ClickableTooltip from "./ClickableTooltip";
 
 export const gridCommonProps: Partial<GridProps> = {
   gap: 3,
@@ -56,26 +57,36 @@ const FeatureHeader = ({ feature }: { feature: Filter }) => {
   // add tick box to this to allow/disable it
   return (
     <>
-      <Card
-        h="100%"
-        w="100%"
-        p={2}
-        display={"flex"}
-        borderWidth={1}
-        position={"relative"}
+      <ClickableTooltip
+        placement="end-end"
+        label={
+          <Text p={3}>
+            {/* this should't be default x but is ok for now */}
+            <FormattedMessage id={`fingerprint-${feature}-x-tooltip`} />
+          </Text>
+        }
       >
-        <GridItem textAlign={"center"} colSpan={3} rowSpan={1}>
-          <FormattedMessage id={`${feature}`} />
-        </GridItem>
+        <Card
+          h="100%"
+          w="100%"
+          p={2}
+          display={"flex"}
+          borderWidth={1}
+          position={"relative"}
+        >
+          <GridItem textAlign={"center"} colSpan={3} rowSpan={1}>
+            <FormattedMessage id={`${feature}`} />
+          </GridItem>
 
-        <Grid>
-          {axes.map((axis, idx) => (
-            <GridItem key={idx} textAlign={"center"} gridRow={2}>
-              <FormattedMessage id={`${axis}`} />
-            </GridItem>
-          ))}
-        </Grid>
-      </Card>
+          <Grid>
+            {axes.map((axis, idx) => (
+              <GridItem key={idx} textAlign={"center"} gridRow={2}>
+                <FormattedMessage id={`${axis}`} />
+              </GridItem>
+            ))}
+          </Grid>
+        </Card>
+      </ClickableTooltip>
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { Card, Grid, GridItem, Input } from "@chakra-ui/react";
+import { Card, Grid, GridItem } from "@chakra-ui/react";
 import { ActionData, XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
@@ -27,7 +27,12 @@ const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
 const FeatureHeaderRow = ({ action }: { action: ActionData }) => {
   return (
     <Card>
-      <Grid templateColumns={`repeat(2, auto)`} alignItems="center" py={2}>
+      <Grid
+        templateColumns={`repeat(2, auto)`}
+        templateRows={`repeat(${action.recordings.length}, auto)`}
+        alignItems="center"
+        py={2}
+      >
         <GridItem rowSpan={action.recordings.length}>
           <FormattedMessage id={action.name} />
         </GridItem>
