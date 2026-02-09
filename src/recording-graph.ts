@@ -54,6 +54,11 @@ interface GraphColors {
   z: string;
 }
 
+const toTransparent = (colour: string, value: number) => {
+  const trans = `${colour.slice(0, colour.length - 2)}, ${value})`
+  return trans
+}
+
 export const getConfig = (
   { x: rawX, y: rawY, z: rawZ }: XYZData,
   responsive: boolean,
@@ -64,6 +69,8 @@ export const getConfig = (
   const x = processDimensionData(rawX);
   const y = processDimensionData(rawY);
   const z = processDimensionData(rawZ);
+  
+  const transparency = 0.3;
   const common = {
     borderWidth: graphLineWeight === "default" ? 1 : 2,
     pointRadius: 0,
@@ -78,14 +85,18 @@ export const getConfig = (
           label: "x",
           borderColor: colors.x,
           borderDash: lineStyles.x ?? [],
+          // fill: 'origin',
+          backgroundColor: toTransparent(colors.x, transparency),
           data: x,
-          pointRadius: labelPeaks,
+          // pointRadius: labelPeaks,
         },
         {
           ...common,
           label: "y",
           borderColor: colors.y,
           borderDash: lineStyles.y ?? [],
+          // fill: 'origin',
+          backgroundColor: toTransparent(colors.y, transparency),
           data: y,
         },
         {
@@ -93,6 +104,8 @@ export const getConfig = (
           label: "z",
           borderColor: colors.z,
           borderDash: lineStyles.z ?? [],
+          // fill: 'origin',
+          backgroundColor: toTransparent(colors.z, transparency),
           data: z,
         },
         // {
@@ -130,7 +143,7 @@ export const getConfig = (
           ticks: {
             display: false, //this will remove only the label
           },
-          display: false,
+          display: true,
         },
         y: {
           type: "linear",
@@ -138,12 +151,14 @@ export const getConfig = (
           max: maxAccelerationScaleForGraphs,
           grid: {
             drawTicks: false,
-            display: false,
+            display: true,
+            lineWidth: (ctx) => ctx.tick.value === 0 ? 1.5 : 0,
+            color: '#555'
           },
           ticks: {
             display: false, //this will remove only the label
           },
-          display: false,
+          // display: false,
         },
       },
       plugins: {
@@ -200,13 +215,11 @@ function labelPeaks(context: ScriptableContext<"line">) {
   points.map((point) => {
     data.push(point.y);
   }, [] as number[]);
-  
+
   const peaks = peakIndices(data);
 
   return peaks.includes(context.dataIndex) ? 10 : 0;
-
 }
-
 
 function toHorizontalLine(value: number, count: number): Pos[] {
   return [
@@ -256,14 +269,16 @@ const peakIndices = (data: number[]) => {
   if (data.length < lag + 2) {
     throw new Error("data sample is too short");
   }
-  
+
   const mean = (data: number[]) => {
     return data.reduce((a, b) => a + b) / data.length;
-  }
+  };
 
   const stddev = (data: number[]) => {
-    return Math.sqrt(data.reduce((a, b) => a + Math.pow(b - mean(data), 2), 0) / data.length)
-  }
+    return Math.sqrt(
+      data.reduce((a, b) => a + Math.pow(b - mean(data), 2), 0) / data.length
+    );
+  };
 
   // init variables
   const signals = Array(data.length).fill(0) as number[];

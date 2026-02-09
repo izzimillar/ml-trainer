@@ -7,6 +7,7 @@
 import { Box, BoxProps } from "@chakra-ui/react";
 import {
   Chart,
+  Filler,
   LineController,
   LineElement,
   LinearScale,
@@ -42,7 +43,7 @@ const RecordingGraph = ({
   const lineStyles = useGraphLineStyles(graphLineScheme);
   useEffect(() => {
     Chart.unregister(...registerables);
-    Chart.register([LinearScale, LineController, PointElement, LineElement]);
+    Chart.register([LinearScale, LineController, PointElement, LineElement, Filler]);
     const chart = new Chart(
       canvasRef.current?.getContext("2d") ?? new HTMLCanvasElement(),
       getRecordingChartConfig(
