@@ -69,7 +69,7 @@ const peaks: FilterStrategy = (data) => {
   const avgFilter: number[] = [];
   avgFilter[lag - 1] = _mean(lead_in);
   const stdFilter: number[] = [];
-  stdFilter[lag - 1] = _mean(lead_in);
+  stdFilter[lag - 1] = _stddev(lead_in);
 
   for (let i = lag; i < data.length; i++) {
     if (
