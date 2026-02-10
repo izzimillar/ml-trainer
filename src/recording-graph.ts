@@ -9,16 +9,19 @@ import {
   ChartConfiguration,
   ChartTypeRegistry,
   ScriptableContext,
+  ScriptableLineSegmentContext,
 } from "chart.js";
 import { GraphLineStyles } from "./hooks/use-graph-line-styles";
 import { maxAccelerationScaleForGraphs } from "./mlConfig";
 import { XYZData } from "./model";
 import { GraphLineWeight } from "./settings";
+import { cross } from "d3";
 
 const smoothen = (d: number[]): number[] => {
   if (d.length === 0) {
     return d;
   }
+
   const newData: number[] = [];
   let prevValue = d[0];
   d.forEach((v) => {
@@ -55,9 +58,9 @@ interface GraphColors {
 }
 
 const toTransparent = (colour: string, value: number) => {
-  const trans = `${colour.slice(0, colour.length - 2)}, ${value})`
-  return trans
-}
+  const trans = `${colour.slice(0, colour.length - 2)}, ${value})`;
+  return trans;
+};
 
 export const getConfig = (
   { x: rawX, y: rawY, z: rawZ }: XYZData,
@@ -69,7 +72,7 @@ export const getConfig = (
   const x = processDimensionData(rawX);
   const y = processDimensionData(rawY);
   const z = processDimensionData(rawZ);
-  
+
   const transparency = 0.3;
   const common = {
     borderWidth: graphLineWeight === "default" ? 1 : 2,
@@ -85,10 +88,14 @@ export const getConfig = (
           label: "x",
           borderColor: colors.x,
           borderDash: lineStyles.x ?? [],
-          // fill: 'origin',
+          fill: "origin",
           backgroundColor: toTransparent(colors.x, transparency),
           data: x,
-          // pointRadius: labelPeaks,
+          // pointRadius: labelZeroCross,
+          segment: {
+            borderWidth: (ctx) => getZeroCrossingPoints(ctx, x),
+          },
+          borderCapStyle: "round"
         },
         {
           ...common,
@@ -152,11 +159,13 @@ export const getConfig = (
           grid: {
             drawTicks: false,
             display: true,
-            lineWidth: (ctx) => ctx.tick.value === 0 ? 1.5 : 0,
-            color: '#555'
+            lineWidth: (ctx) => (ctx.tick.value === 0 ? 1.5 : 0),
           },
           ticks: {
-            display: false, //this will remove only the label
+            callback: function (val) {
+              return val === 0 ? this.getLabelForValue(val) : "";
+            },
+            display: true, //this will remove only the label
           },
           // display: false,
         },
@@ -181,8 +190,7 @@ export const getConfig = (
 // Filter.ZCR,
 // Filter.RMS,
 
-// get the indices of the max values in the x,y, and z directions
-function getMaxPoint(context: ScriptableContext<"line">) {
+function yValuesFromCtx(context: ScriptableContext<"line">) {
   const points = context.dataset.data as Pos[];
 
   const data: number[] = [];
@@ -190,35 +198,7 @@ function getMaxPoint(context: ScriptableContext<"line">) {
     data.push(point.y);
   }, [] as number[]);
 
-  const maxIndex = data.indexOf(Math.max(...data));
-  const isMax = context.dataIndex == maxIndex;
-  return isMax ? 10 : 0;
-}
-
-function getMinPoint(context: ScriptableContext<"line">) {
-  const points = context.dataset.data as Pos[];
-
-  const data: number[] = [];
-  points.map((point) => {
-    data.push(point.y);
-  }, [] as number[]);
-
-  const minIndex = data.indexOf(Math.min(...data));
-  const isMin = context.dataIndex == minIndex;
-  return isMin ? 10 : 0;
-}
-
-function labelPeaks(context: ScriptableContext<"line">) {
-  const points = context.dataset.data as Pos[];
-
-  const data: number[] = [];
-  points.map((point) => {
-    data.push(point.y);
-  }, [] as number[]);
-
-  const peaks = peakIndices(data);
-
-  return peaks.includes(context.dataIndex) ? 10 : 0;
+  return data;
 }
 
 function toHorizontalLine(value: number, count: number): Pos[] {
@@ -228,12 +208,69 @@ function toHorizontalLine(value: number, count: number): Pos[] {
   ];
 }
 
+// get the indices of the max values in the x,y, and z directions
+function getMaxPoint(context: ScriptableContext<"line">) {
+  const data = yValuesFromCtx(context);
+
+  const maxIndex = data.indexOf(Math.max(...data));
+  const isMax = context.dataIndex == maxIndex;
+  return isMax ? 10 : 0;
+}
+
+function getMinPoint(context: ScriptableContext<"line">) {
+  const data = yValuesFromCtx(context);
+
+  const minIndex = data.indexOf(Math.min(...data));
+  const isMin = context.dataIndex == minIndex;
+  return isMin ? 10 : 0;
+}
+
+function labelPeaks(context: ScriptableContext<"line">) {
+  const data = yValuesFromCtx(context);
+
+  const peaks = peakIndices(data);
+
+  return peaks.includes(context.dataIndex) ? 10 : 0;
+}
+
 function getMean(points: Pos[]) {
   return toHorizontalLine(_mean(points), points.length);
 }
 
 function getStdDev(points: Pos[]) {
   return toHorizontalLine(_stddev(points), points.length);
+}
+
+function getZeroCrossingPoints(
+  context: ScriptableLineSegmentContext,
+  points: Pos[]
+) {
+  interface LineSegment {
+    start: number;
+    end: number;
+  }
+  // const data = yValuesFromCtx(context);
+  const data: number[] = [];
+  points.map((point) => {
+    data.push(point.y);
+  }, [] as number[]);
+
+  const indices: LineSegment[] = [];
+
+  for (let i = 1; i < data.length; i++) {
+    if (
+      (data[i] >= 0 && data[i - 1] < 0) ||
+      (data[i] < 0 && data[i - 1] >= 0)
+    ) {
+      indices.push({ start: i - 1, end: i });
+    }
+  }
+
+  const crossing = indices.some(({ start, end }) => {
+    return context.p0DataIndex === start && context.p1DataIndex === end;
+  });
+
+  return crossing ? 4 : 1;
 }
 
 function _mean(points: Pos[]): number {
@@ -257,7 +294,7 @@ function _stddev(points: Pos[]) {
   return stddev;
 }
 
-const peakIndices = (data: number[]) => {
+function peakIndices(data: number[]) {
   // how many points are used in the rolling calculation
   const lag = 5;
   // how many stddev away from the mean a point needs to be a signal
@@ -320,4 +357,4 @@ const peakIndices = (data: number[]) => {
     stdFilter[i] = stddev(y_lag);
   }
   return indices;
-};
+}
