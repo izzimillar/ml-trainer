@@ -83,20 +83,20 @@ export const getConfig = (
     type: "line",
     data: {
       datasets: [
-        {
-          ...common,
-          label: "x",
-          borderColor: colors.x,
-          borderDash: lineStyles.x ?? [],
-          fill: "origin",
-          backgroundColor: toTransparent(colors.x, transparency),
-          data: x,
-          // pointRadius: labelZeroCross,
-          segment: {
-            borderWidth: (ctx) => getZeroCrossingPoints(ctx, x),
-          },
-          borderCapStyle: "round"
-        },
+        // {
+        //   ...common,
+        //   label: "x",
+        //   borderColor: colors.x,
+        //   borderDash: lineStyles.x ?? [],
+        //   fill: "origin",
+        //   backgroundColor: toTransparent(colors.x, transparency),
+        //   data: x,
+        //   // pointRadius: labelZeroCross,
+        //   segment: {
+        //     borderWidth: (ctx) => getZeroCrossingPoints(ctx, x),
+        //   },
+        //   borderCapStyle: "round",
+        // },
         {
           ...common,
           label: "y",
@@ -115,12 +115,18 @@ export const getConfig = (
           backgroundColor: toTransparent(colors.z, transparency),
           data: z,
         },
-        // {
-        //   ...common,
-        //   label: "stddev",
-        //   borderColor: "#d507b3",
-        //   data: getStdDev(x),
-        // },
+        {
+          ...common,
+          label: "stddev",
+          borderColor: "#d507b3",
+          data: getPositiveValues(x),
+        },
+        {
+          ...common,
+          label: "stddev",
+          borderColor: "#d507b3",
+          data: getRootMeanSquare(x),
+        },
       ],
     },
     options: {
@@ -271,6 +277,20 @@ function getZeroCrossingPoints(
   });
 
   return crossing ? 4 : 1;
+}
+
+function getRootMeanSquare(points: Pos[]) {
+  const rms = Math.sqrt(
+    points.reduce((acc, { y }) => acc + Math.pow(y, 2), 0) / points.length
+  );
+
+  return toHorizontalLine(rms, points.length);
+}
+
+function getPositiveValues(points: Pos[]) {
+  return points.map(({ x, y }) => {
+    return { x: x, y: Math.abs(y) };
+  });
 }
 
 function _mean(points: Pos[]): number {
