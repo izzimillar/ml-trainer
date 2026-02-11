@@ -6,7 +6,7 @@
  */
 import * as tf from "@tensorflow/tfjs";
 import { SymbolicTensor } from "@tensorflow/tfjs";
-import { getMlFilters, mlSettings } from "./mlConfig";
+import { Filter, getMlFilters, mlSettings } from "./mlConfig";
 import { ActionData, XYZData } from "./model";
 import { DataWindow } from "./store";
 
@@ -103,6 +103,29 @@ export const normalize = (value: number, min: number, max: number) => {
 // Used for training model and producing fingerprints
 // applyFilters reduces array of x, y and z inputs to a single number array with values.
 export const applyFilters = (
+  data: XYZData,
+  dataWindow: DataWindow,
+  opts: { normalize?: boolean } = {}
+): Record<string, number> => {
+  if (data.x.length === 0 || data.y.length === 0 || data.z.length === 0) {
+    throw new Error("Empty x/y/z data");
+  }
+  return Array.from(mlSettings.includedFilters).reduce((acc, filter) => {
+    const { x, y, z } = applyFilter(filter, data, dataWindow, {
+      normalize: opts.normalize,
+    });
+
+    return {
+      ...acc,
+      [`${filter}-x`]: x,
+      [`${filter}-y`]: y,
+      [`${filter}-z`]: z,
+    };
+  }, {} as Record<string, number>);
+};
+
+export const applyFilter = (
+  filter: Filter,
   { x, y, z }: XYZData,
   dataWindow: DataWindow,
   opts: { normalize?: boolean } = {}
@@ -110,20 +133,19 @@ export const applyFilters = (
   if (x.length === 0 || y.length === 0 || z.length === 0) {
     throw new Error("Empty x/y/z data");
   }
+
   const filters = getMlFilters(dataWindow);
-  return Array.from(mlSettings.includedFilters).reduce((acc, filter) => {
-    const { strategy, min, max } = filters[filter];
-    const applyFilter = (vs: number[]) =>
-      opts.normalize
-        ? normalize(strategy(vs, dataWindow), min, max)
-        : strategy(vs, dataWindow);
-    return {
-      ...acc,
-      [`${filter}-x`]: applyFilter(x),
-      [`${filter}-y`]: applyFilter(y),
-      [`${filter}-z`]: applyFilter(z),
-    };
-  }, {} as Record<string, number>);
+  const { strategy, min, max } = filters[filter];
+
+  const applyFilterOnDimension = (vs: number[]) =>
+    opts.normalize
+      ? normalize(strategy(vs, dataWindow), min, max)
+      : strategy(vs, dataWindow);
+  return {
+    x: applyFilterOnDimension(x),
+    y: applyFilterOnDimension(y),
+    z: applyFilterOnDimension(z),
+  };
 };
 
 interface PredictInput {

@@ -14,9 +14,9 @@ export const gridCommonProps: Partial<GridProps> = {
 const FeaturesTable = () => {
   const actions = useStore((s) => s.actions);
 
-  const totalRecordings = actions.reduce((acc, action) => {
-    return action.recordings.length + acc;
-  }, 0);
+  // const totalRecordings = actions.reduce((acc, action) => {
+  //   return action.recordings.length + acc;
+  // }, 0);
   const totalFilters = mlSettings.includedFilters.size;
 
   return (
@@ -29,23 +29,24 @@ const FeaturesTable = () => {
         overflow="auto"
         flexGrow={1}
         h={0}
-        // change this to not be 3
-        templateColumns={`auto auto repeat(${totalFilters}, 1fr)`}
-        templateRows={`auto auto repeat(${totalRecordings}, 1fr)`}
+        //  ACTION NAME | FEATURES...
+        templateColumns={`auto repeat(${totalFilters}, 1fr)`}
+        //  FEATURE NAME | ACTIONS...
+        templateRows={`auto repeat(${actions.length}, 1fr)`}
       >
-        {/* <GridItem colSpan={2} rowSpan={2} /> */}
+        {/* empty top left cell */}
+        <GridItem />
+
         {/* feature headings */}
-        {/* {Array.from(mlSettings.includedFilters).map((filter, idx) => (
-          <GridItem key={idx} colSpan={3} rowSpan={2}>
+        {Array.from(mlSettings.includedFilters).map((filter, idx) => (
+          <GridItem key={idx}>
             <FeatureHeader key={idx} feature={filter} />
           </GridItem>
-        ))} */}
+        ))}
 
-        {/* rows */}
+        {/* features */}
         {actions.map((action, idx) => (
-          <Box key={idx} display="contents">
-            <FeaturesTableRow key={idx} action={action} />
-          </Box>
+          <FeaturesTableRow key={idx} action={action} />
         ))}
       </Grid>
     </>
@@ -62,7 +63,7 @@ const FeatureHeader = ({ feature }: { feature: Filter }) => {
         placement="end-end"
         label={
           <Text p={3}>
-            {/* this should't be default x but is ok for now */}
+            {/* TODO: change this to be a correct description */}
             <FormattedMessage id={`fingerprint-${feature}-x-tooltip`} />
           </Text>
         }
@@ -75,11 +76,13 @@ const FeatureHeader = ({ feature }: { feature: Filter }) => {
           borderWidth={1}
           position={"relative"}
         >
-          <GridItem textAlign={"center"} colSpan={3} rowSpan={1}>
-            <FormattedMessage id={`${feature}`} />
-          </GridItem>
-
           <Grid>
+            {/* feature name */}
+            <GridItem textAlign={"center"} colSpan={3} rowSpan={1}>
+              <FormattedMessage id={`${feature}`} />
+            </GridItem>
+
+            {/* x, y, z */}
             {axes.map((axis, idx) => (
               <GridItem key={idx} textAlign={"center"} gridRow={2}>
                 <FormattedMessage id={`${axis}`} />

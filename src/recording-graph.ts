@@ -15,7 +15,6 @@ import { GraphLineStyles } from "./hooks/use-graph-line-styles";
 import { maxAccelerationScaleForGraphs } from "./mlConfig";
 import { XYZData } from "./model";
 import { GraphLineWeight } from "./settings";
-import { cross } from "d3";
 
 const smoothen = (d: number[]): number[] => {
   if (d.length === 0) {

@@ -1,27 +1,43 @@
-import { Card, Grid, GridItem } from "@chakra-ui/react";
+import { Card, Grid, GridItem, VStack } from "@chakra-ui/react";
 import { ActionData, RecordingData, XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
-import { applyFilters } from "../ml";
+import { applyFilter, applyFilters } from "../ml";
 import RecordingGraph from "./RecordingGraph";
 import { FormattedMessage } from "react-intl";
+import { Filter, mlSettings } from "../mlConfig";
 
 interface FeaturesTableRowProps {
   action: ActionData;
 }
 
 const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
+  const filters = mlSettings.includedFilters;
+  const numberOfAxes = 3;
+
   return (
     <>
-      <GridItem rowSpan={action.recordings.length} colSpan={2}>
+      <GridItem>
         <FeatureHeaderRow action={action} />
       </GridItem>
 
-      {action.recordings.map((recording, idx) => (
+      {Array.from(filters).map((filter, idx) => (
         <GridItem key={idx}>
-          <RecordingGraphFeatureValues key={idx} recording={recording} />
+          <Grid
+            templateColumns={`repeat(${numberOfAxes}, 1fr)`}
+            templateRows={`repeat(${action.recordings.length}, 1fr)`}
+          >
+            <>
+              {action.recordings.map((recording, idx) => (
+                <FeatureValues
+                  key={idx}
+                  filter={filter}
+                  data={recording.data}
+                />
+              ))}
+            </>
+          </Grid>
         </GridItem>
-        // <FeatureValuesRow key={idx} data={recording.data} />
       ))}
     </>
   );
@@ -50,15 +66,17 @@ const FeatureHeaderRow = ({ action }: { action: ActionData }) => {
   );
 };
 
-const FeatureValuesRow = ({ data }: { data: XYZData }) => {
+const FeatureValues = ({ data, filter }: { data: XYZData; filter: Filter }) => {
   const dataWindow = useStore((s) => s.dataWindow);
-  const dataFeatures = applyFilters(data, dataWindow, { normalize: true });
+  const { x, y, z } = applyFilter(filter, data, dataWindow, {
+    normalize: true,
+  });
 
   return (
     <>
-      {Object.keys(dataFeatures).map((feature, idx) => (
-        <NumberBlock key={idx} value={dataFeatures[feature]} />
-      ))}
+      <NumberBlock value={x} />
+      <NumberBlock value={y} />
+      <NumberBlock value={z} />
     </>
   );
 };
@@ -79,7 +97,7 @@ const NumberBlock = ({ value }: { value: number }) => {
   return (
     <GridItem
       h={"56px"}
-      w="56px"
+      w={"56px"}
       textAlign={"center"}
       backgroundColor={calculateGradientColor("#007DBC", value)}
     >
