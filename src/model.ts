@@ -223,6 +223,12 @@ export enum DataSamplesView {
   GraphAndDataFeatures = "graph and data features",
 }
 
+export enum FeaturesView {
+  Colour = "colour",
+  ColourAndValues = "colour and values",
+  Graph = "graph",
+}
+
 export enum PostImportDialogState {
   None = "none",
   Error = "error",

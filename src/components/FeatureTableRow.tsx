@@ -1,8 +1,8 @@
-import { Card, Grid, GridItem, VStack } from "@chakra-ui/react";
-import { ActionData, RecordingData, XYZData } from "../model";
+import { Card, Grid, GridItem } from "@chakra-ui/react";
+import { ActionData, FeaturesView, RecordingData, XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
-import { applyFilter, applyFilters } from "../ml";
+import { applyFilter } from "../ml";
 import RecordingGraph from "./RecordingGraph";
 import { FormattedMessage } from "react-intl";
 import { Filter, mlSettings } from "../mlConfig";
@@ -67,6 +67,8 @@ const FeatureHeaderRow = ({ action }: { action: ActionData }) => {
 };
 
 const FeatureValues = ({ data, filter }: { data: XYZData; filter: Filter }) => {
+  const { featuresView } = useStore((s) => s.settings);
+
   const dataWindow = useStore((s) => s.dataWindow);
   const { x, y, z } = applyFilter(filter, data, dataWindow, {
     normalize: true,
@@ -74,10 +76,20 @@ const FeatureValues = ({ data, filter }: { data: XYZData; filter: Filter }) => {
 
   return (
     <>
-      <NumberBlock value={x} />
-      <NumberBlock value={y} />
-      <NumberBlock value={z} />
-    </>
+      {featuresView === FeaturesView.ColourAndValues && (
+        <>
+          <NumberBlock value={x} />
+          <NumberBlock value={y} />
+          <NumberBlock value={z} />
+        </>
+      )}
+      {featuresView === FeaturesView.Colour && (
+        <>
+          <ColourBlock value={x} />
+          <ColourBlock value={y} />
+          <ColourBlock value={z} />
+        </>
+      )}    </>
   );
 };
 

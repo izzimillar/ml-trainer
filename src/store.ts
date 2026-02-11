@@ -35,6 +35,7 @@ import {
   EditorStartUp,
   TourTriggerName,
   tourSequence,
+  FeaturesView,
 } from "./model";
 import { defaultSettings, Settings } from "./settings";
 import { getTotalNumSamples } from "./utils/actions";
@@ -286,7 +287,9 @@ export interface Actions {
   setPostConnectTourTrigger(trigger: TourTrigger | undefined): void;
 
   setDataSamplesView(view: DataSamplesView): void;
+  setFeaturesView(view: FeaturesView): void;
   setShowGraphs(show: boolean): void;
+  setShowValues(show: boolean): void;
 
   setPostImportDialogState(state: PostImportDialogState): void;
   startPredicting(buffer: BufferedData): void;
@@ -1123,11 +1126,27 @@ const createMlStore = (logging: Logging) => {
               },
             }));
           },
+          setFeaturesView(view: FeaturesView) {
+            set(({ settings }) => ({
+              settings: {
+                ...settings,
+                featuresView: view,
+              },
+            }));
+          },
           setShowGraphs(show: boolean) {
             set(({ settings }) => ({
               settings: {
                 ...settings,
                 showGraphs: show,
+              },
+            }));
+          },
+          setShowValues(show: boolean) {
+            set(({ settings }) => ({
+              settings: {
+                ...settings,
+                showValues: show,
               },
             }));
           },

@@ -1,15 +1,43 @@
-import { Box, Card, Grid, GridItem, GridProps, Text } from "@chakra-ui/react";
+import {
+  Card,
+  Grid,
+  GridItem,
+  GridProps,
+  HStack,
+  Text,
+} from "@chakra-ui/react";
 import FeaturesTableRow from "./FeatureTableRow";
 import { useStore } from "../store";
 import { FormattedMessage } from "react-intl";
 import { Filter, mlSettings } from "../mlConfig";
 import ClickableTooltip from "./ClickableTooltip";
+import HeadingGrid, { GridColumnHeadingItemProps } from "./HeadingGrid";
+import DataSamplesMenu from "./DataSamplesMenu";
+import ShowValuesCheckbox from "./ShowValuesCheckBox";
 
-export const gridCommonProps: Partial<GridProps> = {
+const gridCommonProps: Partial<GridProps> = {
   gap: 3,
   px: 5,
   w: "100%",
 };
+
+const headings: GridColumnHeadingItemProps[] = [
+  // {
+  //   titleId: "action-label",
+  //   descriptionId: "action-tooltip",
+  // },
+  {
+    // TODO: localise this
+    titleId: "features",
+    descriptionId: "data-samples-tooltip",
+    itemsRight: (
+      <HStack>
+        <ShowValuesCheckbox />
+        {/* <DataSamplesMenu /> */}
+      </HStack>
+    ),
+  },
+];
 
 const FeaturesTable = () => {
   const actions = useStore((s) => s.actions);
@@ -21,6 +49,12 @@ const FeaturesTable = () => {
 
   return (
     <>
+      <HeadingGrid
+        position={"sticky"}
+        top={0}
+        {...gridCommonProps}
+        headings={headings}
+      />
       <Grid
         {...gridCommonProps}
         py={2}

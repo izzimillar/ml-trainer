@@ -4,7 +4,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
-import { DataSamplesView, TourTriggerName } from "./model";
+import { DataSamplesView, FeaturesView, TourTriggerName } from "./model";
 
 type Translation = "preview" | boolean;
 
@@ -314,6 +314,8 @@ export interface Settings {
   toursCompleted: TourTriggerName[];
   dataSamplesView: DataSamplesView;
   showGraphs: boolean;
+  featuresView: FeaturesView;
+  showValues: boolean;
   graphColorScheme: GraphColorScheme;
   graphLineScheme: GraphLineScheme;
   graphLineWeight: GraphLineWeight;
