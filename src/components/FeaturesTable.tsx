@@ -12,7 +12,6 @@ import { FormattedMessage } from "react-intl";
 import { Filter, mlSettings } from "../mlConfig";
 import ClickableTooltip from "./ClickableTooltip";
 import HeadingGrid, { GridColumnHeadingItemProps } from "./HeadingGrid";
-import DataSamplesMenu from "./DataSamplesMenu";
 import ShowValuesCheckbox from "./ShowValuesCheckBox";
 
 const gridCommonProps: Partial<GridProps> = {

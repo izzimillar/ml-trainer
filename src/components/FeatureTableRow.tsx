@@ -1,5 +1,5 @@
 import { Card, Grid, GridItem } from "@chakra-ui/react";
-import { ActionData, FeaturesView, RecordingData, XYZData } from "../model";
+import { ActionData, FeaturesView, XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
 import { applyFilter } from "../ml";
@@ -13,7 +13,6 @@ interface FeaturesTableRowProps {
 
 const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
   const filters = mlSettings.includedFilters;
-  const numberOfAxes = 3;
 
   return (
     <>
@@ -23,20 +22,7 @@ const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
 
       {Array.from(filters).map((filter, idx) => (
         <GridItem key={idx}>
-          <Grid
-            templateColumns={`repeat(${numberOfAxes}, 1fr)`}
-            templateRows={`repeat(${action.recordings.length}, 1fr)`}
-          >
-            <>
-              {action.recordings.map((recording, idx) => (
-                <FeatureValues
-                  key={idx}
-                  filter={filter}
-                  data={recording.data}
-                />
-              ))}
-            </>
-          </Grid>
+          <FeatureCard action={action} filter={filter} />
         </GridItem>
       ))}
     </>
@@ -66,7 +52,57 @@ const FeatureHeaderRow = ({ action }: { action: ActionData }) => {
   );
 };
 
-const FeatureValues = ({ data, filter }: { data: XYZData; filter: Filter }) => {
+const FeatureCard = ({
+  action,
+  filter,
+}: {
+  action: ActionData;
+  filter: Filter;
+}) => {
+  const numberOfAxes = 3;
+
+  const { featuresView } = useStore((s) => s.settings);
+
+  return (
+    <>
+      {featuresView === FeaturesView.Graph && (
+        <Grid templateRows={`repeat(${action.recordings.length}, 1fr)`}>
+          <>
+            {action.recordings.map((recording, idx) => (
+              <GridItem key={idx}>
+                <RecordingGraph data={recording.data} />
+              </GridItem>
+            ))}
+          </>
+        </Grid>
+      )}
+
+      {featuresView !== FeaturesView.Graph && (
+        <Grid
+          templateColumns={`repeat(${numberOfAxes}, 1fr)`}
+          templateRows={`repeat(${action.recordings.length}, 1fr)`}
+        >
+          {action.recordings.map((recording, idx) => (
+            <FeatureValues
+              key={idx}
+              data={recording.data}
+              filter={filter}
+              num_recordings={action.recordings.length}
+            />
+          ))}
+        </Grid>
+      )}
+    </>
+  );
+};
+
+interface FeatureValuesProps {
+  data: XYZData;
+  filter: Filter;
+  num_recordings: number;
+}
+
+const FeatureValues = ({ data, filter }: FeatureValuesProps) => {
   const { featuresView } = useStore((s) => s.settings);
 
   const dataWindow = useStore((s) => s.dataWindow);
@@ -76,6 +112,14 @@ const FeatureValues = ({ data, filter }: { data: XYZData; filter: Filter }) => {
 
   return (
     <>
+      {featuresView === FeaturesView.Colour && (
+        <>
+          <ColourBlock value={x} />
+          <ColourBlock value={y} />
+          <ColourBlock value={z} />
+        </>
+      )}
+
       {featuresView === FeaturesView.ColourAndValues && (
         <>
           <NumberBlock value={x} />
@@ -83,13 +127,7 @@ const FeatureValues = ({ data, filter }: { data: XYZData; filter: Filter }) => {
           <NumberBlock value={z} />
         </>
       )}
-      {featuresView === FeaturesView.Colour && (
-        <>
-          <ColourBlock value={x} />
-          <ColourBlock value={y} />
-          <ColourBlock value={z} />
-        </>
-      )}    </>
+    </>
   );
 };
 
@@ -111,6 +149,7 @@ const NumberBlock = ({ value }: { value: number }) => {
       h={"56px"}
       w={"56px"}
       textAlign={"center"}
+      alignContent={"center"}
       backgroundColor={calculateGradientColor("#007DBC", value)}
     >
       {`${rounded}`}
@@ -118,12 +157,8 @@ const NumberBlock = ({ value }: { value: number }) => {
   );
 };
 
-const RecordingGraphFeatureValues = ({
-  recording,
-}: {
-  recording: RecordingData;
-}) => {
-  return <RecordingGraph data={recording.data} h={300} w={450} />;
+const RecordingGraphFeatureValues = ({ data }: { data: XYZData }) => {
+  return <RecordingGraph data={data} h={300} w={450} />;
 };
 
 export default FeaturesTableRow;

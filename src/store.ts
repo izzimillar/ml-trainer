@@ -290,6 +290,7 @@ export interface Actions {
   setFeaturesView(view: FeaturesView): void;
   setShowGraphs(show: boolean): void;
   setShowValues(show: boolean): void;
+  setShowFeatureGraph(show: boolean): void;
 
   setPostImportDialogState(state: PostImportDialogState): void;
   startPredicting(buffer: BufferedData): void;
@@ -1147,6 +1148,14 @@ const createMlStore = (logging: Logging) => {
               settings: {
                 ...settings,
                 showValues: show,
+              },
+            }));
+          },
+          setShowFeatureGraph(show: boolean) {
+            set(({ settings }) => ({
+              settings: {
+                ...settings,
+                showFeatureGraph: show,
               },
             }));
           },
