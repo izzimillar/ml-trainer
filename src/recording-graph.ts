@@ -8,11 +8,12 @@
 import {
   ChartConfiguration,
   ChartTypeRegistry,
+  elements,
   ScriptableContext,
   ScriptableLineSegmentContext,
 } from "chart.js";
 import { GraphLineStyles } from "./hooks/use-graph-line-styles";
-import { maxAccelerationScaleForGraphs } from "./mlConfig";
+import { Filter, maxAccelerationScaleForGraphs } from "./mlConfig";
 import { XYZData } from "./model";
 import { GraphLineWeight } from "./settings";
 
@@ -66,7 +67,8 @@ export const getConfig = (
   responsive: boolean,
   colors: GraphColors,
   lineStyles: GraphLineStyles,
-  graphLineWeight: GraphLineWeight
+  graphLineWeight: GraphLineWeight,
+  filters: Set<Filter> = new Set<Filter>()
 ): ChartConfiguration<keyof ChartTypeRegistry, Pos[], string> => {
   const x = processDimensionData(rawX);
   const y = processDimensionData(rawY);
@@ -82,49 +84,155 @@ export const getConfig = (
     type: "line",
     data: {
       datasets: [
-        // {
-        //   ...common,
-        //   label: "x",
-        //   borderColor: colors.x,
-        //   borderDash: lineStyles.x ?? [],
-        //   fill: "origin",
-        //   backgroundColor: toTransparent(colors.x, transparency),
-        //   data: x,
-        //   // pointRadius: labelZeroCross,
-        //   segment: {
-        //     borderWidth: (ctx) => getZeroCrossingPoints(ctx, x),
-        //   },
-        //   borderCapStyle: "round",
-        // },
+        {
+          ...common,
+          label: "x",
+          borderColor: colors.x,
+          borderDash: lineStyles.x ?? [],
+          backgroundColor: toTransparent(colors.x, transparency),
+          data: x,
+          segment: {
+            borderWidth: (ctx) => highlightSegments(ctx, x, filters),
+          },
+          borderCapStyle: "round",
+          pointRadius: (ctx: ScriptableContext<"line">) =>
+            highlightPoints(ctx, filters),
+          fill: filters.has(Filter.ACC) ? "origin" : "none"
+        },
         {
           ...common,
           label: "y",
           borderColor: colors.y,
           borderDash: lineStyles.y ?? [],
-          // fill: 'origin',
           backgroundColor: toTransparent(colors.y, transparency),
           data: y,
+          segment: {
+            borderWidth: (ctx) => highlightSegments(ctx, y, filters),
+          },
+          borderCapStyle: "round",
+          pointRadius: (ctx: ScriptableContext<"line">) =>
+            highlightPoints(ctx, filters),
+          fill: filters.has(Filter.ACC) ? "origin" : "none"
         },
         {
           ...common,
           label: "z",
           borderColor: colors.z,
           borderDash: lineStyles.z ?? [],
-          // fill: 'origin',
           backgroundColor: toTransparent(colors.z, transparency),
           data: z,
+          segment: {
+            borderWidth: (ctx) => highlightSegments(ctx, z, filters),
+          },
+          borderCapStyle: "round",
+          pointRadius: (ctx: ScriptableContext<"line">) =>
+            highlightPoints(ctx, filters),
+          fill: filters.has(Filter.ACC) ? "origin" : "none"
+        },
+        // MEAN
+        {
+          ...common,
+          label: "mean-x",
+          borderColor: colors.x,
+          borderDash: lineStyles.x ?? [],
+          data: getMean(x),
+          hidden: !filters.has(Filter.MEAN),
         },
         {
           ...common,
-          label: "stddev",
-          borderColor: "#d507b3",
-          data: getPositiveValues(x),
+          label: "mean-y",
+          borderColor: colors.y,
+          borderDash: lineStyles.y ?? [],
+          data: getMean(y),
+          hidden: !filters.has(Filter.MEAN),
         },
         {
           ...common,
-          label: "stddev",
-          borderColor: "#d507b3",
+          label: "mean-z",
+          borderColor: colors.z,
+          borderDash: lineStyles.z ?? [],
+          data: getMean(z),
+          hidden: !filters.has(Filter.MEAN),
+        },
+        // STD DEV
+        {
+          ...common,
+          label: "pos-stddev-x",
+          borderColor: colors.x,
+          borderDash: lineStyles.x ?? [],
+          data: getStdDev(x, true),
+          hidden: !filters.has(Filter.STD),
+        },
+        {
+          ...common,
+          label: "neg-stddev-x",
+          borderColor: colors.x,
+          borderDash: lineStyles.x ?? [],
+          data: getStdDev(x, false),
+          hidden: !filters.has(Filter.STD),
+          backgroundColor: toTransparent(colors.x, transparency),
+          fill: "-1",
+        },
+        {
+          ...common,
+          label: "pos-stddev-y",
+          borderColor: colors.y,
+          borderDash: lineStyles.y ?? [],
+          data: getStdDev(y, true),
+          hidden: !filters.has(Filter.STD),
+        },
+        {
+          ...common,
+          label: "neg-stddev-y",
+          borderColor: colors.y,
+          borderDash: lineStyles.y ?? [],
+          data: getStdDev(y, false),
+          hidden: !filters.has(Filter.STD),
+          backgroundColor: toTransparent(colors.y, transparency),
+          fill: "-1",
+        },
+        {
+          ...common,
+          label: "pos-stddev-z",
+          borderColor: colors.z,
+          borderDash: lineStyles.z ?? [],
+          data: getStdDev(z, true),
+          hidden: !filters.has(Filter.STD),
+        },
+        {
+          ...common,
+          label: "neg-stddev-z",
+          borderColor: colors.z,
+          borderDash: lineStyles.z ?? [],
+          data: getStdDev(z, false),
+          hidden: !filters.has(Filter.STD),
+          backgroundColor: toTransparent(colors.z, transparency),
+          fill: "-1",
+        },
+        // RMS
+        {
+          ...common,
+          label: "rms-x",
+          borderColor: colors.x,
+          borderDash: lineStyles.x ?? [],
           data: getRootMeanSquare(x),
+          hidden: !filters.has(Filter.RMS),
+        },
+        {
+          ...common,
+          label: "rms-y",
+          borderColor: colors.y,
+          borderDash: lineStyles.y ?? [],
+          data: getRootMeanSquare(y),
+          hidden: !filters.has(Filter.RMS),
+        },
+        {
+          ...common,
+          label: "rms-z",
+          borderColor: colors.z,
+          borderDash: lineStyles.z ?? [],
+          data: getRootMeanSquare(z),
+          hidden: !filters.has(Filter.RMS),
         },
       ],
     },
@@ -186,14 +294,41 @@ export const getConfig = (
     },
   };
 };
-//     Filter.MAX,
-// Filter.MEAN,
-// Filter.MIN,
-// Filter.STD,
-// Filter.PEAKS,
-// Filter.ACC,
-// Filter.ZCR,
-// Filter.RMS,
+
+function highlightPoints(
+  context: ScriptableContext<"line">,
+  filters: Set<Filter>
+) {
+  let isHighlighted: boolean = false;
+
+  if (filters.has(Filter.MAX)) {
+    isHighlighted = isHighlighted || getMaxPoint(context);
+  }
+
+  if (filters.has(Filter.MIN)) {
+    isHighlighted = isHighlighted || getMinPoint(context);
+  }
+
+  if (filters.has(Filter.PEAKS)) {
+    isHighlighted = isHighlighted || labelPeaks(context);
+  }
+
+  return isHighlighted ? 5 : 0;
+}
+
+function highlightSegments(
+  context: ScriptableLineSegmentContext,
+  points: Pos[],
+  filters: Set<Filter>
+) {
+  let isHighlighted: boolean = false;
+
+  if (filters.has(Filter.ZCR)) {
+    isHighlighted = isHighlighted || getZeroCrossingPoints(context, points);
+  }
+
+  return isHighlighted ? 4 : 1;
+}
 
 function yValuesFromCtx(context: ScriptableContext<"line">) {
   const points = context.dataset.data as Pos[];
@@ -219,7 +354,7 @@ function getMaxPoint(context: ScriptableContext<"line">) {
 
   const maxIndex = data.indexOf(Math.max(...data));
   const isMax = context.dataIndex == maxIndex;
-  return isMax ? 10 : 0;
+  return isMax;
 }
 
 function getMinPoint(context: ScriptableContext<"line">) {
@@ -227,7 +362,7 @@ function getMinPoint(context: ScriptableContext<"line">) {
 
   const minIndex = data.indexOf(Math.min(...data));
   const isMin = context.dataIndex == minIndex;
-  return isMin ? 10 : 0;
+  return isMin;
 }
 
 function labelPeaks(context: ScriptableContext<"line">) {
@@ -235,15 +370,15 @@ function labelPeaks(context: ScriptableContext<"line">) {
 
   const peaks = peakIndices(data);
 
-  return peaks.includes(context.dataIndex) ? 10 : 0;
+  return peaks.includes(context.dataIndex);
 }
 
 function getMean(points: Pos[]) {
   return toHorizontalLine(_mean(points), points.length);
 }
 
-function getStdDev(points: Pos[]) {
-  return toHorizontalLine(_stddev(points), points.length);
+function getStdDev(points: Pos[], positive: boolean) {
+  return toHorizontalLine(_stddev(points, positive), points.length);
 }
 
 function getZeroCrossingPoints(
@@ -275,7 +410,7 @@ function getZeroCrossingPoints(
     return context.p0DataIndex === start && context.p1DataIndex === end;
   });
 
-  return crossing ? 4 : 1;
+  return crossing;
 }
 
 function getRootMeanSquare(points: Pos[]) {
@@ -302,7 +437,7 @@ function _mean(points: Pos[]): number {
   return mean;
 }
 
-function _stddev(points: Pos[]) {
+function _stddev(points: Pos[], positive: boolean) {
   const mean = _mean(points);
 
   const stddev = Math.sqrt(
@@ -310,7 +445,7 @@ function _stddev(points: Pos[]) {
       points.length
   );
 
-  return stddev;
+  return positive ? mean + stddev : mean - stddev;
 }
 
 function peakIndices(data: number[]) {

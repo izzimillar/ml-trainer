@@ -12,41 +12,66 @@ interface FeaturesTableRowProps {
 }
 
 const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
+  const { featuresView } = useStore((s) => s.settings);
+
   const filters = mlSettings.includedFilters;
 
   return (
     <>
-      <GridItem>
-        <FeatureHeaderRow action={action} />
+      <GridItem h="100%" w="100%">
+        <FeatureHeaderRow action={action} view={featuresView} />
       </GridItem>
 
       {Array.from(filters).map((filter, idx) => (
         <GridItem key={idx}>
-          <FeatureCard action={action} filter={filter} />
+          <FeatureCard action={action} filter={filter} view={featuresView} />
         </GridItem>
       ))}
     </>
   );
 };
 
-const FeatureHeaderRow = ({ action }: { action: ActionData }) => {
+const FeatureHeaderRow = ({
+  action,
+  view,
+}: {
+  action: ActionData;
+  view: FeaturesView;
+}) => {
   return (
-    <Card>
+    <Card
+      h="100%"
+      w="100%"
+      p={2}
+      display={"flex"}
+      borderWidth={1}
+      position={"relative"}
+    >
       <Grid
-        templateColumns={`repeat(2, auto)`}
-        templateRows={`repeat(${action.recordings.length}, auto)`}
-        alignItems="center"
-        py={2}
+        templateColumns={`repeat(2, 1fr)`}
+        templateRows={`repeat(${action.recordings.length}, 1fr)`}
+        alignContent={"center"}
+        alignItems={"center"}
+        textAlign={"center"}
       >
-        <GridItem rowSpan={action.recordings.length}>
-          <FormattedMessage id={action.name} />
-        </GridItem>
-
-        {action.recordings.map((recording, idx) => (
-          <GridItem key={idx}>
-            <RecordingGraph data={recording.data} h={56} w={96} />
+        {view === FeaturesView.Graph && (
+          <GridItem rowSpan={action.recordings.length} colSpan={2}>
+            <FormattedMessage id={action.name} />
           </GridItem>
-        ))}
+        )}
+
+        {view !== FeaturesView.Graph && (
+          <>
+            <GridItem rowSpan={action.recordings.length}>
+              <FormattedMessage id={action.name} />
+            </GridItem>
+            {action.recordings.map((recording, idx) => (
+              <GridItem key={idx}>
+                <RecordingGraph data={recording.data} h={56} w={96} />
+              </GridItem>
+            ))}
+          </>
+        )}
       </Grid>
     </Card>
   );
@@ -55,29 +80,32 @@ const FeatureHeaderRow = ({ action }: { action: ActionData }) => {
 const FeatureCard = ({
   action,
   filter,
+  view,
 }: {
   action: ActionData;
   filter: Filter;
+  view: FeaturesView;
 }) => {
   const numberOfAxes = 3;
 
-  const { featuresView } = useStore((s) => s.settings);
-
   return (
     <>
-      {featuresView === FeaturesView.Graph && (
+      {view === FeaturesView.Graph && (
         <Grid templateRows={`repeat(${action.recordings.length}, 1fr)`}>
           <>
             {action.recordings.map((recording, idx) => (
               <GridItem key={idx}>
-                <RecordingGraph data={recording.data} />
+                <RecordingGraphFeatureValues
+                  data={recording.data}
+                  filter={filter}
+                />
               </GridItem>
             ))}
           </>
         </Grid>
       )}
 
-      {featuresView !== FeaturesView.Graph && (
+      {view !== FeaturesView.Graph && (
         <Grid
           templateColumns={`repeat(${numberOfAxes}, 1fr)`}
           templateRows={`repeat(${action.recordings.length}, 1fr)`}
@@ -157,8 +185,21 @@ const NumberBlock = ({ value }: { value: number }) => {
   );
 };
 
-const RecordingGraphFeatureValues = ({ data }: { data: XYZData }) => {
-  return <RecordingGraph data={data} h={300} w={450} />;
+const RecordingGraphFeatureValues = ({
+  data,
+  filter,
+}: {
+  data: XYZData;
+  filter: Filter;
+}) => {
+  return (
+    <RecordingGraph
+      data={data}
+      h={200}
+      w={400}
+      filters={new Set<Filter>([filter])}
+    />
+  );
 };
 
 export default FeaturesTableRow;

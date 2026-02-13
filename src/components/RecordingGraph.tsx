@@ -20,12 +20,14 @@ import { useGraphLineStyles } from "../hooks/use-graph-line-styles";
 import { XYZData } from "../model";
 import { getConfig as getRecordingChartConfig } from "../recording-graph";
 import { useSettings } from "../store";
+import { Filter } from "../mlConfig";
 
 interface RecordingGraphProps extends BoxProps {
   data: XYZData;
   responsive?: boolean;
   w?: number;
   h?: number;
+  filters?: Set<Filter>,
 }
 
 const RecordingGraph = ({
@@ -34,6 +36,7 @@ const RecordingGraph = ({
   children,
   w = 156,
   h = 92,
+  filters = new Set<Filter>(),
   ...rest
 }: RecordingGraphProps) => {
   const [{ graphColorScheme, graphLineScheme, graphLineWeight }] =
@@ -51,13 +54,14 @@ const RecordingGraph = ({
         responsive,
         colors,
         lineStyles,
-        graphLineWeight
+        graphLineWeight,
+        filters,
       )
     );
     return () => {
       chart.destroy();
     };
-  }, [colors, data, graphLineWeight, lineStyles, responsive]);
+  }, [colors, data, graphLineWeight, lineStyles, responsive, filters]);
 
   return (
     <Box
