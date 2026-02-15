@@ -290,7 +290,8 @@ export const defaultSettings: Settings = {
   graphLineWeight: "default",
   featuresView: FeaturesView.Colour,
   showValues: false,
-  showFeatureGraph: false
+  showFeatureGraph: false,
+  showGraphLines: true,
 };
 
 export type GraphColorScheme = "default" | "color-blind-1" | "color-blind-2";
@@ -320,6 +321,7 @@ export interface Settings {
   featuresView: FeaturesView;
   showValues: boolean;
   showFeatureGraph: boolean,
+  showGraphLines: boolean,
   graphColorScheme: GraphColorScheme;
   graphLineScheme: GraphLineScheme;
   graphLineWeight: GraphLineWeight;

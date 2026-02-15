@@ -5,12 +5,12 @@ import { FeaturesView } from "../model";
 import { useStore } from "../store";
 
 const ShowValuesCheckbox = () => {
-  const { featuresView, showValues, showFeatureGraph } = useStore(
-    (s) => s.settings
-  );
+  const { featuresView, showValues, showFeatureGraph, showGraphLines } =
+    useStore((s) => s.settings);
   const setFeaturesView = useStore((s) => s.setFeaturesView);
   const setShowValues = useStore((s) => s.setShowValues);
   const setShowGraph = useStore((s) => s.setShowFeatureGraph);
+  const setShowGraphLines = useStore((s) => s.setShowGraphLines);
 
   const handleShowNumbersOnChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,12 +38,32 @@ const ShowValuesCheckbox = () => {
     [setFeaturesView, setShowGraph, showValues]
   );
 
+  const handleShowGraphLinesOnChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const isChecked = e.target.checked;
+      setShowGraphLines(isChecked);
+      setFeaturesView(
+        isChecked
+          ? FeaturesView.Graph
+          : FeaturesView.GraphNoLines
+      );
+    },
+    [setFeaturesView, setShowGraphLines]
+  );
+
   return (
     <>
-      {featuresView !== FeaturesView.Graph && (
+      {(featuresView === FeaturesView.ColourAndValues ||
+        featuresView === FeaturesView.Colour) && (
         <Checkbox isChecked={showValues} onChange={handleShowNumbersOnChange}>
           {/* TODO: localise this */}
           <FormattedMessage id="Show values" />
+        </Checkbox>
+      )}
+
+      {(featuresView === FeaturesView.Graph || featuresView === FeaturesView.GraphNoLines ) && (
+        <Checkbox isChecked={showGraphLines} onChange={handleShowGraphLinesOnChange}>
+          <FormattedMessage id="Show lines" />
         </Checkbox>
       )}
 

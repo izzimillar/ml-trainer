@@ -8,7 +8,6 @@
 import {
   ChartConfiguration,
   ChartTypeRegistry,
-  elements,
   ScriptableContext,
   ScriptableLineSegmentContext,
 } from "chart.js";
@@ -68,7 +67,8 @@ export const getConfig = (
   colors: GraphColors,
   lineStyles: GraphLineStyles,
   graphLineWeight: GraphLineWeight,
-  filters: Set<Filter> = new Set<Filter>()
+  filters: Set<Filter> = new Set<Filter>(),
+  showLines: boolean = true,
 ): ChartConfiguration<keyof ChartTypeRegistry, Pos[], string> => {
   const x = processDimensionData(rawX);
   const y = processDimensionData(rawY);
@@ -93,11 +93,13 @@ export const getConfig = (
           data: x,
           segment: {
             borderWidth: (ctx) => highlightSegments(ctx, x, filters),
+            borderColor: (ctx) => colourSegments(ctx, x, filters, colors.x, showLines)
           },
           borderCapStyle: "round",
           pointRadius: (ctx: ScriptableContext<"line">) =>
             highlightPoints(ctx, filters),
-          fill: filters.has(Filter.ACC) ? "origin" : "none"
+          fill: filters.has(Filter.ACC) ? "origin" : "none",
+          showLine: shouldShowLine(showLines, filters),
         },
         {
           ...common,
@@ -108,11 +110,13 @@ export const getConfig = (
           data: y,
           segment: {
             borderWidth: (ctx) => highlightSegments(ctx, y, filters),
+            borderColor: (ctx) => colourSegments(ctx, y, filters, colors.y, showLines)
           },
           borderCapStyle: "round",
           pointRadius: (ctx: ScriptableContext<"line">) =>
             highlightPoints(ctx, filters),
-          fill: filters.has(Filter.ACC) ? "origin" : "none"
+          fill: filters.has(Filter.ACC) ? "origin" : "none",
+          showLine: shouldShowLine(showLines, filters),
         },
         {
           ...common,
@@ -123,11 +127,13 @@ export const getConfig = (
           data: z,
           segment: {
             borderWidth: (ctx) => highlightSegments(ctx, z, filters),
+            borderColor: (ctx) => colourSegments(ctx, z, filters, colors.z, showLines)
           },
           borderCapStyle: "round",
           pointRadius: (ctx: ScriptableContext<"line">) =>
             highlightPoints(ctx, filters),
-          fill: filters.has(Filter.ACC) ? "origin" : "none"
+          fill: filters.has(Filter.ACC) ? "origin" : "none",
+          showLine: shouldShowLine(showLines, filters),
         },
         // MEAN
         {
@@ -319,7 +325,7 @@ function highlightPoints(
 function highlightSegments(
   context: ScriptableLineSegmentContext,
   points: Pos[],
-  filters: Set<Filter>
+  filters: Set<Filter>,
 ) {
   let isHighlighted: boolean = false;
 
@@ -328,6 +334,27 @@ function highlightSegments(
   }
 
   return isHighlighted ? 4 : 1;
+}
+
+function colourSegments(
+  context: ScriptableLineSegmentContext,
+  points: Pos[],
+  filters: Set<Filter>,
+  colour: string,
+  showLine: boolean
+) {
+  if (filters.has(Filter.ZCR) && !showLine) {
+    return getZeroCrossingPoints(context, points) ? colour : "transparent";
+  }
+
+  return colour;
+}
+
+// returns a boolean depending on whether the showLine setting should be true or false
+// if filters contains zcr we don't want to hide the line as this will hide the segments as well
+// instead, we set the non-zcr to 0 width so they don't appear and set shouldShowLine to true
+function shouldShowLine(showLines: boolean, filters: Set<Filter>) {
+  return filters.has(Filter.ZCR) ? true : showLines;
 }
 
 function yValuesFromCtx(context: ScriptableContext<"line">) {
@@ -421,11 +448,11 @@ function getRootMeanSquare(points: Pos[]) {
   return toHorizontalLine(rms, points.length);
 }
 
-function getPositiveValues(points: Pos[]) {
-  return points.map(({ x, y }) => {
-    return { x: x, y: Math.abs(y) };
-  });
-}
+// function getPositiveValues(points: Pos[]) {
+//   return points.map(({ x, y }) => {
+//     return { x: x, y: Math.abs(y) };
+//   });
+// }
 
 function _mean(points: Pos[]): number {
   const sum = points.reduce((sum, point) => {

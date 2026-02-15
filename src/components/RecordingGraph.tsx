@@ -27,7 +27,8 @@ interface RecordingGraphProps extends BoxProps {
   responsive?: boolean;
   w?: number;
   h?: number;
-  filters?: Set<Filter>,
+  filters?: Set<Filter>;
+  showLines?: boolean;
 }
 
 const RecordingGraph = ({
@@ -37,6 +38,7 @@ const RecordingGraph = ({
   w = 156,
   h = 92,
   filters = new Set<Filter>(),
+  showLines = true,
   ...rest
 }: RecordingGraphProps) => {
   const [{ graphColorScheme, graphLineScheme, graphLineWeight }] =
@@ -46,7 +48,13 @@ const RecordingGraph = ({
   const lineStyles = useGraphLineStyles(graphLineScheme);
   useEffect(() => {
     Chart.unregister(...registerables);
-    Chart.register([LinearScale, LineController, PointElement, LineElement, Filler]);
+    Chart.register([
+      LinearScale,
+      LineController,
+      PointElement,
+      LineElement,
+      Filler,
+    ]);
     const chart = new Chart(
       canvasRef.current?.getContext("2d") ?? new HTMLCanvasElement(),
       getRecordingChartConfig(
@@ -56,19 +64,28 @@ const RecordingGraph = ({
         lineStyles,
         graphLineWeight,
         filters,
+        showLines
       )
     );
     return () => {
       chart.destroy();
     };
-  }, [colors, data, graphLineWeight, lineStyles, responsive, filters]);
+  }, [
+    colors,
+    data,
+    graphLineWeight,
+    lineStyles,
+    responsive,
+    filters,
+    showLines,
+  ]);
 
   return (
     <Box
       borderRadius="md"
       borderWidth={1}
       borderColor="gray.200"
-      w={(w+2)}
+      w={w + 2}
       height="100%"
       position="relative"
       {...rest}

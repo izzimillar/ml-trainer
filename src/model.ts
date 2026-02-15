@@ -227,6 +227,7 @@ export enum FeaturesView {
   Colour = "colour",
   ColourAndValues = "colour and values",
   Graph = "graph",
+  GraphNoLines = "graph with no lines"
 }
 
 export enum PostImportDialogState {

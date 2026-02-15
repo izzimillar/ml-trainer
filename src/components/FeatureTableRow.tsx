@@ -54,13 +54,15 @@ const FeatureHeaderRow = ({
         alignItems={"center"}
         textAlign={"center"}
       >
-        {view === FeaturesView.Graph && (
+        {(view === FeaturesView.Graph ||
+          view === FeaturesView.GraphNoLines) && (
           <GridItem rowSpan={action.recordings.length} colSpan={2}>
             <FormattedMessage id={action.name} />
           </GridItem>
         )}
 
-        {view !== FeaturesView.Graph && (
+        {(view === FeaturesView.Colour ||
+          view == FeaturesView.ColourAndValues) && (
           <>
             <GridItem rowSpan={action.recordings.length}>
               <FormattedMessage id={action.name} />
@@ -90,7 +92,7 @@ const FeatureCard = ({
 
   return (
     <>
-      {view === FeaturesView.Graph && (
+      {(view === FeaturesView.Graph || view === FeaturesView.GraphNoLines) && (
         <Grid templateRows={`repeat(${action.recordings.length}, 1fr)`}>
           <>
             {action.recordings.map((recording, idx) => (
@@ -105,7 +107,8 @@ const FeatureCard = ({
         </Grid>
       )}
 
-      {view !== FeaturesView.Graph && (
+      {(view === FeaturesView.Colour ||
+        view === FeaturesView.ColourAndValues) && (
         <Grid
           templateColumns={`repeat(${numberOfAxes}, 1fr)`}
           templateRows={`repeat(${action.recordings.length}, 1fr)`}
@@ -192,12 +195,15 @@ const RecordingGraphFeatureValues = ({
   data: XYZData;
   filter: Filter;
 }) => {
+  const { showGraphLines } = useStore((s) => s.settings);
+
   return (
     <RecordingGraph
       data={data}
       h={200}
       w={400}
       filters={new Set<Filter>([filter])}
+      showLines={showGraphLines}
     />
   );
 };
