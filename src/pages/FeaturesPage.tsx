@@ -11,6 +11,8 @@ import { useCallback, useRef } from "react";
 import { createDataSamplesPageUrl, createTestingModelPageUrl } from "../urls";
 import { RiArrowRightLine } from "react-icons/ri";
 import BackArrow from "../components/BackArrow";
+import LiveGraphPanel from "../components/LiveGraphPanel";
+import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 
 const FeaturesPage = () => {
   // store
@@ -34,6 +36,7 @@ const FeaturesPage = () => {
 
   return (
     <>
+      <TrainModelDialogs finalFocusRef={trainButtonRef} />
       <DefaultPageLayout
         // localise this
         titleId="features"

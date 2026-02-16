@@ -36,7 +36,7 @@ import { useProject } from "../hooks/project-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useStore } from "../store";
 import { tourElClassname } from "../tours";
-import { createDataSamplesPageUrl, createFeaturesPageUrl } from "../urls";
+import { createFeaturesPageUrl } from "../urls";
 import { ButtonWithLoading } from "../components/ButtonWithLoading";
 
 const TestingModelPage = () => {

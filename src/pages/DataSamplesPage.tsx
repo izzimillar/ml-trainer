@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 import { Button, Flex, HStack, VStack } from "@chakra-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RiAddLine, RiArrowRightLine } from "react-icons/ri";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
@@ -15,7 +15,7 @@ import DefaultPageLayout, {
   ProjectToolbarItems,
 } from "../components/DefaultPageLayout";
 import LiveGraphPanel from "../components/LiveGraphPanel";
-import TrainModelDialogs from "../components/TrainModelFlowDialogs";
+// import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useHasSufficientDataForTraining, useStore } from "../store";
@@ -51,7 +51,7 @@ const DataSamplesPage = () => {
     navigate(createFeaturesPageUrl());
   }, [navigate]);
 
-  const trainButtonRef = useRef(null);
+  // const trainButtonRef = useRef(null);
   const handleAddNewAction = useCallback(() => {
     setSelectedActionIdx(actions.length);
     addNewAction();
@@ -62,7 +62,7 @@ const DataSamplesPage = () => {
   const intl = useIntl();
   return (
     <>
-      <TrainModelDialogs finalFocusRef={trainButtonRef} />
+      {/* <TrainModelDialogs finalFocusRef={trainButtonRef} /> */}
       <DefaultPageLayout
         titleId="data-samples-title"
         showPageTitle
