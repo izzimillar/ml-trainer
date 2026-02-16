@@ -96,7 +96,6 @@ const FeatureHeader = ({ feature }: { feature: Filter }) => {
   const handleIncludeOnChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setFeatures(feature, e.target.checked);
-
     },
     [setFeatures, feature]
   );
@@ -126,8 +125,11 @@ const FeatureHeader = ({ feature }: { feature: Filter }) => {
               <FormattedMessage id={`${feature}`} />
             </GridItem>
 
-            <GridItem colSpan={3}>
-              <Checkbox isChecked={currentFilters.has(feature)} onChange={handleIncludeOnChange}>
+            <GridItem textAlign={"center"} colSpan={3}>
+              <Checkbox
+                isChecked={currentFilters.has(feature)}
+                onChange={handleIncludeOnChange}
+              >
                 <FormattedMessage id="include" />
               </Checkbox>
             </GridItem>

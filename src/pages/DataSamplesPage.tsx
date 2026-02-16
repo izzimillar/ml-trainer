@@ -20,16 +20,16 @@ import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useHasSufficientDataForTraining, useStore } from "../store";
 import { tourElClassname } from "../tours";
-import { createFeaturesPageUrl, createTestingModelPageUrl } from "../urls";
+import { createFeaturesPageUrl } from "../urls";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
   const addNewAction = useStore((s) => s.addNewAction);
-  const model = useStore((s) => s.model);
+  // const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
 
   const navigate = useNavigate();
-  const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
+  // const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
   const tourStart = useStore((s) => s.tourStart);
   const { isConnected } = useConnectionStage();
@@ -43,9 +43,9 @@ const DataSamplesPage = () => {
   const hasSufficientData = useHasSufficientDataForTraining();
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
 
-  const handleNavigateToModel = useCallback(() => {
-    navigate(createTestingModelPageUrl());
-  }, [navigate]);
+  // const handleNavigateToModel = useCallback(() => {
+  //   navigate(createTestingModelPageUrl());
+  // }, [navigate]);
 
   const handleNavigateToFeatures = useCallback(() => {
     navigate(createFeaturesPageUrl());
@@ -105,13 +105,14 @@ const DataSamplesPage = () => {
             {/* navigate to features page button */}
             <Button
               onClick={handleNavigateToFeatures}
-              className={tourElClassname.trainModelButton}
+              // className={tourElClassname.trainModelButton}
               variant="primary"
+              rightIcon={<RiArrowRightLine />}
             >
-              <FormattedMessage id="features" />
+              <FormattedMessage id="Get features" />
             </Button>
 
-            <HStack>
+            {/* <HStack>
               {model ? (
                 <Button
                   onClick={handleNavigateToModel}
@@ -131,7 +132,7 @@ const DataSamplesPage = () => {
                   <FormattedMessage id="train-model" />
                 </Button>
               )}
-            </HStack>
+            </HStack> */}
           </HStack>
           <LiveGraphPanel disconnectedTextId="connect-to-record" />
         </VStack>
