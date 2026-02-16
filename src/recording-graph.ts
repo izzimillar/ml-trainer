@@ -47,7 +47,7 @@ interface Pos {
 
 const processDimensionData = (data: number[]) => {
   const formatToChartPos = (y: number, idx: number) => ({ x: idx, y });
-  return smoothen(data).map(formatToChartPos);
+  return (data).map(formatToChartPos);
 };
 
 interface GraphColors {
@@ -69,6 +69,7 @@ export const getConfig = (
   graphLineWeight: GraphLineWeight,
   filters: Set<Filter> = new Set<Filter>(),
   showLines: boolean = true,
+  featureView: boolean = false
 ): ChartConfiguration<keyof ChartTypeRegistry, Pos[], string> => {
   const x = processDimensionData(rawX);
   const y = processDimensionData(rawY);
@@ -93,7 +94,8 @@ export const getConfig = (
           data: x,
           segment: {
             borderWidth: (ctx) => highlightSegments(ctx, x, filters),
-            borderColor: (ctx) => colourSegments(ctx, x, filters, colors.x, showLines)
+            borderColor: (ctx) =>
+              colourSegments(ctx, x, filters, colors.x, showLines),
           },
           borderCapStyle: "round",
           pointRadius: (ctx: ScriptableContext<"line">) =>
@@ -110,7 +112,8 @@ export const getConfig = (
           data: y,
           segment: {
             borderWidth: (ctx) => highlightSegments(ctx, y, filters),
-            borderColor: (ctx) => colourSegments(ctx, y, filters, colors.y, showLines)
+            borderColor: (ctx) =>
+              colourSegments(ctx, y, filters, colors.y, showLines),
           },
           borderCapStyle: "round",
           pointRadius: (ctx: ScriptableContext<"line">) =>
@@ -127,7 +130,8 @@ export const getConfig = (
           data: z,
           segment: {
             borderWidth: (ctx) => highlightSegments(ctx, z, filters),
-            borderColor: (ctx) => colourSegments(ctx, z, filters, colors.z, showLines)
+            borderColor: (ctx) =>
+              colourSegments(ctx, z, filters, colors.z, showLines),
           },
           borderCapStyle: "round",
           pointRadius: (ctx: ScriptableContext<"line">) =>
@@ -277,14 +281,16 @@ export const getConfig = (
           max: maxAccelerationScaleForGraphs,
           grid: {
             drawTicks: false,
-            display: true,
+            // shows the x axis line when we're in the feature view
+            display: featureView,
             lineWidth: (ctx) => (ctx.tick.value === 0 ? 1.5 : 0),
           },
           ticks: {
             callback: function (val) {
               return val === 0 ? this.getLabelForValue(val) : "";
             },
-            display: true, //this will remove only the label
+            // shows the x axis label when we're in the feature view
+            display: featureView, //this will remove only the label
           },
           // display: false,
         },
@@ -325,7 +331,7 @@ function highlightPoints(
 function highlightSegments(
   context: ScriptableLineSegmentContext,
   points: Pos[],
-  filters: Set<Filter>,
+  filters: Set<Filter>
 ) {
   let isHighlighted: boolean = false;
 
@@ -482,6 +488,7 @@ function peakIndices(data: number[]) {
   const threshold = 3.5;
   const influence = 0.5;
 
+  let peaksCounter = 0;
   const indices: number[] = [];
 
   if (data.length < lag + 2) {
@@ -520,6 +527,7 @@ function peakIndices(data: number[]) {
         signals[i] = +1; // positive signal
         // only record if this is the start of a peak (previously not a peak)
         if (i - 1 > 0 && signals[i - 1] == 0) {
+          peaksCounter++;
           indices.push(i);
         }
       } else {
@@ -537,5 +545,9 @@ function peakIndices(data: number[]) {
     avgFilter[i] = mean(y_lag);
     stdFilter[i] = stddev(y_lag);
   }
+
+  console.log(peaksCounter);
+  console.log(indices);
+  console.log(signals);
   return indices;
 }

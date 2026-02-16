@@ -1,5 +1,6 @@
 import {
   Card,
+  Checkbox,
   Grid,
   GridItem,
   GridProps,
@@ -13,6 +14,7 @@ import { Filter, mlSettings } from "../mlConfig";
 import ClickableTooltip from "./ClickableTooltip";
 import HeadingGrid, { GridColumnHeadingItemProps } from "./HeadingGrid";
 import ShowValuesCheckbox from "./ShowValuesCheckBox";
+import { useCallback } from "react";
 
 const gridCommonProps: Partial<GridProps> = {
   gap: 3,
@@ -41,9 +43,6 @@ const headings: GridColumnHeadingItemProps[] = [
 const FeaturesTable = () => {
   const actions = useStore((s) => s.actions);
 
-  // const totalRecordings = actions.reduce((acc, action) => {
-  //   return action.recordings.length + acc;
-  // }, 0);
   const totalFilters = mlSettings.includedFilters.size;
 
   return (
@@ -89,6 +88,18 @@ const FeaturesTable = () => {
 const FeatureHeader = ({ feature }: { feature: Filter }) => {
   const axes = ["x", "y", "z"];
 
+  const currentFilters = useStore((s) => s.trainingFeatures);
+  const setFeatures = useStore((s) => s.setTrainingFeature);
+
+  // let isIncluded = currentFilters.has(feature);
+
+  const handleIncludeOnChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFeatures(feature, e.target.checked);
+
+    },
+    [setFeatures, feature]
+  );
   // add tick box to this to allow/disable it
   return (
     <>
@@ -113,6 +124,12 @@ const FeatureHeader = ({ feature }: { feature: Filter }) => {
             {/* feature name */}
             <GridItem textAlign={"center"} colSpan={3} rowSpan={1}>
               <FormattedMessage id={`${feature}`} />
+            </GridItem>
+
+            <GridItem colSpan={3}>
+              <Checkbox isChecked={currentFilters.has(feature)} onChange={handleIncludeOnChange}>
+                <FormattedMessage id="include" />
+              </Checkbox>
             </GridItem>
 
             {/* x, y, z */}

@@ -29,6 +29,7 @@ interface RecordingGraphProps extends BoxProps {
   h?: number;
   filters?: Set<Filter>;
   showLines?: boolean;
+  featureView?: boolean;
 }
 
 const RecordingGraph = ({
@@ -39,6 +40,7 @@ const RecordingGraph = ({
   h = 92,
   filters = new Set<Filter>(),
   showLines = true,
+  featureView = false,
   ...rest
 }: RecordingGraphProps) => {
   const [{ graphColorScheme, graphLineScheme, graphLineWeight }] =
@@ -64,7 +66,8 @@ const RecordingGraph = ({
         lineStyles,
         graphLineWeight,
         filters,
-        showLines
+        showLines,
+        featureView,
       )
     );
     return () => {
@@ -78,6 +81,7 @@ const RecordingGraph = ({
     responsive,
     filters,
     showLines,
+    featureView,
   ]);
 
   return (

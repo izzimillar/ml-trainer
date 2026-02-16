@@ -41,7 +41,7 @@ import { defaultSettings, Settings } from "./settings";
 import { getTotalNumSamples } from "./utils/actions";
 import { defaultIcons, MakeCodeIcon } from "./utils/icons";
 import { untitledProjectName } from "./project-name";
-import { mlSettings } from "./mlConfig";
+import { Filter, mlSettings } from "./mlConfig";
 import { BufferedData } from "./buffered-data";
 import { getDetectedAction } from "./utils/prediction";
 import { getTour as getTourSpec } from "./tours";
@@ -147,6 +147,7 @@ export interface State {
   actions: ActionData[];
   dataWindow: DataWindow;
   model: tf.LayersModel | undefined;
+  trainingFeatures: Set<Filter>;
 
   timestamp: number | undefined;
 
@@ -232,6 +233,8 @@ export interface Actions {
   deleteActionRecording(id: ActionData["ID"], recordingIdx: number): void;
   deleteAllActions(): void;
   downloadDataset(): void;
+
+  setTrainingFeature(feature: Filter, isOn: boolean): void;
 
   dataCollectionMicrobitConnectionStart(options?: ConnectOptions): void;
   dataCollectionMicrobitConnected(): void;
@@ -322,6 +325,17 @@ const createMlStore = (logging: Logging) => {
           timestamp: undefined,
           actions: [],
           dataWindow: currentDataWindow,
+          // training on all features
+          trainingFeatures: new Set<Filter>([
+            Filter.MAX,
+            Filter.MEAN,
+            Filter.MIN,
+            Filter.STD,
+            Filter.PEAKS,
+            Filter.ACC,
+            Filter.ZCR,
+            Filter.RMS,
+          ]),
           isRecording: false,
           project: createUntitledProject(),
           projectLoadTimestamp: 0,
@@ -639,6 +653,22 @@ const createMlStore = (logging: Logging) => {
                 currentDataWindow
               ),
             }));
+          },
+
+          setTrainingFeature(feature: Filter, isOn: boolean) {
+            return set(({ trainingFeatures }) => {
+              const newFeatures = new Set(trainingFeatures);
+
+              if (isOn && !trainingFeatures.has(feature)) {
+                newFeatures.add(feature);
+              } else if (!isOn && trainingFeatures.has(feature)) {
+                newFeatures.delete(feature);
+              }
+
+              return {
+                trainingFeatures: newFeatures,
+              };
+            });
           },
 
           downloadDataset() {

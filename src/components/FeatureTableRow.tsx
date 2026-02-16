@@ -44,15 +44,16 @@ const FeatureHeaderRow = ({
       w="100%"
       p={2}
       display={"flex"}
-      borderWidth={1}
+      borderWidth={0}
       position={"relative"}
     >
       <Grid
-        templateColumns={`repeat(2, 1fr)`}
-        templateRows={`repeat(${action.recordings.length}, 1fr)`}
+        templateColumns={`repeat(2, auto)`}
+        templateRows={`repeat(${action.recordings.length}, auto)`}
         alignContent={"center"}
         alignItems={"center"}
         textAlign={"center"}
+        gap={2}
       >
         {(view === FeaturesView.Graph ||
           view === FeaturesView.GraphNoLines) && (
@@ -91,9 +92,16 @@ const FeatureCard = ({
   const numberOfAxes = 3;
 
   return (
-    <>
+    <Card
+      p={2}
+      display="flex"
+      flexDirection="row"
+      width="fit-content"
+      borderColor={"transparent"}
+      borderWidth={1}
+    >
       {(view === FeaturesView.Graph || view === FeaturesView.GraphNoLines) && (
-        <Grid templateRows={`repeat(${action.recordings.length}, 1fr)`}>
+        <Grid templateRows={`repeat(${action.recordings.length}, 1fr)`} gap={2}>
           <>
             {action.recordings.map((recording, idx) => (
               <GridItem key={idx}>
@@ -110,8 +118,9 @@ const FeatureCard = ({
       {(view === FeaturesView.Colour ||
         view === FeaturesView.ColourAndValues) && (
         <Grid
-          templateColumns={`repeat(${numberOfAxes}, 1fr)`}
-          templateRows={`repeat(${action.recordings.length}, 1fr)`}
+          templateColumns={`repeat(${numberOfAxes}, auto)`}
+          templateRows={`repeat(${action.recordings.length}, auto)`}
+          rowGap={1}
         >
           {action.recordings.map((recording, idx) => (
             <FeatureValues
@@ -123,7 +132,7 @@ const FeatureCard = ({
           ))}
         </Grid>
       )}
-    </>
+    </Card>
   );
 };
 
@@ -165,8 +174,8 @@ const FeatureValues = ({ data, filter }: FeatureValuesProps) => {
 const ColourBlock = ({ value }: { value: number }) => {
   return (
     <GridItem
-      h={"56px"}
-      w="56px"
+      h={"60px"}
+      w="60px"
       backgroundColor={calculateGradientColor("#007DBC", value)}
     />
   );
@@ -177,8 +186,8 @@ const NumberBlock = ({ value }: { value: number }) => {
   const rounded = Math.round(value * dp) / dp;
   return (
     <GridItem
-      h={"56px"}
-      w={"56px"}
+      h={"60px"}
+      w={"60px"}
       textAlign={"center"}
       alignContent={"center"}
       backgroundColor={calculateGradientColor("#007DBC", value)}
@@ -200,10 +209,11 @@ const RecordingGraphFeatureValues = ({
   return (
     <RecordingGraph
       data={data}
-      h={200}
-      w={400}
+      h={120}
+      w={200}
       filters={new Set<Filter>([filter])}
       showLines={showGraphLines}
+      featureView={true}
     />
   );
 };
