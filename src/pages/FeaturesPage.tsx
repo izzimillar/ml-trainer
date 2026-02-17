@@ -38,7 +38,7 @@ const FeaturesPage = () => {
       <TrainModelDialogs finalFocusRef={trainButtonRef} />
       <DefaultPageLayout
         // localise this
-        titleId="features"
+        titleId="Data features"
         showPageTitle
         menuItems={<ProjectMenuItems />}
         toolbarItemsRight={<ProjectToolbarItems />}

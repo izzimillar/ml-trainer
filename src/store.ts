@@ -814,11 +814,12 @@ const createMlStore = (logging: Logging) => {
           },
 
           async trainModel() {
-            const { actions, dataWindow } = get();
+            const { actions, dataWindow, trainingFeatures } = get();
             logging.event({
               type: "model-train",
               detail: {
                 actions: actions.length,
+                features: trainingFeatures.size,
                 samples: getTotalNumSamples(actions),
               },
             });
@@ -833,6 +834,7 @@ const createMlStore = (logging: Logging) => {
             const trainingResult = await trainModel(
               actions,
               dataWindow,
+              trainingFeatures,
               (trainModelProgress) =>
                 set({ trainModelProgress }, false, "trainModelProgress")
             );

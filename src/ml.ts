@@ -17,11 +17,17 @@ export type TrainingResult =
 export const trainModel = async (
   data: ActionData[],
   dataWindow: DataWindow,
+  enabledFeatures: Set<Filter>,
   onProgress?: (progress: number) => void
 ): Promise<TrainingResult> => {
   // Gets a set of 24 values for each recording. Each set of features is labelled with a one-hot encoding
-  const { features, labels } = prepareFeaturesAndLabels(data, dataWindow);
-  const model: tf.LayersModel = createModel(data);
+  const { features, labels } = prepareFeaturesAndLabels(
+    data,
+    dataWindow,
+    enabledFeatures
+  );
+  console.log(features)
+  const model: tf.LayersModel = createModel(data, enabledFeatures);
   const totalNumEpochs = mlSettings.numEpochs;
 
   try {
@@ -48,7 +54,8 @@ export const trainModel = async (
 // Exported for testing
 export const prepareFeaturesAndLabels = (
   actions: ActionData[],
-  dataWindow: DataWindow
+  dataWindow: DataWindow,
+  enabledFeatures: Set<Filter>
 ): { features: number[][]; labels: number[][] } => {
   const features: number[][] = [];
   const labels: number[][] = [];
@@ -57,7 +64,14 @@ export const prepareFeaturesAndLabels = (
   actions.forEach((action, index) => {
     action.recordings.forEach((recording) => {
       // Prepare features
-      features.push(Object.values(applyFilters(recording.data, dataWindow)));
+      // only use enabledFeatures --> the features that the user has chosen to include
+      features.push(
+        Object.values(
+          applyFilters(recording.data, dataWindow, {
+            enabledFilters: enabledFeatures,
+          })
+        )
+      );
 
       // Prepare labels
       const label: number[] = new Array(numActions) as number[];
@@ -69,10 +83,10 @@ export const prepareFeaturesAndLabels = (
   return { features, labels };
 };
 
-const createModel = (actions: ActionData[]): tf.LayersModel => {
+const createModel = (actions: ActionData[], filters: Set<Filter>): tf.LayersModel => {
   const numberOfClasses: number = actions.length;
   const inputShape = [
-    mlSettings.includedFilters.size * mlSettings.includedAxes.length,
+    filters.size * mlSettings.includedAxes.length,
   ];
 
   const input = tf.input({ shape: inputShape });
@@ -105,12 +119,18 @@ export const normalize = (value: number, min: number, max: number) => {
 export const applyFilters = (
   data: XYZData,
   dataWindow: DataWindow,
-  opts: { normalize?: boolean } = {}
+  opts: { normalize?: boolean; enabledFilters?: Set<Filter> } = {}
 ): Record<string, number> => {
   if (data.x.length === 0 || data.y.length === 0 || data.z.length === 0) {
     throw new Error("Empty x/y/z data");
   }
-  return Array.from(mlSettings.includedFilters).reduce((acc, filter) => {
+
+  opts.enabledFilters =
+    opts.enabledFilters === undefined
+      ? mlSettings.includedFilters
+      : opts.enabledFilters;
+  
+  return Array.from(opts.enabledFilters).reduce((acc, filter) => {
     const { x, y, z } = applyFilter(filter, data, dataWindow, {
       normalize: opts.normalize,
     });
