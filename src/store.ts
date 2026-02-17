@@ -325,7 +325,7 @@ const createMlStore = (logging: Logging) => {
           timestamp: undefined,
           actions: [],
           dataWindow: currentDataWindow,
-          // training on all features
+          // initially train on all features
           trainingFeatures: new Set<Filter>([
             Filter.MAX,
             Filter.MEAN,
@@ -655,20 +655,47 @@ const createMlStore = (logging: Logging) => {
             }));
           },
 
+          // add or remove a feature from the training features to specify which features a model should use to train
           setTrainingFeature(feature: Filter, isOn: boolean) {
-            return set(({ trainingFeatures }) => {
-              const newFeatures = new Set(trainingFeatures);
+            return set(
+              ({
+                trainingFeatures,
+                project,
+                projectEdited,
+                actions,
+                dataWindow,
+              }) => {
+                const newFeatures = new Set(trainingFeatures);
+                let changedFeatures = false;
 
-              if (isOn && !trainingFeatures.has(feature)) {
-                newFeatures.add(feature);
-              } else if (!isOn && trainingFeatures.has(feature)) {
-                newFeatures.delete(feature);
+                if (isOn && !trainingFeatures.has(feature)) {
+                  newFeatures.add(feature);
+                  changedFeatures = true;
+                } else if (!isOn && trainingFeatures.has(feature)) {
+                  newFeatures.delete(feature);
+                  changedFeatures = true;
+                }
+
+                // remove the existing model if any of the features have been changed
+                if (!changedFeatures) {
+                  return {
+                    trainingFeatures: newFeatures,
+                  };
+                } else {
+                  return {
+                    trainingFeatures: newFeatures,
+                    model: undefined,
+                    ...updateProject(
+                      project,
+                      projectEdited,
+                      actions,
+                      undefined,
+                      dataWindow
+                    ),
+                  };
+                }
               }
-
-              return {
-                trainingFeatures: newFeatures,
-              };
-            });
+            );
           },
 
           downloadDataset() {
@@ -769,9 +796,10 @@ const createMlStore = (logging: Logging) => {
             const {
               settings: { showPreTrainHelp },
               actions,
+              trainingFeatures,
               trainModel,
             } = get();
-            if (!hasSufficientDataForTraining(actions)) {
+            if (!hasSufficientDataForTraining(actions, trainingFeatures)) {
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
               });
@@ -1444,13 +1472,21 @@ export const useHasActions = () => {
   );
 };
 
-const hasSufficientDataForTraining = (actions: ActionData[]): boolean => {
-  return actions.length >= 2 && actions.every((a) => a.recordings.length >= 3);
+const hasSufficientDataForTraining = (
+  actions: ActionData[],
+  features: Set<Filter>
+): boolean => {
+  return (
+    actions.length >= 2 &&
+    actions.every((a) => a.recordings.length >= 3) &&
+    features.size > 0
+  );
 };
 
 export const useHasSufficientDataForTraining = (): boolean => {
   const actions = useStore((s) => s.actions);
-  return hasSufficientDataForTraining(actions);
+  const features = useStore((s) => s.trainingFeatures);
+  return hasSufficientDataForTraining(actions, features);
 };
 
 export const useHasNoStoredData = (): boolean => {

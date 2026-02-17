@@ -102,47 +102,54 @@ const FeatureHeader = ({ feature }: { feature: Filter }) => {
   // add tick box to this to allow/disable it
   return (
     <>
-      <ClickableTooltip
-        placement="end-end"
-        label={
-          <Text p={3}>
-            {/* TODO: change this to be a correct description */}
-            <FormattedMessage id={`fingerprint-${feature}-x-tooltip`} />
-          </Text>
-        }
+      <Card
+        h="100%"
+        w="100%"
+        p={2}
+        display={"flex"}
+        borderWidth={1}
+        position={"relative"}
       >
-        <Card
-          h="100%"
-          w="100%"
-          p={2}
-          display={"flex"}
-          borderWidth={1}
-          position={"relative"}
-        >
-          <Grid>
-            {/* feature name */}
-            <GridItem textAlign={"center"} colSpan={3} rowSpan={1}>
-              <FormattedMessage id={`${feature}`} />
-            </GridItem>
+        <Grid>
+          {/* feature name */}
+          <GridItem textAlign={"center"} colSpan={3} rowSpan={1}>
+            <FormattedMessage id={`${feature}`} />
+          </GridItem>
 
-            <GridItem textAlign={"center"} colSpan={3}>
-              <Checkbox
-                isChecked={currentFilters.has(feature)}
-                onChange={handleIncludeOnChange}
+          <GridItem textAlign={"center"} colSpan={3}>
+            <Checkbox
+              isChecked={currentFilters.has(feature)}
+              onChange={handleIncludeOnChange}
+            >
+              <FormattedMessage id="include" />
+            </Checkbox>
+          </GridItem>
+
+          {/* x, y, z */}
+          {axes.map((axis, idx) => (
+            <GridItem
+              key={idx}
+              display={"flex"}
+              alignItems={"center"}
+              justifyContent={"center"}
+              gridRow={2}
+            >
+              <ClickableTooltip
+                placement="end-end"
+                label={
+                  <Text p={3}>
+                    <FormattedMessage
+                      id={`fingerprint-${feature}-${axis}-tooltip`}
+                    />
+                  </Text>
+                }
               >
-                <FormattedMessage id="include" />
-              </Checkbox>
-            </GridItem>
-
-            {/* x, y, z */}
-            {axes.map((axis, idx) => (
-              <GridItem key={idx} textAlign={"center"} gridRow={2}>
                 <FormattedMessage id={`${axis}`} />
-              </GridItem>
-            ))}
-          </Grid>
-        </Card>
-      </ClickableTooltip>
+              </ClickableTooltip>
+            </GridItem>
+          ))}
+        </Grid>
+      </Card>
     </>
   );
 };

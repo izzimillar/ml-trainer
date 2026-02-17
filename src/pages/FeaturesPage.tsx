@@ -11,7 +11,6 @@ import { useCallback, useRef } from "react";
 import { createDataSamplesPageUrl, createTestingModelPageUrl } from "../urls";
 import { RiArrowRightLine } from "react-icons/ri";
 import BackArrow from "../components/BackArrow";
-import LiveGraphPanel from "../components/LiveGraphPanel";
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 
 const FeaturesPage = () => {
@@ -19,7 +18,7 @@ const FeaturesPage = () => {
   const model = useStore((s) => s.model);
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
-  const hasSufficientData = useHasSufficientDataForTraining();
+  const trainingIsEnabled = useHasSufficientDataForTraining();
 
   // navigation
   const navigate = useNavigate();
@@ -83,7 +82,7 @@ const FeaturesPage = () => {
                 ref={trainButtonRef}
                 // className={tourElClassname.trainModelButton}
                 onClick={() => trainModelFlowStart(handleNavigateToModel)}
-                variant={hasSufficientData ? "primary" : "secondary-disabled"}
+                variant={trainingIsEnabled ? "primary" : "secondary-disabled"}
               >
                 <FormattedMessage id="train-model" />
               </Button>
