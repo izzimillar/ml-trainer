@@ -32,6 +32,7 @@ import MoreMenuButton from "./MoreMenuButton";
 import RecordingFingerprint from "./RecordingFingerprint";
 import RecordingGraph from "./RecordingGraph";
 import { RecordingOptions } from "./RecordingDialog";
+import DataAugmentationControl from "./DataAugmentationContol";
 
 const flash = keyframes({
   "0%, 10%": {
@@ -62,104 +63,118 @@ const ActionDataSamplesCard = ({
   const intl = useIntl();
   const deleteActionRecording = useStore((s) => s.deleteActionRecording);
   const view = useStore((s) => s.settings.dataSamplesView);
-  if (view === DataSamplesView.GraphAndDataFeatures) {
-    // We split the cards in this case
-    return (
-      <HStack>
-        {onRecord && (
-          <DataSamplesRowCard
-            onSelectRow={onSelectRow}
-            selected={selected}
-            position="relative"
-            className={tourElClassname.recordDataSamplesCard}
-          >
+
+  // We split the cards in this case
+  return (
+    <>
+      {view === DataSamplesView.GraphAndDataFeatures && (
+        <HStack>
+          {onRecord && (
+            <DataSamplesRowCard
+              onSelectRow={onSelectRow}
+              selected={selected}
+              position="relative"
+              className={tourElClassname.recordDataSamplesCard}
+            >
+              <RecordingArea
+                action={value}
+                selected={selected}
+                onRecord={onRecord}
+              />
+            </DataSamplesRowCard>
+          )}
+          {value.recordings.map((recording, idx) => (
+            <DataSamplesRowCard
+              onSelectRow={onSelectRow}
+              selected={selected}
+              key={recording.ID}
+            >
+              <CloseButton
+                aria-label={intl.formatMessage(
+                  {
+                    id: "delete-recording-aria",
+                  },
+                  {
+                    sample: value.recordings.length - idx,
+                    numSamples: value.recordings.length,
+                    action: value.name,
+                  }
+                )}
+                position="absolute"
+                top={-2}
+                right={-2}
+                rounded="full"
+                bgColor="white"
+                zIndex={1}
+                borderColor="blackAlpha.500"
+                boxShadow="sm"
+                onClick={() => deleteActionRecording(value.ID, idx)}
+              />
+              <DataSample
+                recording={recording}
+                numRecordings={value.recordings.length}
+                actionId={value.ID}
+                actionName={value.name}
+                recordingIndex={idx}
+                isNew={newRecordingId === recording.ID}
+                onNewAnimationEnd={clearNewRecordingId}
+                onDelete={deleteActionRecording}
+                view={view}
+                hasClose={false}
+              />
+            </DataSamplesRowCard>
+          ))}
+
+          <DataSamplesRowCard selected={selected} >
+            <DataAugmentationControl
+              action={value}
+              selected={selected}
+              onAugment={function (): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
+          </DataSamplesRowCard>
+        </HStack>
+      )}
+
+      {view !== DataSamplesView.GraphAndDataFeatures && (
+        <DataSamplesRowCard
+          onSelectRow={onSelectRow}
+          selected={selected}
+          variant={preview ? "outline" : undefined}
+          // Otherwise we put the tour class on the recording area
+          className={
+            value.recordings.length === 0
+              ? tourElClassname.recordDataSamplesCard
+              : undefined
+          }
+        >
+          {!!onRecord && (
             <RecordingArea
+              className={tourElClassname.recordDataSamplesCard}
               action={value}
               selected={selected}
               onRecord={onRecord}
             />
-          </DataSamplesRowCard>
-        )}
-        {value.recordings.map((recording, idx) => (
-          <DataSamplesRowCard
-            onSelectRow={onSelectRow}
-            selected={selected}
-            key={recording.ID}
-          >
-            <CloseButton
-              aria-label={intl.formatMessage(
-                {
-                  id: "delete-recording-aria",
-                },
-                {
-                  sample: value.recordings.length - idx,
-                  numSamples: value.recordings.length,
-                  action: value.name,
-                }
-              )}
-              position="absolute"
-              top={-2}
-              right={-2}
-              rounded="full"
-              bgColor="white"
-              zIndex={1}
-              borderColor="blackAlpha.500"
-              boxShadow="sm"
-              onClick={() => deleteActionRecording(value.ID, idx)}
-            />
+          )}
+          {value.recordings.map((recording, idx) => (
             <DataSample
-              recording={recording}
-              numRecordings={value.recordings.length}
+              key={recording.ID}
               actionId={value.ID}
               actionName={value.name}
               recordingIndex={idx}
+              hasClose={!preview}
+              recording={recording}
+              numRecordings={value.recordings.length}
               isNew={newRecordingId === recording.ID}
-              onNewAnimationEnd={clearNewRecordingId}
               onDelete={deleteActionRecording}
+              onNewAnimationEnd={clearNewRecordingId}
               view={view}
-              hasClose={false}
             />
-          </DataSamplesRowCard>
-        ))}
-      </HStack>
-    );
-  }
-  return (
-    <DataSamplesRowCard
-      onSelectRow={onSelectRow}
-      selected={selected}
-      variant={preview ? "outline" : undefined}
-      // Otherwise we put the tour class on the recording area
-      className={
-        value.recordings.length === 0
-          ? tourElClassname.recordDataSamplesCard
-          : undefined
-      }
-    >
-      {!!onRecord && (
-        <RecordingArea
-          className={tourElClassname.recordDataSamplesCard}
-          action={value}
-          selected={selected}
-          onRecord={onRecord}
-        />
+          ))}
+        </DataSamplesRowCard>
       )}
-      {value.recordings.map((recording, idx) => (
-        <DataSample
-          key={recording.ID}
-          actionId={value.ID}
-          actionName={value.name}
-          recordingIndex={idx}
-          hasClose={!preview}
-          recording={recording}
-          numRecordings={value.recordings.length}
-          isNew={newRecordingId === recording.ID}
-          onDelete={deleteActionRecording}
-          onNewAnimationEnd={clearNewRecordingId}
-          view={view}
-        />
-      ))}
-    </DataSamplesRowCard>
+    </>
   );
 };
 
