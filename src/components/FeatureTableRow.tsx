@@ -1,4 +1,4 @@
-import { Card, Grid, GridItem } from "@chakra-ui/react";
+import { Box, Card, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
 import { ActionData, FeaturesView, XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
@@ -6,38 +6,65 @@ import { applyFilter } from "../ml";
 import RecordingGraph from "./RecordingGraph";
 import { FormattedMessage } from "react-intl";
 import { Filter, mlSettings } from "../mlConfig";
+import { useRef } from "react";
 
 interface FeaturesTableRowProps {
   action: ActionData;
+  expanded: boolean;
+  onClick?: (rowID: number) => void;
 }
 
-const FeaturesTableRow = ({ action }: FeaturesTableRowProps) => {
+const FeatureTableRow = ({
+  action,
+  expanded,
+  onClick,
+}: FeaturesTableRowProps) => {
   const { featuresView } = useStore((s) => s.settings);
 
   const filters = mlSettings.includedFilters;
 
   return (
-    <>
+    <
+      // height={expanded ? ref.current?.scrollHeight : "100px"}
+      // transition={"height 0.3s ease"}
+      // overflow={"hidden"}
+    >
       <GridItem h="100%" w="100%">
-        <FeatureHeaderRow action={action} view={featuresView} />
+        <FeatureHeaderRow
+          action={action}
+          view={featuresView}
+          expanded={expanded}
+          onClick={onClick}
+        />
       </GridItem>
 
       {Array.from(filters).map((filter, idx) => (
         <GridItem key={idx}>
-          <FeatureCard action={action} filter={filter} view={featuresView} />
+          <FeatureCard
+            action={action}
+            filter={filter}
+            view={featuresView}
+            expanded={expanded}
+          />
         </GridItem>
       ))}
     </>
   );
 };
 
+interface FeatureHeaderRowProps {
+  action: ActionData;
+  view: FeaturesView;
+  expanded: boolean;
+  onClick?: (rowID: number) => void;
+}
+
 const FeatureHeaderRow = ({
   action,
   view,
-}: {
-  action: ActionData;
-  view: FeaturesView;
-}) => {
+  expanded,
+  onClick,
+}: FeatureHeaderRowProps) => {
   return (
     <Card
       h="100%"
@@ -46,6 +73,7 @@ const FeatureHeaderRow = ({
       display={"flex"}
       borderWidth={0}
       position={"relative"}
+      onClick={() => onClick?.(action.ID)}
     >
       <Grid
         templateColumns={`repeat(2, auto)`}
@@ -55,41 +83,102 @@ const FeatureHeaderRow = ({
         textAlign={"center"}
         gap={2}
       >
-        {(view === FeaturesView.Graph ||
-          view === FeaturesView.GraphNoLines) && (
-          <GridItem rowSpan={action.recordings.length} colSpan={2}>
-            <FormattedMessage id={action.name} />
-          </GridItem>
-        )}
+        <GridItem rowSpan={action.recordings.length}>
+          <FormattedMessage id={action.name} />
+        </GridItem>
 
-        {(view === FeaturesView.Colour ||
-          view == FeaturesView.ColourAndValues) && (
-          <>
-            <GridItem rowSpan={action.recordings.length}>
-              <FormattedMessage id={action.name} />
-            </GridItem>
-            {action.recordings.map((recording, idx) => (
-              <GridItem key={idx}>
-                <RecordingGraph data={recording.data} h={56} w={96} />
-              </GridItem>
-            ))}
-          </>
-        )}
+        {expanded &&
+          (view === FeaturesView.Colour ||
+            view == FeaturesView.ColourAndValues) && (
+            <>
+              {action.recordings.map((recording, idx) => (
+                <GridItem key={idx}>
+                  <RecordingGraph data={recording.data} h={56} w={96} />
+                </GridItem>
+              ))}
+            </>
+          )}
       </Grid>
     </Card>
   );
 };
 
-const FeatureCard = ({
-  action,
-  filter,
-  view,
-}: {
+interface FeatureCardProps {
   action: ActionData;
   filter: Filter;
+  expanded: boolean;
   view: FeaturesView;
-}) => {
+}
+
+const FeatureCard = ({ action, filter, expanded, view }: FeatureCardProps) => {
   const numberOfAxes = 3;
+
+  // // TODO: this is definitely not right by looking at the graphs...
+  // const averaged = (): XYZData[] => {
+  //   const averaged_x = () => {
+  //     if (action.recordings.length === 0) {
+  //       return [];
+  //     }
+
+  //     const dataLength = action.recordings[0].data.x.length;
+  //     return Array.from({ length: dataLength }, (_, i) => {
+  //       const sum = action.recordings.reduce((total, recording) => {
+  //         return total + (recording.data.x[i] ?? 0);
+  //       }, 0);
+
+  //       const count = action.recordings.reduce(
+  //         (count, recording) => (recording.data.x[i] ? 1 : 0 + count),
+  //         0
+  //       );
+  //       return sum / count;
+  //     });
+  //   };
+
+  //   const averaged_y = () => {
+  //     if (action.recordings.length === 0) {
+  //       return [];
+  //     }
+
+  //     const dataLength = action.recordings[0].data.y.length;
+  //     return Array.from({ length: dataLength }, (_, i) => {
+  //       const sum = action.recordings.reduce((total, recording) => {
+  //         return total + (recording.data.y[i] ?? 0);
+  //       }, 0);
+  //       const count = action.recordings.reduce(
+  //         (count, recording) => count + (recording.data.y[i] ? 1 : 0),
+  //         0
+  //       );
+  //       return sum / count;
+  //     });
+  //   };
+
+  //   const averaged_z = () => {
+  //     if (action.recordings.length === 0) {
+  //       return [];
+  //     }
+
+  //     const dataLength = action.recordings[0].data.z.length;
+  //     return Array.from({ length: dataLength }, (_, i) => {
+  //       const sum = action.recordings.reduce((total, recording) => {
+  //         return total + (recording.data.z[i] ?? 0);
+  //       }, 0);
+
+  //       const count = action.recordings.reduce(
+  //         (count, recording) => (recording.data.z[i] ? 1 : 0 + count),
+  //         0
+  //       );
+  //       return sum / count;
+  //     });
+  //   };
+
+  //   return [{ x: averaged_x(), y: averaged_y(), z: averaged_z() }];
+  // };
+
+  // const allData = (): XYZData[] => {
+  //   return action.recordings.map((recording) => recording.data);
+  // };
+
+  const numberOfRows = expanded ? action.recordings.length : 1;
 
   return (
     <Card
@@ -101,14 +190,11 @@ const FeatureCard = ({
       borderWidth={1}
     >
       {(view === FeaturesView.Graph || view === FeaturesView.GraphNoLines) && (
-        <Grid templateRows={`repeat(${action.recordings.length}, 1fr)`} gap={2}>
+        <Grid templateRows={`repeat(${numberOfRows}, 1fr)`} gap={2}>
           <>
-            {action.recordings.map((recording, idx) => (
+            {(expanded ? action.recordings : [action.recordings[0]]).map((recording, idx) => (
               <GridItem key={idx}>
-                <RecordingGraphFeatureValues
-                  data={recording.data}
-                  filter={filter}
-                />
+                <RecordingGraphFeatureValues data={recording.data} filter={filter} />
               </GridItem>
             ))}
           </>
@@ -119,10 +205,10 @@ const FeatureCard = ({
         view === FeaturesView.ColourAndValues) && (
         <Grid
           templateColumns={`repeat(${numberOfAxes}, auto)`}
-          templateRows={`repeat(${action.recordings.length}, auto)`}
+          templateRows={`repeat(${numberOfRows}, auto)`}
           rowGap={1}
         >
-          {action.recordings.map((recording, idx) => (
+          {(expanded ? action.recordings : [action.recordings[0]]).map((recording, idx) => (
             <FeatureValues
               key={idx}
               data={recording.data}
@@ -218,4 +304,4 @@ const RecordingGraphFeatureValues = ({
   );
 };
 
-export default FeaturesTableRow;
+export default FeatureTableRow;

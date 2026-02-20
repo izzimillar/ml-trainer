@@ -32,7 +32,7 @@ import MoreMenuButton from "./MoreMenuButton";
 import RecordingFingerprint from "./RecordingFingerprint";
 import RecordingGraph from "./RecordingGraph";
 import { RecordingOptions } from "./RecordingDialog";
-import DataAugmentationControl from "./DataAugmentationContol";
+import DataAugmentationControl from "./DataAugmentationControl";
 
 const flash = keyframes({
   "0%, 10%": {
@@ -48,7 +48,12 @@ interface ActionDataSamplesCardProps {
   onSelectRow?: () => void;
   onRecord?: (recordingOptions: RecordingOptions) => void;
   newRecordingId?: number;
-  onAugment?: (action: ActionData, repeats?: number, mean?: number, stddev?: number) => void;
+  onAugment?: (
+    action: ActionData,
+    repeats?: number,
+    mean?: number,
+    stddev?: number
+  ) => void;
   clearNewRecordingId?: () => void;
 }
 
@@ -126,14 +131,15 @@ const ActionDataSamplesCard = ({
               />
             </DataSamplesRowCard>
           ))}
-
-          <DataSamplesRowCard selected={selected} >
-            <DataAugmentationControl
-              action={value}
-              selected={selected}
-              onAugment={onAugment}
-            />
-          </DataSamplesRowCard>
+          {onAugment && (
+            <DataSamplesRowCard selected={selected}>
+              <DataAugmentationControl
+                action={value}
+                selected={selected}
+                onAugment={onAugment}
+              />
+            </DataSamplesRowCard>
+          )}
         </HStack>
       )}
 

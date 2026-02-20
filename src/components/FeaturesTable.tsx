@@ -7,14 +7,14 @@ import {
   HStack,
   Text,
 } from "@chakra-ui/react";
-import FeaturesTableRow from "./FeatureTableRow";
+import FeatureTableRow from "./FeatureTableRow";
 import { useStore } from "../store";
 import { FormattedMessage } from "react-intl";
 import { Filter, mlSettings } from "../mlConfig";
 import ClickableTooltip from "./ClickableTooltip";
 import HeadingGrid, { GridColumnHeadingItemProps } from "./HeadingGrid";
 import ShowValuesCheckbox from "./ShowValuesCheckBox";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 const gridCommonProps: Partial<GridProps> = {
   gap: 3,
@@ -42,8 +42,19 @@ const headings: GridColumnHeadingItemProps[] = [
 
 const FeaturesTable = () => {
   const actions = useStore((s) => s.actions);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(
+    new Set(actions.map((action) => action.ID))
+  );
 
   const totalFilters = mlSettings.includedFilters.size;
+
+  const toggleExpanded = (rowID: number) => {
+    setExpandedRows((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(rowID) ? newSet.delete(rowID) : newSet.add(rowID);
+      return newSet;
+    });
+  };
 
   return (
     <>
@@ -78,7 +89,13 @@ const FeaturesTable = () => {
 
         {/* features */}
         {actions.map((action, idx) => (
-          <FeaturesTableRow key={idx} action={action} />
+          <FeatureTableRow
+            key={idx}
+            action={action}
+            expanded={expandedRows.has(action.ID)}
+            onClick={toggleExpanded}
+            
+          />
         ))}
       </Grid>
     </>
