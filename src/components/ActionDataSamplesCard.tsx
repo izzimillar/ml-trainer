@@ -48,6 +48,7 @@ interface ActionDataSamplesCardProps {
   onSelectRow?: () => void;
   onRecord?: (recordingOptions: RecordingOptions) => void;
   newRecordingId?: number;
+  onAugment?: (action: ActionData, repeats?: number, mean?: number, stddev?: number) => void;
   clearNewRecordingId?: () => void;
 }
 
@@ -57,6 +58,7 @@ const ActionDataSamplesCard = ({
   onSelectRow,
   onRecord,
   newRecordingId,
+  onAugment,
   clearNewRecordingId,
   preview,
 }: ActionDataSamplesCardProps) => {
@@ -129,9 +131,7 @@ const ActionDataSamplesCard = ({
             <DataAugmentationControl
               action={value}
               selected={selected}
-              onAugment={function (): void {
-                throw new Error("Function not implemented.");
-              }}
+              onAugment={onAugment}
             />
           </DataSamplesRowCard>
         </HStack>

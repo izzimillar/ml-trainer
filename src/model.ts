@@ -19,6 +19,7 @@ export interface XYZData {
 export interface RecordingData {
   ID: number;
   data: XYZData;
+  isGenerated?: boolean;
 }
 
 export interface Action {

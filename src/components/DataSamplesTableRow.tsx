@@ -19,6 +19,7 @@ interface DataSamplesTableRowProps {
   selected: boolean;
   onSelectRow?: () => void;
   onRecord?: (recordingOptions: RecordingOptions) => void;
+  onAugment?: (action: ActionData, repeats?: number, mean?: number, stddev?: number) => void;
   showHints: boolean;
   newRecordingId?: number;
   clearNewRecordingId?: () => void;
@@ -31,6 +32,7 @@ const DataSamplesTableRow = ({
   selected,
   onSelectRow,
   onRecord,
+  onAugment,
   preview,
   showHints,
   newRecordingId,
@@ -79,6 +81,7 @@ const DataSamplesTableRow = ({
                 selected={selected}
                 onSelectRow={onSelectRow}
                 onRecord={onRecord}
+                onAugment={onAugment}
                 clearNewRecordingId={clearNewRecordingId}
               />
             )}

@@ -7,7 +7,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { SymbolicTensor } from "@tensorflow/tfjs";
 import { Filter, getMlFilters, mlSettings } from "./mlConfig";
-import { ActionData, XYZData } from "./model";
+import { ActionData, RecordingData, XYZData } from "./model";
 import { DataWindow } from "./store";
 
 export type TrainingResult =
@@ -17,7 +17,7 @@ export type TrainingResult =
 export const trainModel = async (
   data: ActionData[],
   dataWindow: DataWindow,
-  enabledFeatures: Set<Filter>,
+  enabledFeatures: Set<Filter> = mlSettings.includedFilters,
   onProgress?: (progress: number) => void
 ): Promise<TrainingResult> => {
   // Gets a set of 24 values for each recording. Each set of features is labelled with a one-hot encoding
@@ -26,7 +26,7 @@ export const trainModel = async (
     dataWindow,
     enabledFeatures
   );
-  console.log(features)
+
   const model: tf.LayersModel = createModel(data, enabledFeatures);
   const totalNumEpochs = mlSettings.numEpochs;
 
@@ -55,7 +55,7 @@ export const trainModel = async (
 export const prepareFeaturesAndLabels = (
   actions: ActionData[],
   dataWindow: DataWindow,
-  enabledFeatures: Set<Filter>
+  enabledFeatures: Set<Filter> = mlSettings.includedFilters
 ): { features: number[][]; labels: number[][] } => {
   const features: number[][] = [];
   const labels: number[][] = [];
@@ -83,11 +83,62 @@ export const prepareFeaturesAndLabels = (
   return { features, labels };
 };
 
-const createModel = (actions: ActionData[], filters: Set<Filter>): tf.LayersModel => {
+// DATA AUGMENTATION
+// add jitter to data in order to create an augmented dataset
+export const addJitter = (
+  action: ActionData,
+  repeats: number = 1,
+  mean: number = 0,
+  stddev: number = 1.0,
+  includeOriginal: boolean = false
+) => {
+  const recordings: RecordingData[] = [];
+  let recordingID = Date.now();
+
+  const normalNoise = (mean: number, stddev: number) => {
+    const u1 = Math.random();
+    const u2 = Math.random();
+
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+
+    return z0 * stddev + mean;
+  };
+
+
+  action.recordings.forEach((recording) => {
+    // for the number of repeats requested
+    for (let i = 0; i < repeats; i++) {
+      // for each of the recordings add random noise to each axis
+      const noisy_x = recording.data.x.map(
+        (value) => normalNoise(mean, stddev) + value
+      );
+      const noisy_y = recording.data.y.map(
+        (value) => normalNoise(mean, stddev) + value
+      );
+      const noisy_z = recording.data.z.map(
+        (value) => normalNoise(mean, stddev) + value
+      );
+
+      // add a new recording to the recordings array
+      const newRecording: XYZData = { x: noisy_x, y: noisy_y, z: noisy_z };
+      recordings.push({ ID: recordingID, data: newRecording, isGenerated: true });
+      recordingID++;
+    }
+  });
+
+  if (includeOriginal) {
+    recordings.push(...action.recordings);
+  }
+
+  return recordings;
+};
+
+const createModel = (
+  actions: ActionData[],
+  filters: Set<Filter>
+): tf.LayersModel => {
   const numberOfClasses: number = actions.length;
-  const inputShape = [
-    filters.size * mlSettings.includedAxes.length,
-  ];
+  const inputShape = [filters.size * mlSettings.includedAxes.length];
 
   const input = tf.input({ shape: inputShape });
   const normalizer = tf.layers.batchNormalization().apply(input);
@@ -129,7 +180,7 @@ export const applyFilters = (
     opts.enabledFilters === undefined
       ? mlSettings.includedFilters
       : opts.enabledFilters;
-  
+
   return Array.from(opts.enabledFilters).reduce((acc, filter) => {
     const { x, y, z } = applyFilter(filter, data, dataWindow, {
       normalize: opts.normalize,

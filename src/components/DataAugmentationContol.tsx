@@ -1,12 +1,12 @@
 import { FormattedMessage } from "react-intl";
 import { ActionData } from "../model";
-import { Button, ButtonGroup, Menu, Text, VStack } from "@chakra-ui/react";
-import MoreMenuButton from "./MoreMenuButton";
+import { Button, Menu, Text, VStack } from "@chakra-ui/react";
+// import MoreMenuButton from "./MoreMenuButton";
 
 interface DataAugmentationControlProps {
   action: ActionData;
   selected: boolean;
-  onAugment: () => void;
+  onAugment: (action: ActionData, repeats?: number, mean?: number, stddev?: number) => void;
 }
 
 export const augmentButtonId = (action: ActionData) =>
@@ -28,7 +28,7 @@ const DataAugmentationControl = ({
           id={augmentButtonId(action)}
           px={4}
           variant={disabled ? "secondary-disabled" : selected ? "primary" : "secondary"}
-          onClick={() => onAugment()}
+          onClick={() => onAugment(action, 1)}
         >
           <FormattedMessage id="Add data" />
         </Button>

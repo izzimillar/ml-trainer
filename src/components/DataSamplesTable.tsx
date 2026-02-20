@@ -40,6 +40,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { actionNameInputId } from "./ActionNameCard";
 import { recordButtonId } from "./ActionDataSamplesCard";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
+import { addJitter } from "../ml";
 
 const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "290px 1fr",
@@ -85,6 +86,7 @@ const DataSamplesTable = ({
     [actions]
   );
   const intl = useIntl();
+  const addActionRecordings = useStore((s) => s.addActionRecordings);
   const isDeleteActionConfirmOpen = useStore((s) => s.isDeleteActionDialogOpen);
   const deleteActionConfirmOnOpen = useStore((s) => s.deleteActionDialogOnOpen);
   const deleteAction = useStore((s) => s.deleteAction);
@@ -144,6 +146,12 @@ const DataSamplesTable = ({
     },
     [tourStart]
   );
+
+  const handleAugment = (action: ActionData, repeats: number = 1, mean: number = 0, stddev: number = 0.1) => {
+    const augmentedRecordings = addJitter(action, repeats, mean, stddev);
+
+    addActionRecordings(action.ID, augmentedRecordings);
+  };
 
   const actionNameInputEl = useCallback(
     (idx: number) => document.getElementById(actionNameInputId(actions[idx])),
@@ -287,6 +295,7 @@ const DataSamplesTable = ({
               selected={selectedAction.ID === action.ID}
               onSelectRow={() => setSelectedActionIdx(idx)}
               onRecord={handleRecord}
+              onAugment={handleAugment}
               showHints={showHints}
               onDeleteAction={deleteActionConfirmOnOpen}
               renameShortcutScopeRef={renameActionShortcutScopeRef}
