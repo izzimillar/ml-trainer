@@ -388,6 +388,8 @@ const DataSample = ({
           aria-label={intl.formatMessage({
             id: "recording-graph-label",
           })}
+          // w="156px"
+          // h="96px"
         >
           <Box
             position="absolute"

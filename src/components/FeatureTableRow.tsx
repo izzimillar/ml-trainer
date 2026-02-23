@@ -92,7 +92,7 @@ const FeatureHeaderRow = ({
             <>
               {action.recordings.map((recording, idx) => (
                 <GridItem key={idx}>
-                  <RecordingGraph data={recording.data} h={56} w={96} />
+                  <RecordingGraph data={recording.data} width="94px" height="54px" w={"96px"} h={"56px"} />
                 </GridItem>
               ))}
             </>
@@ -294,8 +294,8 @@ const RecordingGraphFeatureValues = ({
   return (
     <RecordingGraph
       data={data}
-      h={120}
-      w={200}
+      height={"120px"}
+      width={"200px"}
       filters={new Set<Filter>([filter])}
       showLines={showGraphLines}
       featureView={true}

@@ -47,7 +47,7 @@ interface Pos {
 
 const processDimensionData = (data: number[]) => {
   const formatToChartPos = (y: number, idx: number) => ({ x: idx, y });
-  return (data).map(formatToChartPos);
+  return smoothen(data).map(formatToChartPos);
 };
 
 interface GraphColors {
@@ -273,7 +273,7 @@ export const getConfig = (
           ticks: {
             display: false, //this will remove only the label
           },
-          display: true,
+          display: false,
         },
         y: {
           type: "linear",
@@ -292,7 +292,7 @@ export const getConfig = (
             // shows the x axis label when we're in the feature view
             display: featureView, //this will remove only the label
           },
-          // display: false,
+          display: featureView,
         },
       },
       plugins: {
@@ -453,12 +453,6 @@ function getRootMeanSquare(points: Pos[]) {
 
   return toHorizontalLine(rms, points.length);
 }
-
-// function getPositiveValues(points: Pos[]) {
-//   return points.map(({ x, y }) => {
-//     return { x: x, y: Math.abs(y) };
-//   });
-// }
 
 function _mean(points: Pos[]): number {
   const sum = points.reduce((sum, point) => {

@@ -25,6 +25,8 @@ import { Filter } from "../mlConfig";
 interface RecordingGraphProps extends BoxProps {
   data: XYZData;
   responsive?: boolean;
+  width?: string
+  height?: string
   filters?: Set<Filter>;
   showLines?: boolean;
   featureView?: boolean;
@@ -35,6 +37,8 @@ const RecordingGraph = ({
   responsive = false,
   children,
   filters = new Set<Filter>(),
+  width="156px",
+  height="96px",
   showLines = true,
   featureView = false,
   ...rest
@@ -90,7 +94,7 @@ const RecordingGraph = ({
       {...rest}
     >
       {/* canvas dimensions must account for parent border width */}
-      <canvas width={"156px"} height={"96px"} ref={canvasRef} />
+      <canvas width={width} height={height} ref={canvasRef} />
       {children}
     </Box>
   );
