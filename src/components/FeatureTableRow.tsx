@@ -1,4 +1,4 @@
-import { Box, Card, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
+import { Card, Grid, GridItem } from "@chakra-ui/react";
 import { ActionData, FeaturesView, XYZData } from "../model";
 import { useStore } from "../store";
 import { calculateGradientColor } from "../utils/gradient-calculator";
@@ -6,7 +6,6 @@ import { applyFilter } from "../ml";
 import RecordingGraph from "./RecordingGraph";
 import { FormattedMessage } from "react-intl";
 import { Filter, mlSettings } from "../mlConfig";
-import { useRef } from "react";
 
 interface FeaturesTableRowProps {
   action: ActionData;
