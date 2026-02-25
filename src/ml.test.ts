@@ -13,6 +13,8 @@ import { ActionData } from "./model";
 import {
   applyFilters,
   prepareFeaturesAndLabels,
+  prepareFeaturesByAction,
+  splitData,
   TrainingResult,
   trainModel,
 } from "./ml";
@@ -189,5 +191,26 @@ describe("applyFilters", () => {
       "zcr-y": 0,
       "zcr-z": 0,
     });
+  });
+});
+
+describe("splitData", () => {
+  test("test and training split is correct size", () => {
+    const features = prepareFeaturesByAction(
+      fixUpTestData(actionData),
+      currentDataWindow
+    );
+
+    const splitSize = 0.2
+
+    const split = splitData(features, splitSize);
+    const totalFeatures = actionData.reduce(
+      (acc, action) => {
+        return acc + Math.round(action.recordings.length * splitSize)
+      },
+      0
+    );
+
+    expect(split.test_features.length).toEqual(totalFeatures);
   });
 });

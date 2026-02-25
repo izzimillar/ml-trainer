@@ -65,7 +65,8 @@ export const trainModel = async (
 
 // const testModel = () => {};
 
-const splitData = (features: number[][][], testSize: number = 0.2) => {
+// Exported for testing
+export const splitData = (features: number[][][], testSize: number = 0.2) => {
   // Want to keep the number of actions in each class in the testing and training set relative
   // We need to sort into classes and then split each class separately
   const train_features: number[][] = [];
@@ -77,7 +78,7 @@ const splitData = (features: number[][][], testSize: number = 0.2) => {
 
   features.forEach((actionFeatures, actionIndex) => {
     // how many samples should be in the test set
-    const testLength = actionFeatures.length * testSize;
+    const testLength = Math.round(actionFeatures.length * testSize);
 
     // get random indices
     let indices = Array.from({ length: actionFeatures.length }, (_, i) => i);
@@ -113,7 +114,8 @@ const splitData = (features: number[][][], testSize: number = 0.2) => {
   return { train_features, train_labels, test_features, test_labels };
 };
 
-const prepareFeaturesByAction = (
+// Exported for testing
+export const prepareFeaturesByAction = (
   actions: ActionData[],
   dataWindow: DataWindow,
   enabledFeatures: Set<Filter> = mlSettings.includedFilters
@@ -136,7 +138,6 @@ const prepareFeaturesByAction = (
     });
     groupedFeatures.push(actionFeatures);
   });
-  console.log(groupedFeatures.length);
   return groupedFeatures;
 };
 
