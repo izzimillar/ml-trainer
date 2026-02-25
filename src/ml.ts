@@ -12,26 +12,32 @@ import { DataWindow } from "./store";
 
 export type TrainingResult =
   | { error: false; model: tf.LayersModel }
+  | {
+      error: false;
+      model: tf.LayersModel;
+      test_features: number[][];
+      test_labels: number[][];
+    }
   | { error: true };
 
 export const trainModel = async (
   data: ActionData[],
   dataWindow: DataWindow,
   enabledFeatures: Set<Filter> = mlSettings.includedFilters,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
+  testTrainSplit: number = 0
 ): Promise<TrainingResult> => {
   // Gets a set of 24 values for each recording. Each set of features is labelled with a one-hot encoding
-  const { features, labels } = prepareFeaturesAndLabels(
-    data,
-    dataWindow,
-    enabledFeatures
-  );
+  const features = prepareFeaturesByAction(data, dataWindow, enabledFeatures);
+
+  const { train_features, train_labels, test_features, test_labels } =
+    splitData(features, testTrainSplit);
 
   const model: tf.LayersModel = createModel(data, enabledFeatures);
   const totalNumEpochs = mlSettings.numEpochs;
 
   try {
-    await model.fit(tf.tensor(features), tf.tensor(labels), {
+    await model.fit(tf.tensor(train_features), tf.tensor(train_labels), {
       epochs: totalNumEpochs,
       batchSize: 16,
       shuffle: true,
@@ -48,64 +54,64 @@ export const trainModel = async (
   } catch (err) {
     return { error: true };
   }
-  return { error: false, model };
+
+  if (test_features.length === 0) {
+    return { error: false, model };
+  }
+
+  return { error: false, model, test_features, test_labels };
+
 };
 
 // const testModel = () => {};
 
-// const splitData = (features: number[][][], testSize: number = 0.2) => {
-//   // Want to keep the number of actions in each class in the testing and training set relative
-//   // We need to sort into classes and then split each class separately
-//   const train_features: number[][] = [];
-//   const train_labels: number[][] = [];
-//   const test_features: number[][] = [];
-//   const test_labels: number[][] = [];
+const splitData = (features: number[][][], testSize: number = 0.2) => {
+  // Want to keep the number of actions in each class in the testing and training set relative
+  // We need to sort into classes and then split each class separately
+  const train_features: number[][] = [];
+  const train_labels: number[][] = [];
+  const test_features: number[][] = [];
+  const test_labels: number[][] = [];
 
-//   const numberOfActions = features.length;
+  const numberOfActions = features.length;
 
-//   features.forEach((actionFeatures, actionIndex) => {
-//     // how many samples should be in the test set
-//     const testLength = actionFeatures.length * testSize;
+  features.forEach((actionFeatures, actionIndex) => {
+    // how many samples should be in the test set
+    const testLength = actionFeatures.length * testSize;
 
-//     // get random indices
-//     let indices = Array.from({ length: actionFeatures.length }, (_, i) => i);
-//     for (let i = 0; i < testLength; i++) {
-//       const randIndex =
-//         i + Math.floor(Math.random() * (actionFeatures.length - i));
-//       [indices[i], indices[randIndex]] = [indices[randIndex], indices[i]];
-//     }
-//     indices = indices.slice(0, testLength);
+    // get random indices
+    let indices = Array.from({ length: actionFeatures.length }, (_, i) => i);
+    for (let i = 0; i < testLength; i++) {
+      const randIndex =
+        i + Math.floor(Math.random() * (actionFeatures.length - i));
+      [indices[i], indices[randIndex]] = [indices[randIndex], indices[i]];
+    }
+    indices = indices.slice(0, testLength);
 
-//     // add the samples to the test or training set
-//     actionFeatures.forEach((sample, idx) => {
-//       if (indices.includes(idx)) {
-//         // add sample
-//         test_features.push(sample);
-//         // add label
-//         const label: number[] = new Array(numberOfActions) as number[];
-//         label.fill(0, 0, numberOfActions);
-//         label[actionIndex] = 1;
-//         test_labels.push(label);
-//       } else {
-//         // add feature
-//         train_features.push(sample);
-//         // add label
-//         const label: number[] = new Array(numberOfActions) as number[];
-//         label.fill(0, 0, numberOfActions);
-//         label[actionIndex] = 1;
-//         train_labels.push(label);
-//       }
-//     });
-//   });
+    // add the samples to the test or training set
+    actionFeatures.forEach((sample, idx) => {
+      if (indices.includes(idx)) {
+        // add sample
+        test_features.push(sample);
+        // add label
+        const label: number[] = new Array(numberOfActions) as number[];
+        label.fill(0, 0, numberOfActions);
+        label[actionIndex] = 1;
+        test_labels.push(label);
+      } else {
+        // add feature
+        train_features.push(sample);
+        // add label
+        const label: number[] = new Array(numberOfActions) as number[];
+        label.fill(0, 0, numberOfActions);
+        label[actionIndex] = 1;
+        train_labels.push(label);
+      }
+    });
+  });
 
-//   // We want to do stratified sampling so we need to group each of the samples by their label
-
-//   // Get random indices for the values we want to use in our test set.
-
-//   // these samples will be in the test set, all others in the training set. make sure the features and the labels line up.
-
-//   return { train_features, train_labels, test_features, test_labels };
-// };
+  return { train_features, train_labels, test_features, test_labels };
+};
 
 const prepareFeaturesByAction = (
   actions: ActionData[],
