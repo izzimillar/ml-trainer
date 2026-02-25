@@ -178,6 +178,14 @@ const ActionDataSamplesCard = ({
               view={view}
             />
           ))}
+
+          {onAugment && (
+            <DataAugmentationControl
+              action={value}
+              selected={selected}
+              onAugment={onAugment}
+            />
+          )}
         </DataSamplesRowCard>
       )}
     </>

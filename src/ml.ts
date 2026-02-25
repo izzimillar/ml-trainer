@@ -51,35 +51,114 @@ export const trainModel = async (
   return { error: false, model };
 };
 
-// Exported for testing
-export const prepareFeaturesAndLabels = (
+// const testModel = () => {};
+
+// const splitData = (features: number[][][], testSize: number = 0.2) => {
+//   // Want to keep the number of actions in each class in the testing and training set relative
+//   // We need to sort into classes and then split each class separately
+//   const train_features: number[][] = [];
+//   const train_labels: number[][] = [];
+//   const test_features: number[][] = [];
+//   const test_labels: number[][] = [];
+
+//   const numberOfActions = features.length;
+
+//   features.forEach((actionFeatures, actionIndex) => {
+//     // how many samples should be in the test set
+//     const testLength = actionFeatures.length * testSize;
+
+//     // get random indices
+//     let indices = Array.from({ length: actionFeatures.length }, (_, i) => i);
+//     for (let i = 0; i < testLength; i++) {
+//       const randIndex =
+//         i + Math.floor(Math.random() * (actionFeatures.length - i));
+//       [indices[i], indices[randIndex]] = [indices[randIndex], indices[i]];
+//     }
+//     indices = indices.slice(0, testLength);
+
+//     // add the samples to the test or training set
+//     actionFeatures.forEach((sample, idx) => {
+//       if (indices.includes(idx)) {
+//         // add sample
+//         test_features.push(sample);
+//         // add label
+//         const label: number[] = new Array(numberOfActions) as number[];
+//         label.fill(0, 0, numberOfActions);
+//         label[actionIndex] = 1;
+//         test_labels.push(label);
+//       } else {
+//         // add feature
+//         train_features.push(sample);
+//         // add label
+//         const label: number[] = new Array(numberOfActions) as number[];
+//         label.fill(0, 0, numberOfActions);
+//         label[actionIndex] = 1;
+//         train_labels.push(label);
+//       }
+//     });
+//   });
+
+//   // We want to do stratified sampling so we need to group each of the samples by their label
+
+//   // Get random indices for the values we want to use in our test set.
+
+//   // these samples will be in the test set, all others in the training set. make sure the features and the labels line up.
+
+//   return { train_features, train_labels, test_features, test_labels };
+// };
+
+const prepareFeaturesByAction = (
   actions: ActionData[],
   dataWindow: DataWindow,
   enabledFeatures: Set<Filter> = mlSettings.includedFilters
-): { features: number[][]; labels: number[][] } => {
-  const features: number[][] = [];
-  const labels: number[][] = [];
-  const numActions = actions.length;
+): number[][][] => {
+  const groupedFeatures: number[][][] = [];
 
-  actions.forEach((action, index) => {
+  let actionFeatures: number[][] = [];
+  actions.forEach((action) => {
+    actionFeatures = [];
     action.recordings.forEach((recording) => {
       // Prepare features
       // only use enabledFeatures --> the features that the user has chosen to include
-      features.push(
+      actionFeatures.push(
         Object.values(
           applyFilters(recording.data, dataWindow, {
             enabledFilters: enabledFeatures,
           })
         )
       );
-
-      // Prepare labels
-      const label: number[] = new Array(numActions) as number[];
-      label.fill(0, 0, numActions);
-      label[index] = 1;
-      labels.push(label);
     });
+    groupedFeatures.push(actionFeatures);
   });
+  console.log(groupedFeatures.length);
+  return groupedFeatures;
+};
+
+// Exported for testing
+// returns features and labels. features is number[][] where the first dimension is the sample and the second dimension is the features.
+export const prepareFeaturesAndLabels = (
+  actions: ActionData[],
+  dataWindow: DataWindow,
+  enabledFeatures: Set<Filter> = mlSettings.includedFilters
+): { features: number[][]; labels: number[][] } => {
+  const groupedFeatures = prepareFeaturesByAction(
+    actions,
+    dataWindow,
+    enabledFeatures
+  );
+  const features: number[][] = groupedFeatures.flat(1);
+  const labels: number[][] = [];
+
+  groupedFeatures.forEach((action, idx) => {
+    // Prepare labels
+    for (let i = 0; i < action.length; i++) {
+      const label: number[] = new Array(groupedFeatures.length) as number[];
+      label.fill(0, 0, features.length);
+      label[idx] = 1;
+      labels.push(label);
+    }
+  });
+
   return { features, labels };
 };
 
@@ -104,7 +183,6 @@ export const addJitter = (
     return z0 * stddev + mean;
   };
 
-
   action.recordings.forEach((recording) => {
     // for the number of repeats requested
     for (let i = 0; i < repeats; i++) {
@@ -121,7 +199,11 @@ export const addJitter = (
 
       // add a new recording to the recordings array
       const newRecording: XYZData = { x: noisy_x, y: noisy_y, z: noisy_z };
-      recordings.push({ ID: recordingID, data: newRecording, isGenerated: true });
+      recordings.push({
+        ID: recordingID,
+        data: newRecording,
+        isGenerated: true,
+      });
       recordingID++;
     }
   });
