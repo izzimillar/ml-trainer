@@ -42,6 +42,8 @@ import TranslationProvider from "./messages/TranslationProvider";
 import { PostImportDialogState } from "./model";
 import CodePage from "./pages/CodePage";
 import DataSamplesPage from "./pages/DataSamplesPage";
+import EvaluateModelPage from "./pages/EvaluateModelPage";
+import FeaturesPage from "./pages/FeaturesPage";
 import HomePage from "./pages/HomePage";
 import ImportPage from "./pages/ImportPage";
 import NewPage from "./pages/NewPage";
@@ -57,8 +59,8 @@ import {
   createNewPageUrl,
   createTestingModelPageUrl,
   createFeaturesPageUrl,
+  createEvaluateModelPageUrl,
 } from "./urls";
-import FeaturesPage from "./pages/FeaturesPage";
 
 export interface ProviderLayoutProps {
   children: ReactNode;
@@ -178,7 +180,12 @@ const createRouter = () => {
         {
           path: createFeaturesPageUrl(),
           element: <FeaturesPage />,
-        },        {
+        },
+        {
+          path: createEvaluateModelPageUrl(),
+          element: <EvaluateModelPage />,
+        },
+        {
           path: createTestingModelPageUrl(),
           element: <TestingModelPage />,
         },

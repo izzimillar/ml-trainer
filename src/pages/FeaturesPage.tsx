@@ -8,7 +8,7 @@ import { FormattedMessage } from "react-intl";
 import { useHasSufficientDataForTraining, useStore } from "../store";
 import { useNavigate } from "react-router";
 import { useCallback, useRef } from "react";
-import { createDataSamplesPageUrl, createTestingModelPageUrl } from "../urls";
+import { createDataSamplesPageUrl, createEvaluateModelPageUrl } from "../urls";
 import { RiArrowRightLine } from "react-icons/ri";
 import BackArrow from "../components/BackArrow";
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
@@ -23,8 +23,8 @@ const FeaturesPage = () => {
   // navigation
   const navigate = useNavigate();
 
-  const handleNavigateToModel = useCallback(() => {
-    navigate(createTestingModelPageUrl());
+  const handleNavigateToEvaluate = useCallback(() => {
+    navigate(createEvaluateModelPageUrl());
   }, [navigate]);
 
   const trainButtonRef = useRef(null);
@@ -73,7 +73,7 @@ const FeaturesPage = () => {
           <HStack>
             {model ? (
               <Button
-                onClick={handleNavigateToModel}
+                onClick={handleNavigateToEvaluate}
                 // className={tourElClassname.trainModelButton}
                 variant="primary"
                 rightIcon={<RiArrowRightLine />}
@@ -84,7 +84,7 @@ const FeaturesPage = () => {
               <Button
                 ref={trainButtonRef}
                 // className={tourElClassname.trainModelButton}
-                onClick={() => trainModelFlowStart(handleNavigateToModel)}
+                onClick={() => trainModelFlowStart(handleNavigateToEvaluate)}
                 variant={trainingIsEnabled ? "primary" : "secondary-disabled"}
               >
                 <FormattedMessage id="train-model" />
