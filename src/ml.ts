@@ -11,29 +11,43 @@ import { ActionData, RecordingData, XYZData } from "./model";
 import { DataWindow } from "./store";
 
 export type TrainingResult =
-  | { error: false; model: tf.LayersModel }
+  | { error: false; testing: false; model: tf.LayersModel }
   | {
       error: false;
+      testing: true;
       model: tf.LayersModel;
       test_features: number[][];
       test_labels: number[][];
     }
   | { error: true };
 
+export type TestResult = { error: false; accuracy: number } | { error: true };
+
+interface TrainModelOpts {
+  enabledFeatures?: Set<Filter>;
+  onProgress?: (progress: number) => void;
+  testTrainSplit?: number;
+}
+
 export const trainModel = async (
   data: ActionData[],
   dataWindow: DataWindow,
-  enabledFeatures: Set<Filter> = mlSettings.includedFilters,
-  onProgress?: (progress: number) => void,
-  testTrainSplit: number = 0
+  opts: TrainModelOpts = {
+    enabledFeatures: mlSettings.includedFilters,
+    testTrainSplit: 0,
+  }
 ): Promise<TrainingResult> => {
   // Gets a set of 24 values for each recording. Each set of features is labelled with a one-hot encoding
-  const features = prepareFeaturesByAction(data, dataWindow, enabledFeatures);
+  const features = prepareFeaturesByAction(
+    data,
+    dataWindow,
+    opts.enabledFeatures
+  );
 
   const { train_features, train_labels, test_features, test_labels } =
-    splitData(features, testTrainSplit);
+    splitData(features, opts.testTrainSplit);
 
-  const model: tf.LayersModel = createModel(data, enabledFeatures);
+  const model: tf.LayersModel = createModel(data, opts.enabledFeatures);
   const totalNumEpochs = mlSettings.numEpochs;
 
   try {
@@ -47,7 +61,7 @@ export const trainModel = async (
       callbacks: {
         onEpochEnd: (epoch: number) => {
           // Epochs indexed at 0
-          onProgress && onProgress(epoch / (totalNumEpochs - 1));
+          opts.onProgress && opts.onProgress(epoch / (totalNumEpochs - 1));
         },
       },
     });
@@ -56,14 +70,46 @@ export const trainModel = async (
   }
 
   if (test_features.length === 0) {
-    return { error: false, model };
+    return { error: false, testing: false, model };
   }
 
-  return { error: false, model, test_features, test_labels };
-
+  return { error: false, testing: true, model, test_features, test_labels };
 };
 
-// const testModel = () => {};
+export const testModel = (
+  model: tf.LayersModel,
+  test_features: number[][],
+  test_labels: number[][]
+): TestResult => {
+  const numActions = test_labels[0].length;
+  let accuracy: number = 0;
+
+  const prediction = model.predict(tf.tensor(test_features)) as tf.Tensor;
+  try {
+    const confidences = prediction.dataSync() as Float32Array;
+
+    for (let i = 0; i < confidences.length; i += numActions) {
+      const sample: number[] = [].slice.call(
+        confidences.slice(i, i + numActions)
+      );
+
+      const prediction = sample.indexOf(Math.max(...sample));
+      const truth = test_labels[i / numActions].indexOf(1);
+
+      if (prediction === truth) {
+        accuracy++;
+      }
+    }
+    accuracy = accuracy / test_features.length;
+
+    return {
+      error: false,
+      accuracy: accuracy,
+    };
+  } catch (e) {
+    return { error: true };
+  }
+};
 
 // Exported for testing
 export const splitData = (features: number[][][], testSize: number = 0.2) => {
@@ -224,7 +270,7 @@ export const addJitter = (
 
 const createModel = (
   actions: ActionData[],
-  filters: Set<Filter>
+  filters: Set<Filter> = mlSettings.includedFilters
 ): tf.LayersModel => {
   const numberOfClasses: number = actions.length;
   const inputShape = [filters.size * mlSettings.includedAxes.length];

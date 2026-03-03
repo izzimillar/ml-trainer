@@ -15,6 +15,7 @@ import {
   prepareFeaturesAndLabels,
   prepareFeaturesByAction,
   splitData,
+  testModel,
   TrainingResult,
   trainModel,
 } from "./ml";
@@ -29,12 +30,19 @@ const fixUpTestData = (data: Partial<ActionData>[]): ActionData[] => {
 };
 
 let trainingResult: TrainingResult;
+let testingResult: TrainingResult;
 beforeAll(async () => {
   // No webgl in tests running in node.
   await tf.setBackend("cpu");
   trainingResult = await trainModel(
     fixUpTestData(actionData),
-    currentDataWindow
+    currentDataWindow,
+  );
+
+  testingResult = await trainModel(
+    fixUpTestData(actionData),
+    currentDataWindow,
+    { testTrainSplit: 0.2 }
   );
 });
 
@@ -100,6 +108,28 @@ describe("Model tests", () => {
     );
     // The model thinks 1-2 samples of still are circle.
     expect(parseFloat(tensorFlowResultAccuracy)).toBeGreaterThan(0.85);
+  });
+
+  test("test model using training data split", () => {
+    if (testingResult.error) {
+      throw Error("No model returned");
+    }
+
+    if (!testingResult.testing) {
+      throw Error("No testing data available. Retrain model.");
+    }
+
+    const testResult = testModel(
+      testingResult.model,
+      testingResult.test_features,
+      testingResult.test_labels
+    );
+
+    if (testResult.error) {
+      throw Error("Error testing model");
+    }
+
+    expect(testResult.accuracy).toBeGreaterThan(0.5);
   });
 });
 
@@ -201,15 +231,12 @@ describe("splitData", () => {
       currentDataWindow
     );
 
-    const splitSize = 0.2
+    const splitSize = 0.2;
 
     const split = splitData(features, splitSize);
-    const totalFeatures = actionData.reduce(
-      (acc, action) => {
-        return acc + Math.round(action.recordings.length * splitSize)
-      },
-      0
-    );
+    const totalFeatures = actionData.reduce((acc, action) => {
+      return acc + Math.round(action.recordings.length * splitSize);
+    }, 0);
 
     expect(split.test_features.length).toEqual(totalFeatures);
   });

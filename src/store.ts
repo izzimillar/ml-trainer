@@ -831,13 +831,11 @@ const createMlStore = (logging: Logging) => {
             // Delay so we get UI change before training starts. The initial part of training
             // can block the UI. 50 ms is not sufficient, so use 100 for now.
             await new Promise((res) => setTimeout(res, 100));
-            const trainingResult = await trainModel(
-              actions,
-              dataWindow,
-              trainingFeatures,
-              (trainModelProgress) =>
-                set({ trainModelProgress }, false, "trainModelProgress")
-            );
+            const trainingResult = await trainModel(actions, dataWindow, {
+              enabledFeatures: trainingFeatures,
+              onProgress: (trainModelProgress) =>
+                set({ trainModelProgress }, false, "trainModelProgress"),
+            });
             const model = trainingResult.error
               ? undefined
               : trainingResult.model;
