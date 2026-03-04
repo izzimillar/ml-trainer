@@ -11,10 +11,8 @@ import { ActionData, RecordingData, XYZData } from "./model";
 import { DataWindow } from "./store";
 
 export type TrainingResult =
-  | { error: false; testing: false; model: tf.LayersModel }
   | {
       error: false;
-      testing: true;
       model: tf.LayersModel;
       testIds: number[];
     }
@@ -72,10 +70,10 @@ export const trainModel = async (
   }
 
   if (testIds.length === 0) {
-    return { error: false, testing: false, model };
+    return { error: false, model, testIds: [] };
   }
 
-  return { error: false, testing: true, model, testIds };
+  return { error: false, model, testIds };
 };
 
 export const testModel = (
@@ -179,7 +177,7 @@ const getDataFromIDs = (data: ActionData[], ids: number[]) => {
 export const prepareFeaturesAndLabels = (
   actions: ActionData[],
   dataWindow: DataWindow,
-  enabledFeatures: Set<Filter> = mlSettings.includedFilters,
+  enabledFeatures: Set<Filter> = mlSettings.includedFilters
 ): { features: number[][]; labels: number[][] } => {
   const features: number[][] = [];
   const labels: number[][] = [];
@@ -188,7 +186,13 @@ export const prepareFeaturesAndLabels = (
   actions.forEach((action, index) => {
     action.recordings.forEach((recording) => {
       // Prepare features
-      features.push(Object.values(applyFilters(recording.data, dataWindow, { enabledFilters: enabledFeatures})));
+      features.push(
+        Object.values(
+          applyFilters(recording.data, dataWindow, {
+            enabledFilters: enabledFeatures,
+          })
+        )
+      );
 
       // Prepare labels
       const label: number[] = new Array(numActions) as number[];

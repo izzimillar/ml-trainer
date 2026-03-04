@@ -356,7 +356,7 @@ const createMlStore = (logging: Logging) => {
             step: SaveStep.None,
           },
           projectEdited: false,
-          settings: defaultSettings,          
+          settings: defaultSettings,
           isEditorOpen: false,
           isEditorReady: false,
           isEditorLoadingFile: false,
@@ -864,17 +864,25 @@ const createMlStore = (logging: Logging) => {
                 set({ trainModelProgress }, false, "trainModelProgress"),
               testTrainSplit: testTrainSplit,
             });
-            
+
             const model = trainingResult.error
               ? undefined
               : trainingResult.model;
-            
-            const details: ModelDetails = model ? { model: model, name: "New model!"
 
-            } : undefined
+            const details = model
+              ? {
+                  model: model,
+                  name: "New model!",
+                  trainingFeatures: trainingFeatures,
+                  actions: actions,
+                  testSampleIds: !trainingResult.error ? trainingResult.testIds : [],
+                }
+              : undefined;
+
             set(
               ({ project, projectEdited }) => ({
                 model,
+                modelDetails: details,
                 trainModelDialogStage: model
                   ? TrainModelDialogStage.Closed
                   : TrainModelDialogStage.TrainingError,
@@ -892,9 +900,7 @@ const createMlStore = (logging: Logging) => {
             return !trainingResult.error;
           },
 
-          testModel() {
-
-          },
+          testModel() {},
 
           resetProject(): void {
             const {

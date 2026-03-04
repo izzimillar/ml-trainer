@@ -48,8 +48,8 @@ export interface ModelDetails {
   name: string;
   trainingFeatures: Set<Filter>;
   actions: Action[];
-  trainingSamplesCount: number;
-  testResults: TestResult;
+  testSampleIds: number[],
+  testResults?: TestResult;
 }
 
 // Exported for testing
