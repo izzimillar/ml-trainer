@@ -238,7 +238,8 @@ export interface Actions {
   downloadDataset(): void;
 
   setTrainingFeature(feature: Filter, isOn: boolean): void;
-  // saveModel(): void;
+  saveModel(): void;
+  deleteAllModels(): void;
 
   dataCollectionMicrobitConnectionStart(options?: ConnectOptions): void;
   dataCollectionMicrobitConnected(): void;
@@ -920,11 +921,39 @@ const createMlStore = (logging: Logging) => {
 
             const newModelDetails = modelDetails;
             newModelDetails.testResults = testResult;
-            
+
             // set the new model details
             set({ modelDetails: newModelDetails });
 
             return !testResult.error;
+          },
+
+          saveModel() {
+            const { modelDetails, previousModels } = get();
+            if (!modelDetails) {
+              return;
+            }
+            const savedModels = previousModels;
+            savedModels.push(modelDetails);
+
+            set({
+              previousModels: savedModels,
+            });
+          },
+
+          deleteAllModels() {
+            return set(({ project, projectEdited }) => ({
+              previousModels: [],
+              dataWindow: currentDataWindow,
+              model: undefined,
+              ...updateProject(
+                project,
+                projectEdited,
+                [],
+                undefined,
+                currentDataWindow
+              ),
+            }));
           },
 
           resetProject(): void {
