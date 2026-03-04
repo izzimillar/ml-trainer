@@ -875,7 +875,9 @@ const createMlStore = (logging: Logging) => {
                   name: "New model!",
                   trainingFeatures: trainingFeatures,
                   actions: actions,
-                  testSampleIds: !trainingResult.error ? trainingResult.testIds : [],
+                  testSampleIds: !trainingResult.error
+                    ? trainingResult.testIds
+                    : [],
                 }
               : undefined;
 
@@ -901,14 +903,28 @@ const createMlStore = (logging: Logging) => {
           },
 
           testModel() {
-            const { model, modelDetails } = get();
+            const { modelDetails, actions, dataWindow, trainingFeatures } =
+              get();
             // if we're trying to test without a trained model then return.
-            if (!model) {
+            if (!modelDetails) {
               return;
             }
 
-            
+            const testResult = testModel(
+              modelDetails.model,
+              actions,
+              modelDetails.testSampleIds,
+              dataWindow,
+              trainingFeatures
+            );
 
+            const newModelDetails = modelDetails;
+            newModelDetails.testResults = testResult;
+            
+            // set the new model details
+            set({ modelDetails: newModelDetails });
+
+            return !testResult.error;
           },
 
           resetProject(): void {
