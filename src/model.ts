@@ -47,7 +47,7 @@ export interface ModelDetails {
   model: tf.LayersModel;
   name: string;
   trainingFeatures: Set<Filter>;
-  actions: Action[];
+  actions: ActionData[];
   testSampleIds: number[],
   testResults?: TestResult;
 }

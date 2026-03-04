@@ -88,7 +88,7 @@ const FeaturesPage = () => {
               <Button
                 ref={trainButtonRef}
                 // className={tourElClassname.trainModelButton}
-                onClick={() => trainModelFlowStart(handleNavigateToEvaluate)}
+                onClick={() => trainModelFlowStart(handleNavigateToEvaluate, true, 0.2)}
                 variant={trainingIsEnabled ? "primary" : "secondary-disabled"}
               >
                 <FormattedMessage id="train-model" />

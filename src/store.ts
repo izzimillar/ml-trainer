@@ -250,9 +250,13 @@ export interface Actions {
   recordingStarted(): void;
   recordingStopped(): void;
   newSession(projectName?: string): void;
-  trainModelFlowStart: (callback?: () => void) => Promise<void>;
+  trainModelFlowStart: (
+    callback?: () => void,
+    test?: boolean,
+    testTrainSplit?: number
+  ) => Promise<void>;
   closeTrainModelDialogs: () => void;
-  trainModel(testTrainSplit?: number): Promise<boolean>;
+  trainModel(test?: boolean, testTrainSplit?: number): Promise<boolean>;
   testModel(): void;
   setSettings(update: Partial<Settings>): void;
   setLanguage(languageId: string): void;
@@ -819,7 +823,11 @@ const createMlStore = (logging: Logging) => {
             });
           },
 
-          async trainModelFlowStart(callback?: () => void) {
+          async trainModelFlowStart(
+            callback?: () => void,
+            test?,
+            testTrainSplit?
+          ) {
             const {
               settings: { showPreTrainHelp },
               actions,
@@ -835,12 +843,12 @@ const createMlStore = (logging: Logging) => {
                 trainModelDialogStage: TrainModelDialogStage.Help,
               });
             } else {
-              await trainModel();
+              await trainModel(test, testTrainSplit);
               callback?.();
             }
           },
 
-          async trainModel(testTrainSplit) {
+          async trainModel(test, testTrainSplit?) {
             const { actions, dataWindow, trainingFeatures } = get();
             logging.event({
               type: "model-train",
@@ -866,21 +874,34 @@ const createMlStore = (logging: Logging) => {
               testTrainSplit: testTrainSplit,
             });
 
-            const model = trainingResult.error
-              ? undefined
-              : trainingResult.model;
+            let model = undefined;
+            let details = undefined;
 
-            const details = model
-              ? {
-                  model: model,
-                  name: "New model!",
-                  trainingFeatures: trainingFeatures,
-                  actions: actions,
-                  testSampleIds: !trainingResult.error
-                    ? trainingResult.testIds
-                    : [],
-                }
-              : undefined;
+            if (!trainingResult.error) {
+              model = trainingResult.model;
+
+              let testResults = undefined;
+              if (test && trainingResult.testIds.length > 0) {
+                testResults = testModel(
+                  model,
+                  actions,
+                  trainingResult.testIds,
+                  dataWindow,
+                  trainingFeatures
+                );
+              }
+
+              details = {
+                model: model,
+                name: "New model!",
+                trainingFeatures: trainingFeatures,
+                actions: actions,
+                testSampleIds: !trainingResult.error
+                  ? trainingResult.testIds
+                  : [],
+                testResults: testResults,
+              };
+            }
 
             set(
               ({ project, projectEdited }) => ({

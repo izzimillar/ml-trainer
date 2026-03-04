@@ -482,7 +482,7 @@ function peakIndices(data: number[]) {
   const threshold = 3.5;
   const influence = 0.5;
 
-  let peaksCounter = 0;
+  // let peaksCounter = 0;
   const indices: number[] = [];
 
   if (data.length < lag + 2) {
@@ -521,7 +521,7 @@ function peakIndices(data: number[]) {
         signals[i] = +1; // positive signal
         // only record if this is the start of a peak (previously not a peak)
         if (i - 1 > 0 && signals[i - 1] == 0) {
-          peaksCounter++;
+          // peaksCounter++;
           indices.push(i);
         }
       } else {
@@ -539,9 +539,5 @@ function peakIndices(data: number[]) {
     avgFilter[i] = mean(y_lag);
     stdFilter[i] = stddev(y_lag);
   }
-
-  console.log(peaksCounter);
-  console.log(indices);
-  console.log(signals);
   return indices;
 }
