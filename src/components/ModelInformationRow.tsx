@@ -39,7 +39,7 @@ const ModelInformationRow = ({
     if (currentModel) {
       return currentModel.testResults ? 
         currentModel.testResults.error ? 
-          "not tested yet" : currentModel.testResults.accuracy 
+          "not tested yet" : currentModel.testResults.accuracy * 100 
         : "not tested yet"
     }
     return "not tested yet";
@@ -95,7 +95,7 @@ const ModelInformationRow = ({
 
       <GridItem>
         <Card>
-          <FormattedMessage id={`acc: ${accuracy()}`} />
+          <FormattedMessage id={`accuracy: ${accuracy()}%`} />
         </Card>
       </GridItem>
     </Grid>
