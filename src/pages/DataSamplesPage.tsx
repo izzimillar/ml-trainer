@@ -25,11 +25,9 @@ import { createFeaturesPageUrl } from "../urls";
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
   const addNewAction = useStore((s) => s.addNewAction);
-  // const model = useStore((s) => s.model);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
 
   const navigate = useNavigate();
-  // const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
   const tourStart = useStore((s) => s.tourStart);
   const { isConnected } = useConnectionStage();
@@ -42,10 +40,6 @@ const DataSamplesPage = () => {
 
   const hasSufficientData = useHasSufficientDataForTraining();
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
-
-  // const handleNavigateToModel = useCallback(() => {
-  //   navigate(createTestingModelPageUrl());
-  // }, [navigate]);
 
   const handleNavigateToFeatures = useCallback(() => {
     navigate(createFeaturesPageUrl());

@@ -17,7 +17,7 @@ import {
   generateCustomFiles,
   generateProject,
 } from "./makecode/utils";
-import { Confidences, predict, trainModel } from "./ml";
+import { Confidences, predict, testModel, trainModel } from "./ml";
 import {
   DataSamplesView,
   DownloadState,
@@ -36,6 +36,7 @@ import {
   TourTriggerName,
   tourSequence,
   FeaturesView,
+  ModelDetails,
 } from "./model";
 import { defaultSettings, Settings } from "./settings";
 import { getTotalNumSamples } from "./utils/actions";
@@ -147,6 +148,8 @@ export interface State {
   actions: ActionData[];
   dataWindow: DataWindow;
   model: tf.LayersModel | undefined;
+  modelDetails: ModelDetails | undefined;
+  previousModels: ModelDetails[];
   trainingFeatures: Set<Filter>;
 
   timestamp: number | undefined;
@@ -235,6 +238,7 @@ export interface Actions {
   downloadDataset(): void;
 
   setTrainingFeature(feature: Filter, isOn: boolean): void;
+  // saveModel(): void;
 
   dataCollectionMicrobitConnectionStart(options?: ConnectOptions): void;
   dataCollectionMicrobitConnected(): void;
@@ -247,7 +251,8 @@ export interface Actions {
   newSession(projectName?: string): void;
   trainModelFlowStart: (callback?: () => void) => Promise<void>;
   closeTrainModelDialogs: () => void;
-  trainModel(): Promise<boolean>;
+  trainModel(testTrainSplit?: number): Promise<boolean>;
+  testModel(): void;
   setSettings(update: Partial<Settings>): void;
   setLanguage(languageId: string): void;
 
@@ -324,7 +329,10 @@ const createMlStore = (logging: Logging) => {
         (set, get) => ({
           timestamp: undefined,
           actions: [],
+          model: undefined,
+          modelDetails: undefined,
           dataWindow: currentDataWindow,
+          previousModels: [],
           // initially train on all features
           trainingFeatures: new Set<Filter>([
             Filter.MAX,
@@ -348,8 +356,7 @@ const createMlStore = (logging: Logging) => {
             step: SaveStep.None,
           },
           projectEdited: false,
-          settings: defaultSettings,
-          model: undefined,
+          settings: defaultSettings,          
           isEditorOpen: false,
           isEditorReady: false,
           isEditorLoadingFile: false,
@@ -698,6 +705,25 @@ const createMlStore = (logging: Logging) => {
             );
           },
 
+          // saveModel() {
+          //   return set(({ model, trainingFeatures, actions }) => {
+          //     if (model) {
+          //       const newModel: ModelDetails = {
+          //         model: model,
+          //         name: "New model!",
+          //         trainingFeatures: trainingFeatures,
+          //         actions: actions,
+          //         trainingSamplesCount: actions.reduce(
+          //           (acc, action) => acc + action.recordings.length,
+          //           0
+          //         ),
+          //         accuracy: testModel(model),
+          //       };
+          //     }
+          //     return {};
+          //   });
+          // },
+
           downloadDataset() {
             const { actions, project } = get();
             const a = document.createElement("a");
@@ -813,7 +839,7 @@ const createMlStore = (logging: Logging) => {
             }
           },
 
-          async trainModel() {
+          async trainModel(testTrainSplit) {
             const { actions, dataWindow, trainingFeatures } = get();
             logging.event({
               type: "model-train",
@@ -831,14 +857,21 @@ const createMlStore = (logging: Logging) => {
             // Delay so we get UI change before training starts. The initial part of training
             // can block the UI. 50 ms is not sufficient, so use 100 for now.
             await new Promise((res) => setTimeout(res, 100));
+            // train the model with the test and training split
             const trainingResult = await trainModel(actions, dataWindow, {
               enabledFeatures: trainingFeatures,
               onProgress: (trainModelProgress) =>
                 set({ trainModelProgress }, false, "trainModelProgress"),
+              testTrainSplit: testTrainSplit,
             });
+            
             const model = trainingResult.error
               ? undefined
               : trainingResult.model;
+            
+            const details: ModelDetails = model ? { model: model, name: "New model!"
+
+            } : undefined
             set(
               ({ project, projectEdited }) => ({
                 model,
@@ -857,6 +890,10 @@ const createMlStore = (logging: Logging) => {
               actionName
             );
             return !trainingResult.error;
+          },
+
+          testModel() {
+
           },
 
           resetProject(): void {

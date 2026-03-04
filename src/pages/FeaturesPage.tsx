@@ -27,6 +27,10 @@ const FeaturesPage = () => {
     navigate(createEvaluateModelPageUrl());
   }, [navigate]);
 
+  // const handleNavigateToModel = useCallback(() => {
+  //   navigate(createTestingModelPageUrl());
+  // }, [navigate]);
+
   const trainButtonRef = useRef(null);
 
   const navigateToDataSamples = useCallback(() => {

@@ -9,6 +9,10 @@ import { MakeCodeIcon } from "./utils/icons";
 import { ReactNode } from "react";
 import { SpotlightStyle } from "./pages/TourOverlay";
 import { PlacementWithLogical, ThemingProps } from "@chakra-ui/react";
+import { Filter } from "./mlConfig";
+import { TestResult } from "./ml";
+import * as tf from "@tensorflow/tfjs";
+
 
 export interface XYZData {
   x: number[];
@@ -38,6 +42,15 @@ export interface DatasetEditorJsonFormat {
 }
 
 export type DatasetUserFileFormat = ActionData[];
+
+export interface ModelDetails {
+  model: tf.LayersModel;
+  name: string;
+  trainingFeatures: Set<Filter>;
+  actions: Action[];
+  trainingSamplesCount: number;
+  testResults: TestResult;
+}
 
 // Exported for testing
 export const isDatasetUserFileFormat = (

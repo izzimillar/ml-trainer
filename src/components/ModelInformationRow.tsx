@@ -1,26 +1,32 @@
-import { Card, Grid, GridItem } from "@chakra-ui/react";
+import { Card, Grid, GridItem, VStack } from "@chakra-ui/react";
 import { FormattedMessage } from "react-intl";
 import { Filter } from "../mlConfig";
+import { useStore } from "../store";
+import { testModel } from "../ml";
 
 interface ModelInformationRowProps {
   trainingFeatures: Set<Filter>;
 }
 
-const ModelInformationRow = ({ trainingFeatures }: ModelInformationRowProps) => {
+const ModelInformationRow = ({
+  trainingFeatures,
+}: ModelInformationRowProps) => {
+  const model = useStore((s) => s.model);
+
   return (
     <Grid templateColumns={`repeat(4, auto)`}>
       <GridItem>
         <Card>
-        <FormattedMessage id="Model name" />
+          <FormattedMessage id="Model name" />
         </Card>
       </GridItem>
 
       <GridItem>
-        {Array.from(trainingFeatures).map((feature, idx) => (
-          <Card key={idx}>
-            <FormattedMessage id={feature} />
-          </Card>
-        ))}
+        <Card>
+          {Array.from(trainingFeatures).map((feature, idx) => (
+            <FormattedMessage key={idx} id={feature} />
+          ))}
+        </Card>
       </GridItem>
 
       <GridItem>

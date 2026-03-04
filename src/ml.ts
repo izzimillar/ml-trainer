@@ -16,8 +16,7 @@ export type TrainingResult =
       error: false;
       testing: true;
       model: tf.LayersModel;
-      test_features: number[][];
-      test_labels: number[][];
+      testIds: number[];
     }
   | { error: true };
 
@@ -37,21 +36,24 @@ export const trainModel = async (
     testTrainSplit: 0,
   }
 ): Promise<TrainingResult> => {
+  // Get test training split
+  const { trainIds, testIds } = splitData(data, opts.testTrainSplit);
+
+  // get the recording data for the training set.
+  const trainingData = getDataFromIDs(data, trainIds);
+
   // Gets a set of 24 values for each recording. Each set of features is labelled with a one-hot encoding
-  const features = prepareFeaturesByAction(
-    data,
+  const { features, labels } = prepareFeaturesAndLabels(
+    trainingData,
     dataWindow,
     opts.enabledFeatures
   );
-
-  const { train_features, train_labels, test_features, test_labels } =
-    splitData(features, opts.testTrainSplit);
 
   const model: tf.LayersModel = createModel(data, opts.enabledFeatures);
   const totalNumEpochs = mlSettings.numEpochs;
 
   try {
-    await model.fit(tf.tensor(train_features), tf.tensor(train_labels), {
+    await model.fit(tf.tensor(features), tf.tensor(labels), {
       epochs: totalNumEpochs,
       batchSize: 16,
       shuffle: true,
@@ -69,11 +71,11 @@ export const trainModel = async (
     return { error: true };
   }
 
-  if (test_features.length === 0) {
+  if (testIds.length === 0) {
     return { error: false, testing: false, model };
   }
 
-  return { error: false, testing: true, model, test_features, test_labels };
+  return { error: false, testing: true, model, testIds };
 };
 
 export const testModel = (
@@ -112,106 +114,89 @@ export const testModel = (
 };
 
 // Exported for testing
-export const splitData = (features: number[][][], testSize: number = 0.2) => {
+export const splitData = (
+  actions: ActionData[],
+  testSize: number = 0.2
+): { trainIds: number[]; testIds: number[] } => {
   // Want to keep the number of actions in each class in the testing and training set relative
   // We need to sort into classes and then split each class separately
-  const train_features: number[][] = [];
-  const train_labels: number[][] = [];
-  const test_features: number[][] = [];
-  const test_labels: number[][] = [];
+  const testSampleIds: number[] = [];
+  const trainSampleIds: number[] = [];
 
-  const numberOfActions = features.length;
-
-  features.forEach((actionFeatures, actionIndex) => {
+  actions.forEach((action) => {
     // how many samples should be in the test set
-    const testLength = Math.round(actionFeatures.length * testSize);
+    const testLength = Math.round(action.recordings.length * testSize);
 
     // get random indices
-    let indices = Array.from({ length: actionFeatures.length }, (_, i) => i);
+    let indices = Array.from({ length: action.recordings.length }, (_, i) => i);
     for (let i = 0; i < testLength; i++) {
       const randIndex =
-        i + Math.floor(Math.random() * (actionFeatures.length - i));
+        i + Math.floor(Math.random() * (action.recordings.length - i));
       [indices[i], indices[randIndex]] = [indices[randIndex], indices[i]];
     }
     indices = indices.slice(0, testLength);
 
-    // add the samples to the test or training set
-    actionFeatures.forEach((sample, idx) => {
+    // get the recording ids of each sample to be in the test set
+    action.recordings.forEach((recording, idx) => {
       if (indices.includes(idx)) {
-        // add sample
-        test_features.push(sample);
-        // add label
-        const label: number[] = new Array(numberOfActions) as number[];
-        label.fill(0, 0, numberOfActions);
-        label[actionIndex] = 1;
-        test_labels.push(label);
+        // add sample ID
+        testSampleIds.push(recording.ID);
       } else {
         // add feature
-        train_features.push(sample);
-        // add label
-        const label: number[] = new Array(numberOfActions) as number[];
-        label.fill(0, 0, numberOfActions);
-        label[actionIndex] = 1;
-        train_labels.push(label);
+        trainSampleIds.push(recording.ID);
       }
     });
   });
 
-  return { train_features, train_labels, test_features, test_labels };
+  return { trainIds: trainSampleIds, testIds: testSampleIds };
 };
 
-// Exported for testing
-export const prepareFeaturesByAction = (
-  actions: ActionData[],
-  dataWindow: DataWindow,
-  enabledFeatures: Set<Filter> = mlSettings.includedFilters
-): number[][][] => {
-  const groupedFeatures: number[][][] = [];
+const getDataFromIDs = (data: ActionData[], ids: number[]) => {
+  const filteredData: ActionData[] = [];
 
-  let actionFeatures: number[][] = [];
-  actions.forEach((action) => {
-    actionFeatures = [];
+  data.forEach((action) => {
+    const actionData: RecordingData[] = [];
+
     action.recordings.forEach((recording) => {
-      // Prepare features
-      // only use enabledFeatures --> the features that the user has chosen to include
-      actionFeatures.push(
-        Object.values(
-          applyFilters(recording.data, dataWindow, {
-            enabledFilters: enabledFeatures,
-          })
-        )
-      );
+      if (ids.includes(recording.ID)) {
+        actionData.push(recording);
+      }
     });
-    groupedFeatures.push(actionFeatures);
+
+    filteredData.push({
+      recordings: actionData,
+      name: action.name,
+      ID: action.ID,
+      icon: action.icon,
+      requiredConfidence: action.requiredConfidence,
+    });
   });
-  return groupedFeatures;
+
+  return filteredData;
 };
 
 // Exported for testing
-// returns features and labels. features is number[][] where the first dimension is the sample and the second dimension is the features.
 export const prepareFeaturesAndLabels = (
   actions: ActionData[],
   dataWindow: DataWindow,
-  enabledFeatures: Set<Filter> = mlSettings.includedFilters
+  enabledFeatures: Set<Filter> = mlSettings.includedFilters,
 ): { features: number[][]; labels: number[][] } => {
-  const groupedFeatures = prepareFeaturesByAction(
-    actions,
-    dataWindow,
-    enabledFeatures
-  );
-  const features: number[][] = groupedFeatures.flat(1);
+  const features: number[][] = [];
   const labels: number[][] = [];
+  const numActions = actions.length;
 
-  groupedFeatures.forEach((action, idx) => {
-    // Prepare labels
-    for (let i = 0; i < action.length; i++) {
-      const label: number[] = new Array(groupedFeatures.length) as number[];
-      label.fill(0, 0, features.length);
-      label[idx] = 1;
+  actions.forEach((action, index) => {
+    action.recordings.forEach((recording) => {
+      // Prepare features
+      features.push(Object.values(applyFilters(recording.data, dataWindow, { enabledFilters: enabledFeatures})));
+
+      // Prepare labels
+      const label: number[] = new Array(numActions) as number[];
+      label.fill(0, 0, numActions);
+      label[index] = 1;
       labels.push(label);
-    }
+    });
   });
-
   return { features, labels };
 };
 
