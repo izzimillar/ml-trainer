@@ -900,7 +900,16 @@ const createMlStore = (logging: Logging) => {
             return !trainingResult.error;
           },
 
-          testModel() {},
+          testModel() {
+            const { model, modelDetails } = get();
+            // if we're trying to test without a trained model then return.
+            if (!model) {
+              return;
+            }
+
+            
+
+          },
 
           resetProject(): void {
             const {

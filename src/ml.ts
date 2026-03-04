@@ -78,13 +78,22 @@ export const trainModel = async (
 
 export const testModel = (
   model: tf.LayersModel,
-  test_features: number[][],
-  test_labels: number[][]
+  data: ActionData[],
+  testIds: number[],
+  dataWindow: DataWindow,
+  enabledFeatures: Set<Filter> = mlSettings.includedFilters
 ): TestResult => {
-  const numActions = test_labels[0].length;
+  const testingData: ActionData[] = getDataFromIDs(data, testIds);
+  const numActions = testingData.length;
   let accuracy: number = 0;
 
-  const prediction = model.predict(tf.tensor(test_features)) as tf.Tensor;
+  const { features, labels } = prepareFeaturesAndLabels(
+    testingData,
+    dataWindow,
+    enabledFeatures
+  );
+
+  const prediction = model.predict(tf.tensor(features)) as tf.Tensor;
   try {
     const confidences = prediction.dataSync() as Float32Array;
 
@@ -94,13 +103,13 @@ export const testModel = (
       );
 
       const prediction = sample.indexOf(Math.max(...sample));
-      const truth = test_labels[i / numActions].indexOf(1);
+      const truth = labels[i / numActions].indexOf(1);
 
       if (prediction === truth) {
         accuracy++;
       }
     }
-    accuracy = accuracy / test_features.length;
+    accuracy = accuracy / features.length;
 
     return {
       error: false,

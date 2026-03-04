@@ -13,7 +13,6 @@ import { ActionData } from "./model";
 import {
   applyFilters,
   prepareFeaturesAndLabels,
-  prepareFeaturesByAction,
   splitData,
   testModel,
   TrainingResult,
@@ -115,14 +114,15 @@ describe("Model tests", () => {
       throw Error("No model returned");
     }
 
-    if (!testingResult.testing) {
+    if (testingResult.testIds.length === 0) {
       throw Error("No testing data available. Retrain model.");
     }
 
     const testResult = testModel(
       testingResult.model,
-      testingResult.test_features,
-      testingResult.test_labels
+      fixUpTestData(actionData),
+      testingResult.testIds,
+      currentDataWindow
     );
 
     if (testResult.error) {
@@ -226,18 +226,14 @@ describe("applyFilters", () => {
 
 describe("splitData", () => {
   test("test and training split is correct size", () => {
-    const features = prepareFeaturesByAction(
-      fixUpTestData(actionData),
-      currentDataWindow
-    );
-
     const splitSize = 0.2;
 
-    const split = splitData(features, splitSize);
+    const split = splitData(fixUpTestData(actionData), splitSize);
+
     const totalFeatures = actionData.reduce((acc, action) => {
       return acc + Math.round(action.recordings.length * splitSize);
     }, 0);
 
-    expect(split.test_features.length).toEqual(totalFeatures);
+    expect(split.testIds.length).toEqual(totalFeatures);
   });
 });
