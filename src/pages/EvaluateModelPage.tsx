@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import DefaultPageLayout from "../components/DefaultPageLayout";
 import { createFeaturesPageUrl, createTestingModelPageUrl } from "../urls";
 import { useNavigate } from "react-router";
@@ -11,9 +11,10 @@ import ModelInformationRow from "../components/ModelInformationRow";
 import BackArrow from "../components/BackArrow";
 
 const EvaluateModelPage = () => {
-  const model = useStore((s) => s.model);
+  const model = useStore((s) => s.modelDetails);
+  const previousModels = useStore((s) => s.previousModels);
   // const allFeatures: Set<Filter> = mlSettings.includedFilters;
-  const features: Set<Filter> = useStore((s) => s.trainingFeatures);
+  // const features: Set<Filter> = useStore((s) => s.trainingFeatures);
 
   const navigate = useNavigate();
 
@@ -24,6 +25,12 @@ const EvaluateModelPage = () => {
   const navigateToFeatures = useCallback(() => {
     navigate(createFeaturesPageUrl());
   }, [navigate]);
+
+  useEffect(() => {
+    if (!model) {
+      return navigateToFeatures();
+    }
+  });
 
   return model ? (
     <DefaultPageLayout
@@ -40,20 +47,7 @@ const EvaluateModelPage = () => {
       }
     >
       <VStack>
-        <ModelInformationRow trainingFeatures={features} />
-        {/* <Grid templateColumns={`repeat(${allFeatures.size}, 1fr)`} gap={2}>
-          {Array.from(allFeatures).map((feature, idx) => (
-            <GridItem key={idx}>
-              <Card key={idx} justifyContent="space-between" w="100%" alignItems={"center"}>
-                <FormattedMessage id={feature} />
-                <Checkbox isChecked={features.has(feature)}>
-                  <FormattedMessage id="included" />
-                </Checkbox>
-              </Card>
-            </GridItem>
-          ))}
-        </Grid> */}
-
+        <ModelInformationRow details={model} />
         <HStack>
           <Button
             onClick={handleNavigateToModel}
