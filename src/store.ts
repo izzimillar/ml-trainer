@@ -710,25 +710,6 @@ const createMlStore = (logging: Logging) => {
             );
           },
 
-          // saveModel() {
-          //   return set(({ model, trainingFeatures, actions }) => {
-          //     if (model) {
-          //       const newModel: ModelDetails = {
-          //         model: model,
-          //         name: "New model!",
-          //         trainingFeatures: trainingFeatures,
-          //         actions: actions,
-          //         trainingSamplesCount: actions.reduce(
-          //           (acc, action) => acc + action.recordings.length,
-          //           0
-          //         ),
-          //         accuracy: testModel(model),
-          //       };
-          //     }
-          //     return {};
-          //   });
-          // },
-
           downloadDataset() {
             const { actions, project } = get();
             const a = document.createElement("a");
@@ -893,6 +874,7 @@ const createMlStore = (logging: Logging) => {
 
               details = {
                 model: model,
+                ID: Date.now(),
                 name: "New model!",
                 trainingFeatures: trainingFeatures,
                 actions: actions,
@@ -951,9 +933,23 @@ const createMlStore = (logging: Logging) => {
 
           saveModel() {
             const { modelDetails, previousModels } = get();
+
             if (!modelDetails) {
               return;
             }
+
+            const currentID = modelDetails?.ID;
+
+            // if this model is already saved then return
+            if (
+              previousModels.reduce(
+                (found, details) => found || details.ID === currentID,
+                false
+              )
+            ) {
+              return;
+            }
+
             const savedModels = previousModels;
             savedModels.push(modelDetails);
 

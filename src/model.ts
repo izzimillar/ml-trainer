@@ -45,6 +45,7 @@ export type DatasetUserFileFormat = ActionData[];
 
 export interface ModelDetails {
   model: tf.LayersModel;
+  ID: number;
   name: string;
   trainingFeatures: Set<Filter>;
   actions: ActionData[];
