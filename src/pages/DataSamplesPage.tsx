@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 import { Button, Flex, HStack, VStack } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { RiAddLine, RiArrowRightLine } from "react-icons/ri";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
@@ -15,17 +15,18 @@ import DefaultPageLayout, {
   ProjectToolbarItems,
 } from "../components/DefaultPageLayout";
 import LiveGraphPanel from "../components/LiveGraphPanel";
-// import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useHasSufficientDataForTraining, useStore } from "../store";
 import { tourElClassname } from "../tours";
-import { createFeaturesPageUrl } from "../urls";
+import { createFeaturesPageUrl, createTestingModelPageUrl } from "../urls";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
+  const model = useStore((s) => s.model);
   const addNewAction = useStore((s) => s.addNewAction);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
+  const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
   const navigate = useNavigate();
 
@@ -45,7 +46,11 @@ const DataSamplesPage = () => {
     navigate(createFeaturesPageUrl());
   }, [navigate]);
 
-  // const trainButtonRef = useRef(null);
+  const handleNavigateToModel = useCallback(() => {
+    navigate(createTestingModelPageUrl());
+  }, [navigate]);
+
+  const trainButtonRef = useRef(null);
   const handleAddNewAction = useCallback(() => {
     setSelectedActionIdx(actions.length);
     addNewAction();
@@ -96,17 +101,15 @@ const DataSamplesPage = () => {
               </Button>
             </HStack>
 
-            {/* navigate to features page button */}
-            <Button
-              onClick={handleNavigateToFeatures}
-              // className={tourElClassname.trainModelButton}
-              variant="primary"
-              rightIcon={<RiArrowRightLine />}
-            >
-              <FormattedMessage id="Get features" />
-            </Button>
-
-            {/* <HStack>
+            <HStack>
+              {/* navigate to features page button */}
+              <Button
+                onClick={handleNavigateToFeatures}
+                variant="primary"
+                // rightIcon={<RiArrowRightLine />}
+              >
+                <FormattedMessage id="Inspect data" />
+              </Button>
               {model ? (
                 <Button
                   onClick={handleNavigateToModel}
@@ -126,7 +129,7 @@ const DataSamplesPage = () => {
                   <FormattedMessage id="train-model" />
                 </Button>
               )}
-            </HStack> */}
+            </HStack>
           </HStack>
           <LiveGraphPanel disconnectedTextId="connect-to-record" />
         </VStack>
