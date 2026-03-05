@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router";
 import { TrainModelDialogStage } from "../model";
 import { useSettings, useStore } from "../store";
-import { createEvaluateModelPageUrl } from "../urls";
+import { createTestAndTrainPageUrl } from "../urls";
 import TrainingErrorDialog from "./TrainingErrorDialog";
 import TrainingModelProgressDialog from "./TrainingModelProgressDialog";
 import TrainModelIntroDialog from "./TrainModelHelpDialog";
@@ -30,7 +30,7 @@ const TrainModelDialogs = ({ finalFocusRef }: TrainModelDialogsProps) => {
       setSettings({ showPreTrainHelp: !isSkipNextTime });
       const result = await trainModel(true, 0.2);
       if (result) {
-        navigate(createEvaluateModelPageUrl());
+        navigate(createTestAndTrainPageUrl());
       }
     },
     [navigate, setSettings, trainModel]

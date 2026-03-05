@@ -59,7 +59,7 @@ import {
   createNewPageUrl,
   createTestingModelPageUrl,
   createFeaturesPageUrl,
-  createEvaluateModelPageUrl,
+  createTestAndTrainPageUrl,
 } from "./urls";
 
 export interface ProviderLayoutProps {
@@ -182,7 +182,7 @@ const createRouter = () => {
           element: <FeaturesPage />,
         },
         {
-          path: createEvaluateModelPageUrl(),
+          path: createTestAndTrainPageUrl(),
           element: <EvaluateModelPage />,
         },
         {

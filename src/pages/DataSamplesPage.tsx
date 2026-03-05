@@ -19,7 +19,8 @@ import { useConnectionStage } from "../connection-stage-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useHasSufficientDataForTraining, useStore } from "../store";
 import { tourElClassname } from "../tours";
-import { createFeaturesPageUrl, createTestingModelPageUrl } from "../urls";
+import { createFeaturesPageUrl, createTestAndTrainPageUrl } from "../urls";
+import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
@@ -46,8 +47,8 @@ const DataSamplesPage = () => {
     navigate(createFeaturesPageUrl());
   }, [navigate]);
 
-  const handleNavigateToModel = useCallback(() => {
-    navigate(createTestingModelPageUrl());
+  const handleNavigateToTestAndTrain = useCallback(() => {
+    navigate(createTestAndTrainPageUrl());
   }, [navigate]);
 
   const trainButtonRef = useRef(null);
@@ -61,7 +62,7 @@ const DataSamplesPage = () => {
   const intl = useIntl();
   return (
     <>
-      {/* <TrainModelDialogs finalFocusRef={trainButtonRef} /> */}
+      <TrainModelDialogs finalFocusRef={trainButtonRef} />
       <DefaultPageLayout
         titleId="data-samples-title"
         showPageTitle
@@ -112,21 +113,23 @@ const DataSamplesPage = () => {
               </Button>
               {model ? (
                 <Button
-                  onClick={handleNavigateToModel}
+                  onClick={handleNavigateToTestAndTrain}
                   className={tourElClassname.trainModelButton}
                   variant="primary"
                   rightIcon={<RiArrowRightLine />}
                 >
-                  <FormattedMessage id="testing-model-title" />
+                  <FormattedMessage id="Test model" />
                 </Button>
               ) : (
                 <Button
                   ref={trainButtonRef}
                   className={tourElClassname.trainModelButton}
-                  onClick={() => trainModelFlowStart(handleNavigateToModel)}
+                  onClick={() =>
+                    trainModelFlowStart(handleNavigateToTestAndTrain)
+                  }
                   variant={hasSufficientData ? "primary" : "secondary-disabled"}
                 >
-                  <FormattedMessage id="train-model" />
+                  <FormattedMessage id="Train and test" />
                 </Button>
               )}
             </HStack>

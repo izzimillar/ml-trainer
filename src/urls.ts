@@ -21,7 +21,7 @@ export const createDataSamplesPageUrl = () => `${basepath}data-samples`;
 
 export const createFeaturesPageUrl = () => `${basepath}features`;
 
-export const createEvaluateModelPageUrl = () => `${basepath}evaluate-model`;
+export const createTestAndTrainPageUrl = () => `${basepath}train-model`;
 
 export const createTestingModelPageUrl = () => `${basepath}testing-model`;
 

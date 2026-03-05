@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   CardProps,
   Grid,
@@ -32,6 +33,8 @@ interface ModelInformationRowProps {
   details: ModelDetails;
   selected?: boolean;
   onSelectRow?: () => void;
+  savedModelIds?: ModelDetails["ID"][];
+  onSave?: () => void;
   // trainingFeatures: Set<Filter>;
 }
 
@@ -39,9 +42,10 @@ const ModelInformationRow = ({
   details,
   selected,
   onSelectRow,
+  savedModelIds,
+  onSave,
 }: ModelInformationRowProps) => {
   // const navigate = useNavigate();
-  // const saveModel = useStore((s) => s.saveModel);
 
   // const navigateToFeatures = useCallback(() => {
   //   navigate(createFeaturesPageUrl());
@@ -65,21 +69,15 @@ const ModelInformationRow = ({
     return 0;
   };
 
-  const accuracy = details ? 
-    details.testResults ? 
-      details.testResults.error ? 
-        0 : details.testResults.accuracy * 100
+  const accuracy = details
+    ? details.testResults
+      ? details.testResults.error
+        ? 0
+        : details.testResults.accuracy * 100
       : 0
     : 0;
 
-  // const modelIsSaved = previousModels.reduce(
-  //   (found, details) => found || details.ID === currentModel?.ID,
-  //   false
-  // );
-
-  // const handleSaveModel = useCallback(() => {
-  //   saveModel();
-  // }, [saveModel]);
+  const modelIsSaved = savedModelIds?.includes(details.ID);
 
   return (
     <Grid {...gridCommonProps}>
@@ -152,83 +150,22 @@ const ModelInformationRow = ({
                 colorScheme={"brand2.500"}
               />
 
-              <PercentageDisplay
-                value={accuracy}
-                colorScheme={"brand2.500"}
-              />
+              <PercentageDisplay value={accuracy} colorScheme={"brand2.500"} />
             </HStack>
           </Card>
         </GridItem>
+
+        {onSave && <GridItem>
+          <Button
+            variant={"primary"}
+            onClick={onSave}
+            isDisabled={modelIsSaved}
+          >
+            <FormattedMessage id="Save model" />
+          </Button>
+        </GridItem>}
       </Box>
     </Grid>
-    // <Grid templateColumns={`repeat(4, auto)`} templateRows={"repeat(2, 1fr)"}>
-    //   <GridItem>
-    //     <Card>
-    //       <FormattedMessage id="Model name" />
-    //     </Card>
-    //   </GridItem>
-
-    //   <GridItem>
-    //     <Card>
-    //       <FormattedMessage id={"features"} />
-    //     </Card>
-    //   </GridItem>
-
-    //   <GridItem>
-    //     <Card>
-    //       <FormattedMessage id="Number of samples trained on" />
-    //     </Card>
-    //   </GridItem>
-
-    //   <GridItem>
-    //     <Card>
-    //       <FormattedMessage id="accuracy" />
-    //     </Card>
-    //   </GridItem>
-
-    //   <GridItem>
-    //     <Card>
-    //       <FormattedMessage id={currentModel.name} />
-    //     </Card>
-    //   </GridItem>
-
-    //   <GridItem>
-    //     <Card>
-    //       {Array.from(trainingFeatures).map((feature, idx) => (
-    //         <VStack key={idx}>
-    //           <FormattedMessage id={feature} />
-    //         </VStack>
-    //       ))}
-    //     </Card>
-    //   </GridItem>
-
-    //   <GridItem>
-    //     <Card>
-    //       <FormattedMessage
-    //         id={`number: ${
-    //           numberOfTrainingSamples() - currentModel.testSampleIds.length
-    //         }`}
-    //       />
-    //     </Card>
-    //   </GridItem>
-
-    //   <GridItem>
-    //     <Card>
-    //       <FormattedMessage id={`accuracy: ${accuracy()}%`} />
-    //     </Card>
-    //   </GridItem>
-
-    //   <GridItem>
-    //     <Button
-    //       variant={"primary"}
-    //       // leftIcon={<RiAddLine />}
-    //       onClick={handleSaveModel}
-    //       isDisabled={modelIsSaved}
-    //     >
-    //       <FormattedMessage id="Save model" />
-    //     </Button>
-    //   </GridItem>
-    // </Grid>
   );
 };
 

@@ -6,15 +6,17 @@ import { Button, HStack, VStack } from "@chakra-ui/react";
 import { RiArrowRightLine } from "react-icons/ri";
 import { FormattedMessage } from "react-intl";
 import { useStore } from "../store";
-import { Filter } from "../mlConfig";
 import ModelInformationRow from "../components/ModelInformationRow";
 import BackArrow from "../components/BackArrow";
 
 const EvaluateModelPage = () => {
   const model = useStore((s) => s.modelDetails);
   const previousModels = useStore((s) => s.previousModels);
+  const saveModel = useStore((s) => s.saveModel);
   // const allFeatures: Set<Filter> = mlSettings.includedFilters;
   // const features: Set<Filter> = useStore((s) => s.trainingFeatures);
+
+  const savedIds = previousModels.map((model) => model.ID);
 
   const navigate = useNavigate();
 
@@ -26,6 +28,10 @@ const EvaluateModelPage = () => {
     navigate(createFeaturesPageUrl());
   }, [navigate]);
 
+  const handleSaveModel = useCallback(() => {
+    saveModel();
+  }, [saveModel]);
+
   useEffect(() => {
     if (!model) {
       return navigateToFeatures();
@@ -34,7 +40,7 @@ const EvaluateModelPage = () => {
 
   return model ? (
     <DefaultPageLayout
-      titleId="Evaluate model"
+      titleId="Train and test model"
       showPageTitle
       toolbarItemsLeft={
         <Button
@@ -47,14 +53,22 @@ const EvaluateModelPage = () => {
       }
     >
       <VStack>
-        <ModelInformationRow details={model} />
+        <ModelInformationRow
+          details={model}
+          savedModelIds={savedIds}
+          onSave={handleSaveModel}
+        />
+
+        {previousModels.map((details, idx) => (
+          <ModelInformationRow key={idx} details={details} />
+        ))}
         <HStack>
           <Button
             onClick={handleNavigateToModel}
             variant="primary"
             rightIcon={<RiArrowRightLine />}
           >
-            <FormattedMessage id="testing-model-title" />
+            <FormattedMessage id="Use model" />
           </Button>
         </HStack>
       </VStack>

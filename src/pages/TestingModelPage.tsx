@@ -113,7 +113,7 @@ const TestingModelPage = () => {
 
   return model ? (
     <DefaultPageLayout
-      titleId="testing-model-title"
+      titleId="Use model"
       showPageTitle
       menuItems={<ProjectMenuItems />}
       toolbarItemsRight={<ProjectToolbarItems />}

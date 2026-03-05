@@ -933,48 +933,63 @@ const createMlStore = (logging: Logging) => {
           },
 
           saveModel() {
-            const { modelDetails, previousModels } = get();
+            const {
+              modelDetails,
+              previousModels,
+              project,
+              projectEdited,
+              actions,
+              model,
+              dataWindow,
+            } = get();
 
-            if (!modelDetails) {
-              return;
-            }
-
+            if (!modelDetails) return;
             const currentID = modelDetails?.ID;
+            const alreadySaved = previousModels.reduce(
+              (found, details) => found || details.ID === currentID,
+              false
+            );
+            if (alreadySaved) return;
 
-            // if this model is already saved then return
-            if (
-              previousModels.reduce(
-                (found, details) => found || details.ID === currentID,
-                false
-              )
-            ) {
-              return;
-            }
-
-            const savedModels = previousModels;
-            savedModels.push(modelDetails);
+            const savedModels = [...previousModels, modelDetails];
 
             set({
               previousModels: savedModels,
+              ...updateProject(
+                project,
+                projectEdited,
+                actions,
+                model,
+                dataWindow
+              ),
             });
           },
 
           setModelName(id: ModelDetails["ID"], name: string) {
-            return set(({ previousModels }) => {
-              const newModels = previousModels.map((model) =>
-                id !== model.ID ? model : { ...model, name }
-              );
-              return {
-                previousModels: newModels,
-                // ...updateProject(
-                //   project,
-                //   projectEdited,
-                //   newActions,
-                //   model,
-                //   dataWindow
-                // ),
-              };
-            });
+            return set(
+              ({
+                project,
+                projectEdited,
+                actions,
+                model,
+                dataWindow,
+                previousModels,
+              }) => {
+                const newModels = previousModels.map((model) =>
+                  id !== model.ID ? model : { ...model, name }
+                );
+                return {
+                  previousModels: newModels,
+                  ...updateProject(
+                    project,
+                    projectEdited,
+                    actions,
+                    model,
+                    dataWindow
+                  ),
+                };
+              }
+            );
           },
 
           deleteAllModels() {

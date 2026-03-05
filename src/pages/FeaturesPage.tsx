@@ -8,7 +8,7 @@ import { FormattedMessage } from "react-intl";
 import { useHasSufficientDataForTraining, useStore } from "../store";
 import { useNavigate } from "react-router";
 import { useCallback, useRef } from "react";
-import { createDataSamplesPageUrl, createEvaluateModelPageUrl } from "../urls";
+import { createDataSamplesPageUrl, createTestAndTrainPageUrl } from "../urls";
 import { RiArrowRightLine } from "react-icons/ri";
 import BackArrow from "../components/BackArrow";
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
@@ -24,7 +24,7 @@ const FeaturesPage = () => {
   const navigate = useNavigate();
 
   const handleNavigateToEvaluate = useCallback(() => {
-    navigate(createEvaluateModelPageUrl());
+    navigate(createTestAndTrainPageUrl());
   }, [navigate]);
 
   // const handleNavigateToModel = useCallback(() => {
@@ -82,7 +82,7 @@ const FeaturesPage = () => {
                 variant="primary"
                 rightIcon={<RiArrowRightLine />}
               >
-                <FormattedMessage id="testing-model-title" />
+                <FormattedMessage id="Test model" />
               </Button>
             ) : (
               <Button
@@ -91,7 +91,7 @@ const FeaturesPage = () => {
                 onClick={() => trainModelFlowStart(handleNavigateToEvaluate, true, 0.2)}
                 variant={trainingIsEnabled ? "primary" : "secondary-disabled"}
               >
-                <FormattedMessage id="train-model" />
+                <FormattedMessage id="Train and test" />
               </Button>
             )}
           </HStack>
