@@ -21,7 +21,8 @@ export enum ModelNameCardViewMode {
 }
 
 interface ModelNameCardProps {
-  value: ModelDetails;
+  name: ModelDetails["name"];
+  id: ModelDetails["ID"];
   onDeleteAction?: () => void;
   onSelectRow?: () => void;
   selected?: boolean;
@@ -31,11 +32,12 @@ interface ModelNameCardProps {
 
 const modelNameMaxLength = 18;
 
-export const modelNameInputId = (model: ModelDetails) =>
-  `model-name-input-${model.ID}`;
+export const modelNameInputId = (name: ModelDetails["name"]) =>
+  `model-name-input-${name}`;
 
 const ModelNameCard = ({
-  value,
+  name,
+  id,
   onDeleteAction,
   onSelectRow,
   selected = false,
@@ -46,8 +48,7 @@ const ModelNameCard = ({
   const toast = useToast();
   const toastId = "name-too-long-toast";
   const setModelName = useStore((s) => s.setModelName);
-  const { ID: id } = value;
-  const [localName, setLocalName] = useState<string>(value.name);
+  const [localName, setLocalName] = useState<string>(name);
   // Avoid autofocus on mobile as it triggers the keyboard
   const allowAutoFocus = useBreakpointValue({ base: false, md: true });
 
@@ -87,6 +88,9 @@ const ModelNameCard = ({
     [debouncedSetModelName, id, intl, toast]
   );
 
+
+  
+
   return (
     <Card
       p={2}
@@ -115,7 +119,7 @@ const ModelNameCard = ({
       <CardBody p={0} alignContent="center">
         <HStack>
           <Input
-            id={modelNameInputId(value)}
+            id={modelNameInputId(name)}
             autoFocus={allowAutoFocus && localName.length === 0}
             isTruncated
             readOnly={viewMode !== ModelNameCardViewMode.Editable}

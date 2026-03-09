@@ -883,6 +883,7 @@ const createMlStore = (logging: Logging) => {
                   ? trainingResult.testIds
                   : [],
                 testResults: testResults,
+                testTrainSplit: testTrainSplit,
               };
             }
 

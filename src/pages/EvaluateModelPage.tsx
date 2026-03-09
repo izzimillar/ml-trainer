@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useRef } from "react";
 import DefaultPageLayout from "../components/DefaultPageLayout";
 import { createDataSamplesPageUrl, createTestingModelPageUrl } from "../urls";
 import { useNavigate } from "react-router";
@@ -12,6 +12,10 @@ import HeadingGrid, {
   GridColumnHeadingItemProps,
 } from "../components/HeadingGrid";
 import { Filter } from "../mlConfig";
+import TrainModelDialogs from "../components/TrainModelFlowDialogs";
+import { ModelNameCardViewMode } from "../components/ModelNameCard";
+import ModelTrainRow from "../components/ModelTrainRow";
+import { ModelDetails } from "../model";
 
 const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "200px 240px 200px 200px 340px 150px",
@@ -41,14 +45,24 @@ const headings: GridColumnHeadingItemProps[] = [
 ];
 
 const EvaluateModelPage = () => {
-  const model = useStore((s) => s.modelDetails);
   const previousModels = useStore((s) => s.previousModels);
+  const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
   const saveModel = useStore((s) => s.saveModel);
   // const allFeatures: Set<Filter> = mlSettings.includedFilters;
   const features: Set<Filter> = useStore((s) => s.trainingFeatures);
+  const actions = useStore((s) => s.actions);
 
-  const savedIds = previousModels.map((model) => model.ID);
+  const pretrainedModelDetails: Partial<ModelDetails> = {
+    name: "New model!",
+    ID: Date.now(),
+    trainingFeatures: features,
+    actions: actions,
+    testTrainSplit: 0.2,
+  };
 
+  // const savedIds = previousModels.map((model) => model.ID);
+
+  const trainButtonRef = useRef(null);
   const navigate = useNavigate();
 
   const handleNavigateToModel = useCallback(() => {
@@ -63,69 +77,65 @@ const EvaluateModelPage = () => {
     saveModel();
   }, [saveModel]);
 
-  useEffect(() => {
-    if (!model) {
-      return navigateToDataSamples();
-    }
-  });
-
-  return model ? (
-    <DefaultPageLayout
-      titleId="Train and test model"
-      showPageTitle
-      toolbarItemsLeft={
-        <Button
-          leftIcon={<BackArrow />}
-          variant="toolbar"
-          onClick={navigateToDataSamples}
-        >
-          <FormattedMessage id="Edit data samples" />
-        </Button>
-      }
-    >
-      <VStack>
-        <HeadingGrid
-          position="sticky"
-          top={0}
-          px={5}
-          {...gridCommonProps}
-          headings={headings}
-        />
-        <Grid
-          {...gridCommonProps}
-          alignItems="stretch"
-          autoRows="max-content"
-          overflow="auto"
-          flexGrow={1}
-        >
-          <ModelInformationRow
-            details={model}
-            savedModelIds={savedIds}
-            onSave={handleSaveModel}
-            trainingFeatures={features}
-          />
-
-          {previousModels.map((details, idx) => (
-            <ModelInformationRow
-              key={idx}
-              details={details}
-              trainingFeatures={undefined}
-            />
-          ))}
-        </Grid>
-        <HStack>
+  return (
+    <>
+      <TrainModelDialogs finalFocusRef={trainButtonRef} />
+      <DefaultPageLayout
+        titleId="Train and test model"
+        showPageTitle
+        toolbarItemsLeft={
           <Button
-            onClick={handleNavigateToModel}
-            variant="primary"
-            rightIcon={<RiArrowRightLine />}
+            leftIcon={<BackArrow />}
+            variant="toolbar"
+            onClick={navigateToDataSamples}
           >
-            <FormattedMessage id="Use model" />
+            <FormattedMessage id="Edit data samples" />
           </Button>
-        </HStack>
-      </VStack>
-    </DefaultPageLayout>
-  ) : (
-    <></>
+        }
+      >
+        <VStack>
+          <HeadingGrid
+            position="sticky"
+            top={0}
+            px={5}
+            {...gridCommonProps}
+            headings={headings}
+          />
+          <Grid
+            {...gridCommonProps}
+            alignItems="stretch"
+            autoRows="max-content"
+            overflow="auto"
+            flexGrow={1}
+          >
+            <ModelTrainRow
+              details={pretrainedModelDetails}
+              nameViewMode={ModelNameCardViewMode.Editable}
+              onTrain={() => trainModelFlowStart(handleSaveModel, true, 0.2)}
+              trainingFeatures={features}
+              trainButtonRef={trainButtonRef}
+            />
+
+            {previousModels.map((details, idx) => (
+              <ModelInformationRow
+                key={idx}
+                details={details}
+                nameViewMode={ModelNameCardViewMode.ReadOnly}
+              />
+            ))}
+          </Grid>
+          <HStack>
+            <Button
+              onClick={handleNavigateToModel}
+              variant="primary"
+              rightIcon={<RiArrowRightLine />}
+            >
+              <FormattedMessage id="Use model" />
+            </Button>
+          </HStack>
+        </VStack>
+      </DefaultPageLayout>
+    </>
   );
 };
 

@@ -3,7 +3,6 @@ import {
   Button,
   Card,
   CardProps,
-  Checkbox,
   Grid,
   GridItem,
   HStack,
@@ -14,9 +13,6 @@ import ModelNameCard, { ModelNameCardViewMode } from "./ModelNameCard";
 import { ModelDetails } from "../model";
 import PercentageMeter from "./PercentageMeter";
 import PercentageDisplay from "./PercentageDisplay";
-import { Filter, mlSettings } from "../mlConfig";
-import { useCallback } from "react";
-import { useStore } from "../store";
 
 const cardCommonProps: Partial<CardProps> = {
   p: 2,
@@ -29,32 +25,26 @@ const cardCommonProps: Partial<CardProps> = {
 
 interface ModelInformationRowProps {
   details: ModelDetails;
+  nameViewMode: ModelNameCardViewMode;
   selected?: boolean;
   onSelectRow?: () => void;
-  savedModelIds?: ModelDetails["ID"][];
-  onSave?: () => void;
   onDelete?: () => void;
-  trainingFeatures?: Set<Filter>;
 }
 
 const ModelInformationRow = ({
   details,
+  nameViewMode,
   selected,
   onSelectRow,
-  savedModelIds,
-  onSave,
   onDelete,
-  trainingFeatures,
 }: ModelInformationRowProps) => {
-  const setFeatures = useStore((s) => s.setTrainingFeature);
-  const allFeatures = mlSettings.includedFilters;
 
-  const handleIncludeOnChange = useCallback(
-    (feature: Filter, e: React.ChangeEvent<HTMLInputElement>) => {
-      setFeatures(feature, e.target.checked);
-    },
-    [setFeatures]
-  );
+  // const handleIncludeOnChange = useCallback(
+  //   (feature: Filter, e: React.ChangeEvent<HTMLInputElement>) => {
+  //     setFeatures(feature, e.target.checked);
+  //   },
+  //   [setFeatures]
+  // );
 
   const numberOfTrainingSamples = () => {
     if (details) {
@@ -76,15 +66,10 @@ const ModelInformationRow = ({
       : 0
     : 0;
 
-  const modelIsSaved = savedModelIds?.includes(details.ID);
-
   return (
     <Box role="region" display="contents" h="100%">
       <GridItem>
-        <ModelNameCard
-          value={details}
-          viewMode={ModelNameCardViewMode.Editable}
-        />
+        <ModelNameCard name={details.name} id={details.ID} viewMode={nameViewMode} />
       </GridItem>
 
       <GridItem>
@@ -101,23 +86,11 @@ const ModelInformationRow = ({
             justifyItems={"start"}
             w="100%"
           >
-            {trainingFeatures &&
-              Array.from(allFeatures).map((feature, idx) => (
-                <VStack key={idx}>
-                  <Checkbox
-                    isChecked={trainingFeatures.has(feature)}
-                    onChange={(e) => handleIncludeOnChange(feature, e)}
-                  >
-                    <FormattedMessage id={feature} />
-                  </Checkbox>
-                </VStack>
-              ))}
-            {!trainingFeatures &&
-              Array.from(details.trainingFeatures).map((feature, idx) => (
-                <VStack key={idx}>
-                  <FormattedMessage id={feature} />
-                </VStack>
-              ))}
+            {Array.from(details.trainingFeatures).map((feature, idx) => (
+              <VStack key={idx}>
+                <FormattedMessage id={feature} />
+              </VStack>
+            ))}
           </Grid>
         </Card>
       </GridItem>
@@ -129,7 +102,7 @@ const ModelInformationRow = ({
           onClick={onSelectRow}
         >
           <FormattedMessage
-            id={`Trained on ${numberOfTrainingSamples()} samples`}
+            id={`${numberOfTrainingSamples()} training samples`}
           />
         </Card>
       </GridItem>
@@ -142,7 +115,7 @@ const ModelInformationRow = ({
         >
           <VStack>
             <FormattedMessage
-              id={`Tested on ${details.testSampleIds.length} samples`}
+              id={`${details.testSampleIds.length} testing samples`}
             />
           </VStack>
         </Card>
@@ -172,16 +145,6 @@ const ModelInformationRow = ({
           borderColor={selected ? "brand.500" : "transparent"}
           onClick={onSelectRow}
         >
-          {onSave && (
-            <Button
-              variant={"primary"}
-              onClick={onSave}
-              isDisabled={modelIsSaved}
-            >
-              <FormattedMessage id="Train model" />
-            </Button>
-          )}
-
           {onDelete && (
             <Button variant={"warning"} onClick={onDelete}>
               <FormattedMessage id="Delete model" />

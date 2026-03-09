@@ -24,10 +24,10 @@ import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
-  const model = useStore((s) => s.model);
+  // const model = useStore((s) => s.model);
   const addNewAction = useStore((s) => s.addNewAction);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
-  const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
+  // const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
   const navigate = useNavigate();
 
@@ -104,34 +104,19 @@ const DataSamplesPage = () => {
 
             <HStack>
               {/* navigate to features page button */}
-              <Button
-                onClick={handleNavigateToFeatures}
-                variant="primary"
-                // rightIcon={<RiArrowRightLine />}
-              >
+              <Button onClick={handleNavigateToFeatures} variant="primary">
                 <FormattedMessage id="Inspect data" />
               </Button>
-              {model ? (
-                <Button
-                  onClick={handleNavigateToTestAndTrain}
-                  className={tourElClassname.trainModelButton}
-                  variant="primary"
-                  rightIcon={<RiArrowRightLine />}
-                >
-                  <FormattedMessage id="Test model" />
-                </Button>
-              ) : (
-                <Button
-                  ref={trainButtonRef}
-                  className={tourElClassname.trainModelButton}
-                  onClick={() =>
-                    trainModelFlowStart(handleNavigateToTestAndTrain)
-                  }
-                  variant={hasSufficientData ? "primary" : "secondary-disabled"}
-                >
-                  <FormattedMessage id="Train and test" />
-                </Button>
-              )}
+
+              <Button
+                ref={trainButtonRef}
+                className={tourElClassname.trainModelButton}
+                onClick={handleNavigateToTestAndTrain}
+                variant={hasSufficientData ? "primary" : "secondary-disabled"}
+                rightIcon={<RiArrowRightLine />}
+              >
+                <FormattedMessage id="Train and test" />
+              </Button>
             </HStack>
           </HStack>
           <LiveGraphPanel disconnectedTextId="connect-to-record" />
