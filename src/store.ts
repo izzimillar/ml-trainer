@@ -974,12 +974,24 @@ const createMlStore = (logging: Logging) => {
                 model,
                 dataWindow,
                 previousModels,
+                modelDetails,
               }) => {
                 const newModels = previousModels.map((model) =>
                   id !== model.ID ? model : { ...model, name }
                 );
+
+                let newDetails = undefined;
+
+                if (modelDetails) {
+                  newDetails = {
+                    ...modelDetails,
+                    name: id === modelDetails?.ID ? name : modelDetails.name,
+                  };
+                }
+
                 return {
                   previousModels: newModels,
+                  modelDetails: newDetails,
                   ...updateProject(
                     project,
                     projectEdited,

@@ -1,13 +1,40 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import DefaultPageLayout from "../components/DefaultPageLayout";
-import { createFeaturesPageUrl, createTestingModelPageUrl } from "../urls";
+import { createDataSamplesPageUrl, createTestingModelPageUrl } from "../urls";
 import { useNavigate } from "react-router";
-import { Button, HStack, VStack } from "@chakra-ui/react";
+import { Button, Grid, GridProps, HStack, VStack } from "@chakra-ui/react";
 import { RiArrowRightLine } from "react-icons/ri";
 import { FormattedMessage } from "react-intl";
 import { useStore } from "../store";
 import ModelInformationRow from "../components/ModelInformationRow";
 import BackArrow from "../components/BackArrow";
+import HeadingGrid, {
+  GridColumnHeadingItemProps,
+} from "../components/HeadingGrid";
+
+const gridCommonProps: Partial<GridProps> = {
+  gridTemplateColumns: "100px",
+  gap: 3,
+  w: "100%",
+};
+
+const headings: GridColumnHeadingItemProps[] = [
+  {
+    titleId: "Model name",
+  },
+  // {
+  //   titleId: "Features",
+  // },
+  // {
+  //   titleId: "Training size",
+  // },
+  // {
+  //   titleId: "Test size",
+  // },
+  // {
+  //   titleId: "Accuracy",
+  // },
+];
 
 const EvaluateModelPage = () => {
   const model = useStore((s) => s.modelDetails);
@@ -18,14 +45,16 @@ const EvaluateModelPage = () => {
 
   const savedIds = previousModels.map((model) => model.ID);
 
+  const scrollableAreaRef = useRef<HTMLDivElement>(null);
+
   const navigate = useNavigate();
 
   const handleNavigateToModel = useCallback(() => {
     navigate(createTestingModelPageUrl());
   }, [navigate]);
 
-  const navigateToFeatures = useCallback(() => {
-    navigate(createFeaturesPageUrl());
+  const navigateToDataSamples = useCallback(() => {
+    navigate(createDataSamplesPageUrl());
   }, [navigate]);
 
   const handleSaveModel = useCallback(() => {
@@ -34,7 +63,7 @@ const EvaluateModelPage = () => {
 
   useEffect(() => {
     if (!model) {
-      return navigateToFeatures();
+      return navigateToDataSamples();
     }
   });
 
@@ -46,22 +75,19 @@ const EvaluateModelPage = () => {
         <Button
           leftIcon={<BackArrow />}
           variant="toolbar"
-          onClick={navigateToFeatures}
+          onClick={navigateToDataSamples}
         >
           <FormattedMessage id="Choose features" />
         </Button>
       }
     >
       <VStack>
-        <ModelInformationRow
-          details={model}
-          savedModelIds={savedIds}
-          onSave={handleSaveModel}
+        <HeadingGrid
+          position="sticky"
+          top={0}
+          {...gridCommonProps}
+          headings={headings}
         />
-
-        {previousModels.map((details, idx) => (
-          <ModelInformationRow key={idx} details={details} />
-        ))}
         <HStack>
           <Button
             onClick={handleNavigateToModel}

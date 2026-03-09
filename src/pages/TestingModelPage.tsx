@@ -36,7 +36,7 @@ import { useProject } from "../hooks/project-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useStore } from "../store";
 import { tourElClassname } from "../tours";
-import { createFeaturesPageUrl } from "../urls";
+import { createDataSamplesPageUrl } from "../urls";
 import { ButtonWithLoading } from "../components/ButtonWithLoading";
 
 const TestingModelPage = () => {
@@ -47,13 +47,13 @@ const TestingModelPage = () => {
   const bufferedData = useBufferedData();
   const intl = useIntl();
 
-  const navigateToFeatures = useCallback(() => {
-    navigate(createFeaturesPageUrl());
+  const navigateToDataSamples = useCallback(() => {
+    navigate(createDataSamplesPageUrl());
   }, [navigate]);
 
   useEffect(() => {
     if (!model) {
-      return navigateToFeatures();
+      return navigateToDataSamples();
     }
     startPredicting(bufferedData);
 
@@ -63,7 +63,7 @@ const TestingModelPage = () => {
   }, [
     bufferedData,
     model,
-    navigateToFeatures,
+    navigateToDataSamples,
     startPredicting,
     stopPredicting,
   ]);
@@ -121,7 +121,7 @@ const TestingModelPage = () => {
         <Button
           leftIcon={<BackArrow />}
           variant="toolbar"
-          onClick={navigateToFeatures}
+          onClick={navigateToDataSamples}
         >
           <FormattedMessage id="Back to data features" />
         </Button>

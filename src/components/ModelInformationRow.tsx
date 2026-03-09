@@ -80,82 +80,80 @@ const ModelInformationRow = ({
   const modelIsSaved = savedModelIds?.includes(details.ID);
 
   return (
-    <Grid {...gridCommonProps}>
-      <Box role="region" display="contents">
-        <GridItem>
-          <ModelNameCard
-            value={details}
-            viewMode={ModelNameCardViewMode.Editable}
-          />
-        </GridItem>
+    <Box role="region" display="contents">
+      <GridItem>
+        <ModelNameCard
+          value={details}
+          viewMode={ModelNameCardViewMode.Editable}
+        />
+      </GridItem>
 
-        <GridItem>
-          <Card
-            {...cardCommonProps}
-            borderColor={selected ? "brand.500" : "transparent"}
-            onClick={onSelectRow}
-            // opacity={disabled ? 0.5 : undefined}
-            // variant={
-            //   viewMode === ModelNameCardViewMode.Preview ? "outline" : undefined
-            // }
+      <GridItem>
+        <Card
+          {...cardCommonProps}
+          borderColor={selected ? "brand.500" : "transparent"}
+          onClick={onSelectRow}
+          // opacity={disabled ? 0.5 : undefined}
+          // variant={
+          //   viewMode === ModelNameCardViewMode.Preview ? "outline" : undefined
+          // }
+        >
+          <HStack
+            align={"center"}
+            alignItems={"center"}
+            alignContent={"center"}
           >
-            <HStack
-              align={"center"}
-              alignItems={"center"}
-              alignContent={"center"}
-            >
-              {Array.from(details.trainingFeatures).map((feature, idx) => (
-                <HStack key={idx}>
-                  <FormattedMessage id={feature} />
-                </HStack>
-              ))}
-            </HStack>
-          </Card>
-        </GridItem>
+            {Array.from(details.trainingFeatures).map((feature, idx) => (
+              <HStack key={idx}>
+                <FormattedMessage id={feature} />
+              </HStack>
+            ))}
+          </HStack>
+        </Card>
+      </GridItem>
 
+      <GridItem>
+        <Card
+          {...cardCommonProps}
+          borderColor={selected ? "brand.500" : "transparent"}
+          onClick={onSelectRow}
+        >
+          <FormattedMessage id={`${numberOfTrainingSamples()} training`} />
+        </Card>
+      </GridItem>
+
+      <GridItem>
+        <Card
+          {...cardCommonProps}
+          borderColor={selected ? "brand.500" : "transparent"}
+          onClick={onSelectRow}
+        >
+          <VStack>
+            <FormattedMessage id={`${details.testSampleIds.length} testing`} />
+          </VStack>
+        </Card>
+      </GridItem>
+
+      <GridItem>
+        <Card
+          {...cardCommonProps}
+          borderColor={selected ? "brand.500" : "transparent"}
+          onClick={onSelectRow}
+        >
+          <HStack w="100%" gap={5}>
+            <PercentageMeter
+              meterBarWidthPx={240}
+              value={accuracy}
+              colorScheme={"brand2.500"}
+            />
+
+            <PercentageDisplay value={accuracy} colorScheme={"brand2.500"} />
+          </HStack>
+        </Card>
+      </GridItem>
+
+      {onSave && (
         <GridItem>
-          <Card
-            {...cardCommonProps}
-            borderColor={selected ? "brand.500" : "transparent"}
-            onClick={onSelectRow}
-          >
-            <FormattedMessage id={`${numberOfTrainingSamples()} training`} />
-          </Card>
-        </GridItem>
-
-        <GridItem>
-          <Card
-            {...cardCommonProps}
-            borderColor={selected ? "brand.500" : "transparent"}
-            onClick={onSelectRow}
-          >
-            <VStack>
-              <FormattedMessage
-                id={`${details.testSampleIds.length} testing`}
-              />
-            </VStack>
-          </Card>
-        </GridItem>
-
-        <GridItem>
-          <Card
-            {...cardCommonProps}
-            borderColor={selected ? "brand.500" : "transparent"}
-            onClick={onSelectRow}
-          >
-            <HStack w="100%" gap={5}>
-              <PercentageMeter
-                meterBarWidthPx={240}
-                value={accuracy}
-                colorScheme={"brand2.500"}
-              />
-
-              <PercentageDisplay value={accuracy} colorScheme={"brand2.500"} />
-            </HStack>
-          </Card>
-        </GridItem>
-
-        {onSave && <GridItem>
           <Button
             variant={"primary"}
             onClick={onSave}
@@ -163,9 +161,9 @@ const ModelInformationRow = ({
           >
             <FormattedMessage id="Save model" />
           </Button>
-        </GridItem>}
-      </Box>
-    </Grid>
+        </GridItem>
+      )}
+    </Box>
   );
 };
 
