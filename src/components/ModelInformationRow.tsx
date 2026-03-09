@@ -129,6 +129,7 @@ const ModelInformationRow = ({
           {...cardCommonProps}
           borderColor={selected ? "brand.500" : "transparent"}
           onClick={onSelectRow}
+          // TODO: edit this for if there's no testing data
         >
           <HStack w="100%" gap={5}>
             <PercentageMeter
