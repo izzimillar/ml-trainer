@@ -14,7 +14,6 @@ import HeadingGrid, {
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { ModelNameCardViewMode } from "../components/ModelNameCard";
 import ModelTrainRow from "../components/ModelTrainRow";
-import { name } from "ejs";
 
 const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "200px 240px 200px 200px 340px 150px",
@@ -104,7 +103,7 @@ const EvaluateModelPage = () => {
               nameViewMode={ModelNameCardViewMode.Editable}
               onTrain={() =>
                 trainModelFlowStart(handleSaveModel, {
-                  name: name,
+                  name: modelName,
                   trainingSize: split/100,
                 })
               }
