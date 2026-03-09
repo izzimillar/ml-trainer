@@ -38,7 +38,6 @@ const ModelInformationRow = ({
   onSelectRow,
   onDelete,
 }: ModelInformationRowProps) => {
-
   // const handleIncludeOnChange = useCallback(
   //   (feature: Filter, e: React.ChangeEvent<HTMLInputElement>) => {
   //     setFeatures(feature, e.target.checked);
@@ -69,7 +68,11 @@ const ModelInformationRow = ({
   return (
     <Box role="region" display="contents" h="100%">
       <GridItem>
-        <ModelNameCard name={details.name} id={details.ID} viewMode={nameViewMode} />
+        <ModelNameCard
+          name={details.name}
+          setName={(_) => {}}
+          viewMode={nameViewMode}
+        />
       </GridItem>
 
       <GridItem>

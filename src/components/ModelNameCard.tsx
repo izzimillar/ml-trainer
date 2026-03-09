@@ -7,12 +7,10 @@ import {
   useBreakpointValue,
   useToast,
 } from "@chakra-ui/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 import { useIntl } from "react-intl";
 import { ModelDetails } from "../model";
-import { useStore } from "../store";
 import { tourElClassname } from "../tours";
-import debounce from "lodash.debounce";
 
 export enum ModelNameCardViewMode {
   Editable = "Editable", // Interaction, color, depth
@@ -22,7 +20,7 @@ export enum ModelNameCardViewMode {
 
 interface ModelNameCardProps {
   name: ModelDetails["name"];
-  id: ModelDetails["ID"];
+  setName: React.Dispatch<React.SetStateAction<string>>;
   onDeleteAction?: () => void;
   onSelectRow?: () => void;
   selected?: boolean;
@@ -37,7 +35,7 @@ export const modelNameInputId = (name: ModelDetails["name"]) =>
 
 const ModelNameCard = ({
   name,
-  id,
+  setName,
   onDeleteAction,
   onSelectRow,
   selected = false,
@@ -47,22 +45,8 @@ const ModelNameCard = ({
   const intl = useIntl();
   const toast = useToast();
   const toastId = "name-too-long-toast";
-  const setModelName = useStore((s) => s.setModelName);
-  const [localName, setLocalName] = useState<string>(name);
   // Avoid autofocus on mobile as it triggers the keyboard
   const allowAutoFocus = useBreakpointValue({ base: false, md: true });
-
-  const debouncedSetModelName = useMemo(
-    () =>
-      debounce(
-        (id: ModelDetails["ID"], name: string) => {
-          setModelName(id, name);
-        },
-        400,
-        { leading: true }
-      ),
-    [setModelName]
-  );
 
   const onChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
@@ -82,14 +66,10 @@ const ModelNameCard = ({
         });
         return;
       }
-      setLocalName(name);
-      debouncedSetModelName(id, name);
+      setName(name);
     },
-    [debouncedSetModelName, id, intl, toast]
+    [setName, intl, toast]
   );
-
-
-  
 
   return (
     <Card
@@ -120,10 +100,10 @@ const ModelNameCard = ({
         <HStack>
           <Input
             id={modelNameInputId(name)}
-            autoFocus={allowAutoFocus && localName.length === 0}
+            autoFocus={allowAutoFocus && name.length === 0}
             isTruncated
             readOnly={viewMode !== ModelNameCardViewMode.Editable}
-            value={localName}
+            value={name}
             borderWidth={0}
             maxLength={18}
             {...(viewMode !== ModelNameCardViewMode.Editable

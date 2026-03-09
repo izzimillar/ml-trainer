@@ -151,6 +151,7 @@ export interface State {
   modelDetails: ModelDetails | undefined;
   previousModels: ModelDetails[];
   trainingFeatures: Set<Filter>;
+  testTrainingSplit: number;
 
   timestamp: number | undefined;
 
@@ -253,11 +254,10 @@ export interface Actions {
   newSession(projectName?: string): void;
   trainModelFlowStart: (
     callback?: () => void,
-    test?: boolean,
-    testTrainSplit?: number
+    modelDetails?: Partial<ModelDetails>
   ) => Promise<void>;
   closeTrainModelDialogs: () => void;
-  trainModel(test?: boolean, testTrainSplit?: number): Promise<boolean>;
+  trainModel(modelDetails?: Partial<ModelDetails>): Promise<boolean>;
   testModel(): void;
   setSettings(update: Partial<Settings>): void;
   setLanguage(languageId: string): void;
@@ -350,6 +350,7 @@ const createMlStore = (logging: Logging) => {
             Filter.ZCR,
             Filter.RMS,
           ]),
+          testTrainingSplit: 0.2,
           isRecording: false,
           project: createUntitledProject(),
           projectLoadTimestamp: 0,
@@ -805,11 +806,7 @@ const createMlStore = (logging: Logging) => {
             });
           },
 
-          async trainModelFlowStart(
-            callback?: () => void,
-            test?,
-            testTrainSplit?
-          ) {
+          async trainModelFlowStart(callback?: () => void, modelDetails?) {
             const {
               settings: { showPreTrainHelp },
               actions,
@@ -825,12 +822,12 @@ const createMlStore = (logging: Logging) => {
                 trainModelDialogStage: TrainModelDialogStage.Help,
               });
             } else {
-              await trainModel(test, testTrainSplit);
+              await trainModel(modelDetails);
               callback?.();
             }
           },
 
-          async trainModel(test, testTrainSplit?) {
+          async trainModel(modelDetails?) {
             const { actions, dataWindow, trainingFeatures } = get();
             logging.event({
               type: "model-train",
@@ -849,6 +846,7 @@ const createMlStore = (logging: Logging) => {
             // can block the UI. 50 ms is not sufficient, so use 100 for now.
             await new Promise((res) => setTimeout(res, 100));
             // train the model with the test and training split
+            const testTrainSplit = modelDetails?.testTrainSplit ?? 0;
             const trainingResult = await trainModel(actions, dataWindow, {
               enabledFeatures: trainingFeatures,
               onProgress: (trainModelProgress) =>
@@ -863,7 +861,7 @@ const createMlStore = (logging: Logging) => {
               model = trainingResult.model;
 
               let testResults = undefined;
-              if (test && trainingResult.testIds.length > 0) {
+              if (trainingResult.testIds.length > 0) {
                 testResults = testModel(
                   model,
                   actions,
@@ -875,8 +873,8 @@ const createMlStore = (logging: Logging) => {
 
               details = {
                 model: model,
-                ID: Date.now(),
-                name: "New model!",
+                ID: modelDetails?.ID ?? Date.now(),
+                name: modelDetails?.name ?? "New model!",
                 trainingFeatures: trainingFeatures,
                 actions: actions,
                 testSampleIds: !trainingResult.error

@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import DefaultPageLayout from "../components/DefaultPageLayout";
 import { createDataSamplesPageUrl, createTestingModelPageUrl } from "../urls";
 import { useNavigate } from "react-router";
@@ -11,11 +11,10 @@ import BackArrow from "../components/BackArrow";
 import HeadingGrid, {
   GridColumnHeadingItemProps,
 } from "../components/HeadingGrid";
-import { Filter } from "../mlConfig";
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { ModelNameCardViewMode } from "../components/ModelNameCard";
 import ModelTrainRow from "../components/ModelTrainRow";
-import { ModelDetails } from "../model";
+import { name } from "ejs";
 
 const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "200px 240px 200px 200px 340px 150px",
@@ -48,19 +47,8 @@ const EvaluateModelPage = () => {
   const previousModels = useStore((s) => s.previousModels);
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
   const saveModel = useStore((s) => s.saveModel);
-  // const allFeatures: Set<Filter> = mlSettings.includedFilters;
-  const features: Set<Filter> = useStore((s) => s.trainingFeatures);
-  const actions = useStore((s) => s.actions);
-
-  const pretrainedModelDetails: Partial<ModelDetails> = {
-    name: "New model!",
-    ID: Date.now(),
-    trainingFeatures: features,
-    actions: actions,
-    testTrainSplit: 0.2,
-  };
-
-  // const savedIds = previousModels.map((model) => model.ID);
+  const [modelName, setModelName] = useState<string>("New model!");
+  const [split, setSplit] = useState<number>(20);
 
   const trainButtonRef = useRef(null);
   const navigate = useNavigate();
@@ -109,10 +97,17 @@ const EvaluateModelPage = () => {
             flexGrow={1}
           >
             <ModelTrainRow
-              details={pretrainedModelDetails}
+              name={modelName}
+              setName={setModelName}
+              split={split}
+              setSplit={setSplit}
               nameViewMode={ModelNameCardViewMode.Editable}
-              onTrain={() => trainModelFlowStart(handleSaveModel, true, 0.2)}
-              trainingFeatures={features}
+              onTrain={() =>
+                trainModelFlowStart(handleSaveModel, {
+                  name: name,
+                  testTrainSplit: split/100,
+                })
+              }
               trainButtonRef={trainButtonRef}
             />
 

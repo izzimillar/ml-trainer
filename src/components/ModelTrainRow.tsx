@@ -15,11 +15,10 @@ import {
 } from "@chakra-ui/react";
 import { FormattedMessage } from "react-intl";
 import ModelNameCard, { ModelNameCardViewMode } from "./ModelNameCard";
-import { ModelDetails } from "../model";
 import PercentageMeter from "./PercentageMeter";
 import PercentageDisplay from "./PercentageDisplay";
 import { Filter, mlSettings } from "../mlConfig";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useStore } from "../store";
 
 const cardCommonProps: Partial<CardProps> = {
@@ -32,7 +31,10 @@ const cardCommonProps: Partial<CardProps> = {
 };
 
 interface ModelTrainRowProps {
-  details: Partial<ModelDetails>;
+  name: string;
+  setName: React.Dispatch<React.SetStateAction<string>>;
+  split: number;
+  setSplit: React.Dispatch<React.SetStateAction<number>>;
   nameViewMode: ModelNameCardViewMode;
   selected?: boolean;
   onSelectRow?: () => void;
@@ -41,7 +43,10 @@ interface ModelTrainRowProps {
 }
 
 const ModelTrainRow = ({
-  details,
+  name,
+  setName,
+  split,
+  setSplit,
   nameViewMode,
   selected,
   onSelectRow,
@@ -51,7 +56,22 @@ const ModelTrainRow = ({
   const setFeatures = useStore((s) => s.setTrainingFeature);
   const allFeatures = mlSettings.includedFilters;
   const trainingFeatures: Set<Filter> = useStore((s) => s.trainingFeatures);
-  const [split, setSplit] = useState<number>(details.testTrainSplit ?? 20);
+  const actions = useStore((s) => s.actions);
+
+  const testingSamplesNumber = useCallback(() => {
+    return actions.reduce(
+      (acc, action) =>
+        acc + Math.round((action.recordings.length * split) / 100),
+      0
+    );
+  }, [split, actions]);
+
+  const trainingSamplesNumber = useCallback(() => {
+    return (
+      actions.reduce((acc, action) => acc + action.recordings.length, 0) -
+      testingSamplesNumber()
+    );
+  }, [testingSamplesNumber, actions]);
 
   const handleIncludeOnChange = useCallback(
     (feature: Filter, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,36 +80,10 @@ const ModelTrainRow = ({
     [setFeatures]
   );
 
-  const accuracy = details
-    ? details.testResults
-      ? details.testResults.error
-        ? 0
-        : details.testResults.accuracy * 100
-      : 0
-    : 0;
-
-  const testingSamplesNumber = useCallback(() => {
-    return details.actions
-      ? details.actions.reduce(
-          (acc, action) => acc + Math.round(action.recordings.length * split/100),
-          0
-        )
-      : 0;
-  }, [split, details.actions]);
-
-  const trainingSamplesNumber = useCallback(() => {
-    return details.actions
-      ? details.actions.reduce(
-          (acc, action) => acc + (action.recordings.length),
-          0
-        ) - testingSamplesNumber()
-      : 0;
-  }, [testingSamplesNumber, details.actions]);
-
   return (
     <Box role="region" display="contents" h="100%">
       <GridItem>
-        <ModelNameCard name={"Temp name"} id={1} viewMode={nameViewMode} />
+        <ModelNameCard name={name} setName={setName} viewMode={nameViewMode} />
       </GridItem>
 
       <GridItem>
@@ -148,10 +142,7 @@ const ModelTrainRow = ({
             </GridItem>
 
             <GridItem colSpan={2}>
-              <Slider
-                defaultValue={details.testTrainSplit ?? 0 * 100}
-                onChange={setSplit}
-              >
+              <Slider defaultValue={split} onChange={setSplit}>
                 <SliderTrack>
                   <SliderFilledTrack />
                 </SliderTrack>
@@ -171,11 +162,11 @@ const ModelTrainRow = ({
           <HStack w="100%" gap={5}>
             <PercentageMeter
               meterBarWidthPx={240}
-              value={accuracy}
+              value={69}
               colorScheme={"brand2.500"}
             />
 
-            <PercentageDisplay value={accuracy} colorScheme={"brand2.500"} />
+            <PercentageDisplay value={69} colorScheme={"brand2.500"} />
           </HStack>
         </Card>
       </GridItem>
