@@ -28,7 +28,7 @@ const TrainModelDialogs = ({ finalFocusRef }: TrainModelDialogsProps) => {
   const handleHelpNext = useCallback(
     async (isSkipNextTime: boolean) => {
       setSettings({ showPreTrainHelp: !isSkipNextTime });
-      const result = await trainModel(true, 0.2);
+      const result = await trainModel({ testTrainSplit: 0.2 });
       if (result) {
         navigate(createTestAndTrainPageUrl());
       }
