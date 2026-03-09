@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import DefaultPageLayout from "../components/DefaultPageLayout";
 import { createDataSamplesPageUrl, createTestingModelPageUrl } from "../urls";
 import { useNavigate } from "react-router";
@@ -11,9 +11,10 @@ import BackArrow from "../components/BackArrow";
 import HeadingGrid, {
   GridColumnHeadingItemProps,
 } from "../components/HeadingGrid";
+import { Filter } from "../mlConfig";
 
 const gridCommonProps: Partial<GridProps> = {
-  gridTemplateColumns: "100px",
+  gridTemplateColumns: "200px 240px 200px 200px 340px 150px",
   gap: 3,
   w: "100%",
 };
@@ -21,19 +22,22 @@ const gridCommonProps: Partial<GridProps> = {
 const headings: GridColumnHeadingItemProps[] = [
   {
     titleId: "Model name",
+    // descriptionId: ""
   },
-  // {
-  //   titleId: "Features",
-  // },
-  // {
-  //   titleId: "Training size",
-  // },
-  // {
-  //   titleId: "Test size",
-  // },
-  // {
-  //   titleId: "Accuracy",
-  // },
+  {
+    titleId: "Features",
+    // descriptionId: "action-tooltip"
+  },
+  {
+    titleId: "Training size",
+  },
+  {
+    titleId: "Test size",
+  },
+  {
+    titleId: "Accuracy",
+  },
+  {},
 ];
 
 const EvaluateModelPage = () => {
@@ -41,11 +45,9 @@ const EvaluateModelPage = () => {
   const previousModels = useStore((s) => s.previousModels);
   const saveModel = useStore((s) => s.saveModel);
   // const allFeatures: Set<Filter> = mlSettings.includedFilters;
-  // const features: Set<Filter> = useStore((s) => s.trainingFeatures);
+  const features: Set<Filter> = useStore((s) => s.trainingFeatures);
 
   const savedIds = previousModels.map((model) => model.ID);
-
-  const scrollableAreaRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
 
@@ -77,7 +79,7 @@ const EvaluateModelPage = () => {
           variant="toolbar"
           onClick={navigateToDataSamples}
         >
-          <FormattedMessage id="Choose features" />
+          <FormattedMessage id="Edit data samples" />
         </Button>
       }
     >
@@ -85,9 +87,32 @@ const EvaluateModelPage = () => {
         <HeadingGrid
           position="sticky"
           top={0}
+          px={5}
           {...gridCommonProps}
           headings={headings}
         />
+        <Grid
+          {...gridCommonProps}
+          alignItems="stretch"
+          autoRows="max-content"
+          overflow="auto"
+          flexGrow={1}
+        >
+          <ModelInformationRow
+            details={model}
+            savedModelIds={savedIds}
+            onSave={handleSaveModel}
+            trainingFeatures={features}
+          />
+
+          {previousModels.map((details, idx) => (
+            <ModelInformationRow
+              key={idx}
+              details={details}
+              trainingFeatures={undefined}
+            />
+          ))}
+        </Grid>
         <HStack>
           <Button
             onClick={handleNavigateToModel}

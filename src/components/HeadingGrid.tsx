@@ -38,16 +38,16 @@ export interface GridColumnHeadingItemProps {
 const GridColumnHeadingItem = (props: GridColumnHeadingItemProps) => {
   return (
     <GridItem>
-      {props.titleId && props.descriptionId && (
+      {props.titleId && (
         <HStack justifyContent="space-between">
           <HStack>
             <Text opacity={0.7}>
               <FormattedMessage id={props.titleId} />
             </Text>
-            <InfoToolTip
+            {props.descriptionId && <InfoToolTip
               titleId={props.titleId}
               descriptionId={props.descriptionId}
-            />
+            />}
           </HStack>
           {props.itemsRight}
         </HStack>

@@ -90,7 +90,7 @@ const ModelNameCard = ({
   return (
     <Card
       p={2}
-      h="120px"
+      h="100%"
       display="flex"
       borderColor={selected ? "brand.500" : "transparent"}
       borderWidth={1}

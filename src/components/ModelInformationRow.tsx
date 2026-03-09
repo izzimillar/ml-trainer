@@ -3,9 +3,9 @@ import {
   Button,
   Card,
   CardProps,
+  Checkbox,
   Grid,
   GridItem,
-  GridProps,
   HStack,
   VStack,
 } from "@chakra-ui/react";
@@ -14,19 +14,17 @@ import ModelNameCard, { ModelNameCardViewMode } from "./ModelNameCard";
 import { ModelDetails } from "../model";
 import PercentageMeter from "./PercentageMeter";
 import PercentageDisplay from "./PercentageDisplay";
-
-const gridCommonProps: Partial<GridProps> = {
-  gridTemplateColumns: "190px 360px 100px 100px auto",
-  gap: 3,
-  w: "100%",
-};
+import { Filter, mlSettings } from "../mlConfig";
+import { useCallback } from "react";
+import { useStore } from "../store";
 
 const cardCommonProps: Partial<CardProps> = {
   p: 2,
-  h: "120px",
-  display: "flex",
+  h: "100%",
+  display: "grid",
   borderWidth: 1,
   position: "relative",
+  placeItems: "center",
 };
 
 interface ModelInformationRowProps {
@@ -35,7 +33,8 @@ interface ModelInformationRowProps {
   onSelectRow?: () => void;
   savedModelIds?: ModelDetails["ID"][];
   onSave?: () => void;
-  // trainingFeatures: Set<Filter>;
+  onDelete?: () => void;
+  trainingFeatures?: Set<Filter>;
 }
 
 const ModelInformationRow = ({
@@ -44,18 +43,18 @@ const ModelInformationRow = ({
   onSelectRow,
   savedModelIds,
   onSave,
+  onDelete,
+  trainingFeatures,
 }: ModelInformationRowProps) => {
-  // const navigate = useNavigate();
+  const setFeatures = useStore((s) => s.setTrainingFeature);
+  const allFeatures = mlSettings.includedFilters;
 
-  // const navigateToFeatures = useCallback(() => {
-  //   navigate(createFeaturesPageUrl());
-  // }, [navigate]);
-
-  // useEffect(() => {
-  //   if (!currentModel) {
-  //     return navigateToFeatures();
-  //   }
-  // });
+  const handleIncludeOnChange = useCallback(
+    (feature: Filter, e: React.ChangeEvent<HTMLInputElement>) => {
+      setFeatures(feature, e.target.checked);
+    },
+    [setFeatures]
+  );
 
   const numberOfTrainingSamples = () => {
     if (details) {
@@ -80,7 +79,7 @@ const ModelInformationRow = ({
   const modelIsSaved = savedModelIds?.includes(details.ID);
 
   return (
-    <Box role="region" display="contents">
+    <Box role="region" display="contents" h="100%">
       <GridItem>
         <ModelNameCard
           value={details}
@@ -93,22 +92,33 @@ const ModelInformationRow = ({
           {...cardCommonProps}
           borderColor={selected ? "brand.500" : "transparent"}
           onClick={onSelectRow}
-          // opacity={disabled ? 0.5 : undefined}
-          // variant={
-          //   viewMode === ModelNameCardViewMode.Preview ? "outline" : undefined
-          // }
         >
-          <HStack
-            align={"center"}
-            alignItems={"center"}
-            alignContent={"center"}
+          <Grid
+            templateColumns={"repeat(2, 1fr)"}
+            autoFlow={"row"}
+            gap={1}
+            alignItems={"start"}
+            justifyItems={"start"}
+            w="100%"
           >
-            {Array.from(details.trainingFeatures).map((feature, idx) => (
-              <HStack key={idx}>
-                <FormattedMessage id={feature} />
-              </HStack>
-            ))}
-          </HStack>
+            {trainingFeatures &&
+              Array.from(allFeatures).map((feature, idx) => (
+                <VStack key={idx}>
+                  <Checkbox
+                    isChecked={trainingFeatures.has(feature)}
+                    onChange={(e) => handleIncludeOnChange(feature, e)}
+                  >
+                    <FormattedMessage id={feature} />
+                  </Checkbox>
+                </VStack>
+              ))}
+            {!trainingFeatures &&
+              Array.from(details.trainingFeatures).map((feature, idx) => (
+                <VStack key={idx}>
+                  <FormattedMessage id={feature} />
+                </VStack>
+              ))}
+          </Grid>
         </Card>
       </GridItem>
 
@@ -118,7 +128,9 @@ const ModelInformationRow = ({
           borderColor={selected ? "brand.500" : "transparent"}
           onClick={onSelectRow}
         >
-          <FormattedMessage id={`${numberOfTrainingSamples()} training`} />
+          <FormattedMessage
+            id={`Trained on ${numberOfTrainingSamples()} samples`}
+          />
         </Card>
       </GridItem>
 
@@ -129,7 +141,9 @@ const ModelInformationRow = ({
           onClick={onSelectRow}
         >
           <VStack>
-            <FormattedMessage id={`${details.testSampleIds.length} testing`} />
+            <FormattedMessage
+              id={`Tested on ${details.testSampleIds.length} samples`}
+            />
           </VStack>
         </Card>
       </GridItem>
@@ -152,17 +166,29 @@ const ModelInformationRow = ({
         </Card>
       </GridItem>
 
-      {onSave && (
-        <GridItem>
-          <Button
-            variant={"primary"}
-            onClick={onSave}
-            isDisabled={modelIsSaved}
-          >
-            <FormattedMessage id="Save model" />
-          </Button>
-        </GridItem>
-      )}
+      <GridItem>
+        <Card
+          {...cardCommonProps}
+          borderColor={selected ? "brand.500" : "transparent"}
+          onClick={onSelectRow}
+        >
+          {onSave && (
+            <Button
+              variant={"primary"}
+              onClick={onSave}
+              isDisabled={modelIsSaved}
+            >
+              <FormattedMessage id="Train model" />
+            </Button>
+          )}
+
+          {onDelete && (
+            <Button variant={"warning"} onClick={onDelete}>
+              <FormattedMessage id="Delete model" />
+            </Button>
+          )}
+        </Card>
+      </GridItem>
     </Box>
   );
 };
