@@ -51,7 +51,7 @@ export interface ModelDetails {
   actions: ActionData[];
   testSampleIds: number[],
   testResults?: TestResult;
-  testTrainSplit?: number;
+  trainingSize?: number;
 }
 
 // Exported for testing

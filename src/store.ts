@@ -151,7 +151,6 @@ export interface State {
   modelDetails: ModelDetails | undefined;
   previousModels: ModelDetails[];
   trainingFeatures: Set<Filter>;
-  testTrainingSplit: number;
 
   timestamp: number | undefined;
 
@@ -350,7 +349,6 @@ const createMlStore = (logging: Logging) => {
             Filter.ZCR,
             Filter.RMS,
           ]),
-          testTrainingSplit: 0.2,
           isRecording: false,
           project: createUntitledProject(),
           projectLoadTimestamp: 0,
@@ -813,7 +811,7 @@ const createMlStore = (logging: Logging) => {
               trainingFeatures,
               trainModel,
             } = get();
-            if (!hasSufficientDataForTraining(actions, trainingFeatures)) {
+            if (!hasSufficientDataForTraining(actions, trainingFeatures, modelDetails?.trainingSize ?? 0)) {
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
               });
@@ -846,12 +844,12 @@ const createMlStore = (logging: Logging) => {
             // can block the UI. 50 ms is not sufficient, so use 100 for now.
             await new Promise((res) => setTimeout(res, 100));
             // train the model with the test and training split
-            const testTrainSplit = modelDetails?.testTrainSplit ?? 0;
+            const testSize = 1 - (modelDetails?.trainingSize ?? 1);
             const trainingResult = await trainModel(actions, dataWindow, {
               enabledFeatures: trainingFeatures,
               onProgress: (trainModelProgress) =>
                 set({ trainModelProgress }, false, "trainModelProgress"),
-              testTrainSplit: testTrainSplit,
+              testSize: testSize,
             });
 
             let model = undefined;
@@ -881,9 +879,11 @@ const createMlStore = (logging: Logging) => {
                   ? trainingResult.testIds
                   : [],
                 testResults: testResults,
-                testTrainSplit: testTrainSplit,
+                trainingSize: 1 - testSize,
               };
             }
+
+            console.log(modelDetails);
 
             set(
               ({ project, projectEdited }) => ({
@@ -1633,11 +1633,12 @@ export const useHasActions = () => {
 
 const hasSufficientDataForTraining = (
   actions: ActionData[],
-  features: Set<Filter>
+  features: Set<Filter>,
+  split: number
 ): boolean => {
   return (
     actions.length >= 2 &&
-    actions.every((a) => a.recordings.length >= 3) &&
+    actions.every((a) => a.recordings.length * (split) >= 3) &&
     features.size > 0
   );
 };
@@ -1645,7 +1646,7 @@ const hasSufficientDataForTraining = (
 export const useHasSufficientDataForTraining = (): boolean => {
   const actions = useStore((s) => s.actions);
   const features = useStore((s) => s.trainingFeatures);
-  return hasSufficientDataForTraining(actions, features);
+  return hasSufficientDataForTraining(actions, features, 0);
 };
 
 export const useHasNoStoredData = (): boolean => {

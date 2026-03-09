@@ -23,7 +23,7 @@ export type TestResult = { error: false; accuracy: number } | { error: true };
 interface TrainModelOpts {
   enabledFeatures?: Set<Filter>;
   onProgress?: (progress: number) => void;
-  testTrainSplit?: number;
+  testSize?: number;
 }
 
 export const trainModel = async (
@@ -31,11 +31,11 @@ export const trainModel = async (
   dataWindow: DataWindow,
   opts: TrainModelOpts = {
     enabledFeatures: mlSettings.includedFilters,
-    testTrainSplit: 0,
+    testSize: 0,
   }
 ): Promise<TrainingResult> => {
   // Get test training split
-  const { trainIds, testIds } = splitData(data, opts.testTrainSplit);
+  const { trainIds, testIds } = splitData(data, opts.testSize);
 
   // get the recording data for the training set.
   const trainingData = getDataFromIDs(data, trainIds);

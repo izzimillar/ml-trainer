@@ -41,7 +41,7 @@ beforeAll(async () => {
   testingResult = await trainModel(
     fixUpTestData(actionData),
     currentDataWindow,
-    { testTrainSplit: 0.2 }
+    { testSize: 0.2 }
   );
 });
 

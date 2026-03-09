@@ -48,7 +48,7 @@ const EvaluateModelPage = () => {
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
   const saveModel = useStore((s) => s.saveModel);
   const [modelName, setModelName] = useState<string>("New model!");
-  const [split, setSplit] = useState<number>(20);
+  const [split, setSplit] = useState<number>(80);
 
   const trainButtonRef = useRef(null);
   const navigate = useNavigate();
@@ -105,7 +105,7 @@ const EvaluateModelPage = () => {
               onTrain={() =>
                 trainModelFlowStart(handleSaveModel, {
                   name: name,
-                  testTrainSplit: split/100,
+                  trainingSize: split/100,
                 })
               }
               trainButtonRef={trainButtonRef}

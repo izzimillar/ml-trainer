@@ -30,9 +30,6 @@ interface ModelNameCardProps {
 
 const modelNameMaxLength = 18;
 
-export const modelNameInputId = (name: ModelDetails["name"]) =>
-  `model-name-input-${name}`;
-
 const ModelNameCard = ({
   name,
   setName,
@@ -99,7 +96,7 @@ const ModelNameCard = ({
       <CardBody p={0} alignContent="center">
         <HStack>
           <Input
-            id={modelNameInputId(name)}
+            id={name}
             autoFocus={allowAutoFocus && name.length === 0}
             isTruncated
             readOnly={viewMode !== ModelNameCardViewMode.Editable}

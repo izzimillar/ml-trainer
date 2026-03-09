@@ -18,7 +18,7 @@ import ModelNameCard, { ModelNameCardViewMode } from "./ModelNameCard";
 import PercentageMeter from "./PercentageMeter";
 import PercentageDisplay from "./PercentageDisplay";
 import { Filter, mlSettings } from "../mlConfig";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { useStore } from "../store";
 
 const cardCommonProps: Partial<CardProps> = {
@@ -58,7 +58,7 @@ const ModelTrainRow = ({
   const trainingFeatures: Set<Filter> = useStore((s) => s.trainingFeatures);
   const actions = useStore((s) => s.actions);
 
-  const testingSamplesNumber = useCallback(() => {
+  const trainingSamplesNumber = useCallback(() => {
     return actions.reduce(
       (acc, action) =>
         acc + Math.round((action.recordings.length * split) / 100),
@@ -66,12 +66,12 @@ const ModelTrainRow = ({
     );
   }, [split, actions]);
 
-  const trainingSamplesNumber = useCallback(() => {
+  const testingSamplesNumber = useCallback(() => {
     return (
       actions.reduce((acc, action) => acc + action.recordings.length, 0) -
-      testingSamplesNumber()
+      trainingSamplesNumber()
     );
-  }, [testingSamplesNumber, actions]);
+  }, [trainingSamplesNumber, actions]);
 
   const handleIncludeOnChange = useCallback(
     (feature: Filter, e: React.ChangeEvent<HTMLInputElement>) => {
