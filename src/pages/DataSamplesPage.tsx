@@ -24,10 +24,9 @@ import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 
 const DataSamplesPage = () => {
   const actions = useStore((s) => s.actions);
-  // const model = useStore((s) => s.model);
   const addNewAction = useStore((s) => s.addNewAction);
   const [selectedActionIdx, setSelectedActionIdx] = useState<number>(0);
-  // const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
+  const insufficientData = useStore((s) => s.insufficientDataModelDialog);
 
   const navigate = useNavigate();
 
@@ -48,8 +47,12 @@ const DataSamplesPage = () => {
   }, [navigate]);
 
   const handleNavigateToTestAndTrain = useCallback(() => {
-    navigate(createTestAndTrainPageUrl());
-  }, [navigate]);
+    if (!hasSufficientData) {
+      insufficientData();
+    } else {
+      navigate(createTestAndTrainPageUrl());
+    }
+  }, [navigate, hasSufficientData, insufficientData]);
 
   const trainButtonRef = useRef(null);
   const handleAddNewAction = useCallback(() => {

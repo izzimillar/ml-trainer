@@ -257,6 +257,7 @@ export interface Actions {
     modelDetails?: Partial<ModelDetails>
   ) => Promise<void>;
   closeTrainModelDialogs: () => void;
+  insufficientDataModelDialog: () => void;
   trainModel(modelDetails?: Partial<ModelDetails>): Promise<boolean>;
   testModel(): void;
   setSettings(update: Partial<Settings>): void;
@@ -802,6 +803,12 @@ const createMlStore = (logging: Logging) => {
           closeTrainModelDialogs() {
             set({
               trainModelDialogStage: TrainModelDialogStage.Closed,
+            });
+          },
+
+          insufficientDataModelDialog() {
+            set({
+              trainModelDialogStage: TrainModelDialogStage.InsufficientData,
             });
           },
 

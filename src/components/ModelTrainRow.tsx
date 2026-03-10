@@ -183,7 +183,6 @@ const ModelTrainRow = ({
               ref={trainButtonRef}
               variant={hasSufficientData(split/100) ? "primary" : "secondary-disabled"}
               onClick={onTrain}
-              
             >
               <FormattedMessage id="Train model" />
             </Button>
