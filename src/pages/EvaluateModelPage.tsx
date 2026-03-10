@@ -2,7 +2,14 @@ import { useCallback, useRef, useState } from "react";
 import DefaultPageLayout from "../components/DefaultPageLayout";
 import { createDataSamplesPageUrl, createTestingModelPageUrl } from "../urls";
 import { useNavigate } from "react-router";
-import { Button, Grid, GridProps, HStack, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  Grid,
+  GridProps,
+  HStack,
+  VStack,
+} from "@chakra-ui/react";
 import { RiArrowRightLine } from "react-icons/ri";
 import { FormattedMessage } from "react-intl";
 import { useStore } from "../store";
@@ -19,6 +26,7 @@ const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "200px 240px 200px 200px 340px 150px",
   gap: 3,
   w: "100%",
+  px: 5,
 };
 
 const headings: GridColumnHeadingItemProps[] = [
@@ -82,21 +90,51 @@ const EvaluateModelPage = () => {
           </Button>
         }
       >
+        <Flex as="main" flexGrow={1} flexDir="column">
+          <VStack>
+            <HeadingGrid
+              position="sticky"
+              top={0}
+              px={5}
+              {...gridCommonProps}
+              headings={headings}
+            />
+            <Grid {...gridCommonProps}>
+              {previousModels.map((details, idx) => (
+                <ModelInformationRow
+                  key={idx}
+                  details={details}
+                  nameViewMode={ModelNameCardViewMode.ReadOnly}
+                  onSelectRow={() => setSelectedModelIdx(idx)}
+                  selected={selectedModelIdx == idx}
+                  onDelete={() => deleteModel(details.ID)}
+                />
+              ))}
+            </Grid>
+          </VStack>
+        </Flex>
+
         <VStack>
-          <HeadingGrid
-            position="sticky"
-            top={0}
+          <HStack
+            role="region"
+            justifyContent="flex-end"
             px={5}
-            {...gridCommonProps}
-            headings={headings}
-          />
-          <Grid
-            {...gridCommonProps}
-            alignItems="stretch"
-            autoRows="max-content"
-            overflow="auto"
-            flexGrow={1}
+            py={2}
+            w="full"
+            borderBottomWidth={3}
+            borderTopWidth={3}
+            borderColor="gray.200"
+            alignItems="center"
           >
+            <Button
+              onClick={handleNavigateToModel}
+              variant="primary"
+              rightIcon={<RiArrowRightLine />}
+            >
+              <FormattedMessage id="Use model" />
+            </Button>
+          </HStack>
+          <Grid {...gridCommonProps} paddingBottom={2} h={152}>
             <ModelTrainRow
               name={modelName}
               setName={setModelName}
@@ -111,27 +149,7 @@ const EvaluateModelPage = () => {
               }
               trainButtonRef={trainButtonRef}
             />
-
-            {previousModels.map((details, idx) => (
-              <ModelInformationRow
-                key={idx}
-                details={details}
-                nameViewMode={ModelNameCardViewMode.ReadOnly}
-                onSelectRow={() => setSelectedModelIdx(idx)}
-                selected={selectedModelIdx == idx}
-                onDelete={() => deleteModel(details.ID)}
-              />
-            ))}
           </Grid>
-          <HStack>
-            <Button
-              onClick={handleNavigateToModel}
-              variant="primary"
-              rightIcon={<RiArrowRightLine />}
-            >
-              <FormattedMessage id="Use model" />
-            </Button>
-          </HStack>
         </VStack>
       </DefaultPageLayout>
     </>
