@@ -19,7 +19,7 @@ import PercentageMeter from "./PercentageMeter";
 import PercentageDisplay from "./PercentageDisplay";
 import { Filter, mlSettings } from "../mlConfig";
 import React, { useCallback } from "react";
-import { useStore } from "../store";
+import { useHasSufficientDataForTraining, useStore } from "../store";
 
 const cardCommonProps: Partial<CardProps> = {
   p: 2,
@@ -32,9 +32,9 @@ const cardCommonProps: Partial<CardProps> = {
 
 interface ModelTrainRowProps {
   name: string;
-  setName: React.Dispatch<React.SetStateAction<string>>;
+  setName: (name: string) => void;
   split: number;
-  setSplit: React.Dispatch<React.SetStateAction<number>>;
+  setSplit: (value: number) => void;
   nameViewMode: ModelNameCardViewMode;
   selected?: boolean;
   onSelectRow?: () => void;
@@ -57,6 +57,7 @@ const ModelTrainRow = ({
   const allFeatures = mlSettings.includedFilters;
   const trainingFeatures: Set<Filter> = useStore((s) => s.trainingFeatures);
   const actions = useStore((s) => s.actions);
+  const hasSufficientData = useHasSufficientDataForTraining;
 
   const trainingSamplesNumber = useCallback(() => {
     return actions.reduce(
@@ -178,7 +179,12 @@ const ModelTrainRow = ({
           onClick={onSelectRow}
         >
           {onTrain && (
-            <Button ref={trainButtonRef} variant={"primary"} onClick={onTrain}>
+            <Button
+              ref={trainButtonRef}
+              variant={hasSufficientData(split/100) ? "primary" : "secondary-disabled"}
+              onClick={onTrain}
+              
+            >
               <FormattedMessage id="Train model" />
             </Button>
           )}

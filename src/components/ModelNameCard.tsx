@@ -20,7 +20,7 @@ export enum ModelNameCardViewMode {
 
 interface ModelNameCardProps {
   name: ModelDetails["name"];
-  setName: React.Dispatch<React.SetStateAction<string>>;
+  setName: (name: string) => void;
   onDeleteAction?: () => void;
   onSelectRow?: () => void;
   selected?: boolean;

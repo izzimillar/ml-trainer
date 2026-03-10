@@ -72,6 +72,8 @@ const ModelInformationRow = ({
           name={details.name}
           setName={(_) => {}}
           viewMode={nameViewMode}
+          onSelectRow={onSelectRow}
+          selected={selected}
         />
       </GridItem>
 

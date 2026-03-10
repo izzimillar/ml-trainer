@@ -240,6 +240,7 @@ export interface Actions {
   setTrainingFeature(feature: Filter, isOn: boolean): void;
   saveModel(): void;
   setModelName(id: ModelDetails["ID"], name: string): void;
+  deleteModel(id: ModelDetails["ID"]): void;
   deleteAllModels(): void;
 
   dataCollectionMicrobitConnectionStart(options?: ConnectOptions): void;
@@ -811,7 +812,13 @@ const createMlStore = (logging: Logging) => {
               trainingFeatures,
               trainModel,
             } = get();
-            if (!hasSufficientDataForTraining(actions, trainingFeatures, modelDetails?.trainingSize ?? 0)) {
+            if (
+              !hasSufficientDataForTraining(
+                actions,
+                trainingFeatures,
+                modelDetails?.trainingSize ?? 0
+              )
+            ) {
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
               });
@@ -1003,19 +1010,47 @@ const createMlStore = (logging: Logging) => {
             );
           },
 
-          deleteAllModels() {
-            return set(({ project, projectEdited }) => ({
-              previousModels: [],
-              dataWindow: currentDataWindow,
-              model: undefined,
-              ...updateProject(
+          deleteModel(id: ModelDetails["ID"]) {
+            return set(
+              ({
+                previousModels,
                 project,
                 projectEdited,
-                [],
-                undefined,
-                currentDataWindow
-              ),
-            }));
+                actions,
+                model,
+                dataWindow,
+              }) => {
+                const newModels = previousModels.filter((m) => m.ID !== id);
+
+                return {
+                  previousModels: newModels,
+                  ...updateProject(
+                    project,
+                    projectEdited,
+                    actions,
+                    model,
+                    dataWindow
+                  ),
+                };
+              }
+            );
+          },
+
+          deleteAllModels() {
+            return set(
+              ({ project, projectEdited, actions, model, dataWindow }) => ({
+                previousModels: [],
+                dataWindow: currentDataWindow,
+                model: undefined,
+                ...updateProject(
+                  project,
+                  projectEdited,
+                  actions,
+                  model,
+                  dataWindow
+                ),
+              })
+            );
           },
 
           resetProject(): void {
@@ -1634,19 +1669,19 @@ export const useHasActions = () => {
 const hasSufficientDataForTraining = (
   actions: ActionData[],
   features: Set<Filter>,
-  split: number
+  trainingSplit: number
 ): boolean => {
   return (
     actions.length >= 2 &&
-    actions.every((a) => a.recordings.length * (split) >= 3) &&
+    actions.every((a) => Math.round(a.recordings.length * trainingSplit) >= 3) &&
     features.size > 0
   );
 };
 
-export const useHasSufficientDataForTraining = (): boolean => {
+export const useHasSufficientDataForTraining = (trainingSplit?: number): boolean => {
   const actions = useStore((s) => s.actions);
   const features = useStore((s) => s.trainingFeatures);
-  return hasSufficientDataForTraining(actions, features, 0);
+  return hasSufficientDataForTraining(actions, features, trainingSplit ?? 1);
 };
 
 export const useHasNoStoredData = (): boolean => {

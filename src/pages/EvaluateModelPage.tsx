@@ -46,8 +46,10 @@ const EvaluateModelPage = () => {
   const previousModels = useStore((s) => s.previousModels);
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
   const saveModel = useStore((s) => s.saveModel);
+  const deleteModel = useStore((s) => s.deleteModel);
   const [modelName, setModelName] = useState<string>("New model!");
   const [split, setSplit] = useState<number>(80);
+  const [selectedModelIdx, setSelectedModelIdx] = useState<number>(0);
 
   const trainButtonRef = useRef(null);
   const navigate = useNavigate();
@@ -104,7 +106,7 @@ const EvaluateModelPage = () => {
               onTrain={() =>
                 trainModelFlowStart(handleSaveModel, {
                   name: modelName,
-                  trainingSize: split/100,
+                  trainingSize: split / 100,
                 })
               }
               trainButtonRef={trainButtonRef}
@@ -115,6 +117,9 @@ const EvaluateModelPage = () => {
                 key={idx}
                 details={details}
                 nameViewMode={ModelNameCardViewMode.ReadOnly}
+                onSelectRow={() => setSelectedModelIdx(idx)}
+                selected={selectedModelIdx == idx}
+                onDelete={() => deleteModel(details.ID)}
               />
             ))}
           </Grid>
