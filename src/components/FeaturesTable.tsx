@@ -1,6 +1,5 @@
 import {
   Card,
-  Checkbox,
   Grid,
   GridItem,
   GridProps,
@@ -13,30 +12,28 @@ import { FormattedMessage } from "react-intl";
 import { Filter, mlSettings } from "../mlConfig";
 import ClickableTooltip from "./ClickableTooltip";
 import HeadingGrid, { GridColumnHeadingItemProps } from "./HeadingGrid";
+import { useState } from "react";
 import ShowValuesCheckbox from "./ShowValuesCheckBox";
-import { useCallback, useState } from "react";
 
 const gridCommonProps: Partial<GridProps> = {
   gap: 3,
   px: 5,
   w: "100%",
+  templateColumns: `180px auto`
 };
 
 const headings: GridColumnHeadingItemProps[] = [
-  // {
-  //   titleId: "action-label",
-  //   descriptionId: "action-tooltip",
-  // },
+  {
+    titleId: "Actions",
+  },
   {
     // TODO: localise this
-    titleId: "features",
-    descriptionId: "data-samples-tooltip",
+    titleId: "Features",
     itemsRight: (
       <HStack>
         <ShowValuesCheckbox />
-        {/* <DataSamplesMenu /> */}
       </HStack>
-    ),
+    ),    
   },
 ];
 
@@ -73,7 +70,7 @@ const FeaturesTable = () => {
         flexGrow={1}
         h={0}
         //  ACTION NAME | FEATURES...
-        templateColumns={`auto repeat(${totalFilters}, 1fr)`}
+        templateColumns={`180px repeat(${totalFilters}, 1fr)`}
         //  FEATURE NAME | ACTIONS...
         templateRows={`auto repeat(${actions.length}, 1fr)`}
       >
@@ -94,7 +91,6 @@ const FeaturesTable = () => {
             action={action}
             expanded={expandedRows.has(action.ID)}
             onClick={toggleExpanded}
-            
           />
         ))}
       </Grid>
@@ -105,18 +101,6 @@ const FeaturesTable = () => {
 const FeatureHeader = ({ feature }: { feature: Filter }) => {
   const axes = ["x", "y", "z"];
 
-  const currentFilters = useStore((s) => s.trainingFeatures);
-  const setFeatures = useStore((s) => s.setTrainingFeature);
-
-  // let isIncluded = currentFilters.has(feature);
-
-  const handleIncludeOnChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFeatures(feature, e.target.checked);
-    },
-    [setFeatures, feature]
-  );
-  // add tick box to this to allow/disable it
   return (
     <>
       <Card
@@ -124,22 +108,13 @@ const FeatureHeader = ({ feature }: { feature: Filter }) => {
         w="100%"
         p={2}
         display={"flex"}
-        borderWidth={1}
+        // borderWidth={1}
         position={"relative"}
       >
         <Grid>
           {/* feature name */}
           <GridItem textAlign={"center"} colSpan={3} rowSpan={1}>
             <FormattedMessage id={`${feature}`} />
-          </GridItem>
-
-          <GridItem textAlign={"center"} colSpan={3}>
-            <Checkbox
-              isChecked={currentFilters.has(feature)}
-              onChange={handleIncludeOnChange}
-            >
-              <FormattedMessage id="include" />
-            </Checkbox>
           </GridItem>
 
           {/* x, y, z */}

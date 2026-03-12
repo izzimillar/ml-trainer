@@ -108,7 +108,7 @@ const DataSamplesPage = () => {
             <HStack>
               {/* navigate to features page button */}
               <Button onClick={handleNavigateToFeatures} variant="primary">
-                <FormattedMessage id="Inspect data" />
+                <FormattedMessage id="Explore data" />
               </Button>
 
               <Button

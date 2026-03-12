@@ -29,7 +29,7 @@ const FeatureTableRow = ({
       // overflow={"hidden"}
     >
       <GridItem h="100%" w="100%">
-        <FeatureHeaderRow
+        <ActionHeaderRow
           action={action}
           view={featuresView}
           expanded={expanded}
@@ -51,19 +51,23 @@ const FeatureTableRow = ({
   );
 };
 
-interface FeatureHeaderRowProps {
+interface ActionHeaderRowProps {
   action: ActionData;
   view: FeaturesView;
   expanded: boolean;
   onClick?: (rowID: number) => void;
 }
 
-const FeatureHeaderRow = ({
+const ActionHeaderRow = ({
   action,
   view,
   expanded,
   onClick,
-}: FeatureHeaderRowProps) => {
+}: ActionHeaderRowProps) => {
+  const showGraphs =
+    (view === FeaturesView.Colour || view == FeaturesView.ColourAndValues) &&
+    expanded;
+
   return (
     <Card
       h="100%"
@@ -75,28 +79,34 @@ const FeatureHeaderRow = ({
       onClick={() => onClick?.(action.ID)}
     >
       <Grid
-        templateColumns={`repeat(2, auto)`}
-        templateRows={`repeat(${action.recordings.length}, auto)`}
-        alignContent={"center"}
+        templateColumns={`repeat(${showGraphs ? 2 : 1}, auto)`}
+        templateRows={`repeat(${
+          showGraphs ? action.recordings.length : 1
+        }, auto)`}
         alignItems={"center"}
         textAlign={"center"}
         gap={2}
+        h="100%"
       >
-        <GridItem rowSpan={action.recordings.length}>
+        <GridItem rowSpan={showGraphs ? action.recordings.length : 1}>
           <FormattedMessage id={action.name} />
         </GridItem>
 
-        {expanded &&
-          (view === FeaturesView.Colour ||
-            view == FeaturesView.ColourAndValues) && (
-            <>
-              {action.recordings.map((recording, idx) => (
-                <GridItem key={idx}>
-                  <RecordingGraph data={recording.data} width="94px" height="54px" w={"96px"} h={"56px"} />
-                </GridItem>
-              ))}
-            </>
-          )}
+        {showGraphs && (
+          <>
+            {action.recordings.map((recording, idx) => (
+              <GridItem key={idx}>
+                <RecordingGraph
+                  data={recording.data}
+                  width="94px"
+                  height="54px"
+                  w={"96px"}
+                  h={"56px"}
+                />
+              </GridItem>
+            ))}
+          </>
+        )}
       </Grid>
     </Card>
   );
@@ -191,11 +201,16 @@ const FeatureCard = ({ action, filter, expanded, view }: FeatureCardProps) => {
       {(view === FeaturesView.Graph || view === FeaturesView.GraphNoLines) && (
         <Grid templateRows={`repeat(${numberOfRows}, 1fr)`} gap={2}>
           <>
-            {(expanded ? action.recordings : [action.recordings[0]]).map((recording, idx) => (
-              <GridItem key={idx}>
-                <RecordingGraphFeatureValues data={recording.data} filter={filter} />
-              </GridItem>
-            ))}
+            {(expanded ? action.recordings : [action.recordings[0]]).map(
+              (recording, idx) => (
+                <GridItem key={idx}>
+                  <RecordingGraphFeatureValues
+                    data={recording.data}
+                    filter={filter}
+                  />
+                </GridItem>
+              )
+            )}
           </>
         </Grid>
       )}
@@ -207,14 +222,16 @@ const FeatureCard = ({ action, filter, expanded, view }: FeatureCardProps) => {
           templateRows={`repeat(${numberOfRows}, auto)`}
           rowGap={1}
         >
-          {(expanded ? action.recordings : [action.recordings[0]]).map((recording, idx) => (
-            <FeatureValues
-              key={idx}
-              data={recording.data}
-              filter={filter}
-              num_recordings={action.recordings.length}
-            />
-          ))}
+          {(expanded ? action.recordings : [action.recordings[0]]).map(
+            (recording, idx) => (
+              <FeatureValues
+                key={idx}
+                data={recording.data}
+                filter={filter}
+                num_recordings={action.recordings.length}
+              />
+            )
+          )}
         </Grid>
       )}
     </Card>
