@@ -6,7 +6,6 @@ import {
   Checkbox,
   Grid,
   GridItem,
-  HStack,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -15,8 +14,6 @@ import {
 } from "@chakra-ui/react";
 import { FormattedMessage } from "react-intl";
 import ModelNameCard, { ModelNameCardViewMode } from "./ModelNameCard";
-import PercentageMeter from "./PercentageMeter";
-import PercentageDisplay from "./PercentageDisplay";
 import { Filter, mlSettings } from "../mlConfig";
 import React, { useCallback } from "react";
 import { useHasSufficientDataForTraining, useStore } from "../store";
@@ -154,7 +151,7 @@ const ModelTrainRow = ({
         </Card>
       </GridItem>
 
-      <GridItem>
+      {/* <GridItem>
         <Card
           {...cardCommonProps}
           borderColor={selected ? "brand.500" : "transparent"}
@@ -170,7 +167,7 @@ const ModelTrainRow = ({
             <PercentageDisplay value={69} colorScheme={"brand2.500"} />
           </HStack>
         </Card>
-      </GridItem>
+      </GridItem> */}
 
       <GridItem>
         <Card

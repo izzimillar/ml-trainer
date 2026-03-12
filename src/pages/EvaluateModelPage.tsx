@@ -29,6 +29,13 @@ const gridCommonProps: Partial<GridProps> = {
   px: 5,
 };
 
+const trainRowGridCommonProps: Partial<GridProps> = {
+  gridTemplateColumns: "200px 240px 200px 200px 150px",
+  gap: 3,
+  w: "100%",
+  px: 5,
+};
+
 const headings: GridColumnHeadingItemProps[] = [
   {
     titleId: "Model name",
@@ -62,9 +69,20 @@ const EvaluateModelPage = () => {
   const trainButtonRef = useRef(null);
   const navigate = useNavigate();
 
+  const selectedModelName = () => {
+    if (previousModels.length === 0) {
+      return "model";
+    } else {
+      return previousModels[selectedModelIdx].name;
+    }
+  };
+
   const handleNavigateToModel = useCallback(() => {
+    if (previousModels.length === 0) {
+      return;
+    }
     navigate(createTestingModelPageUrl());
-  }, [navigate]);
+  }, [navigate, previousModels]);
 
   const navigateToDataSamples = useCallback(() => {
     navigate(createDataSamplesPageUrl());
@@ -128,28 +146,33 @@ const EvaluateModelPage = () => {
           >
             <Button
               onClick={handleNavigateToModel}
-              variant="primary"
+              variant={
+                previousModels.length === 0 ? "secondary-disabled" : "primary"
+              }
               rightIcon={<RiArrowRightLine />}
+              disabled={previousModels.length === 0}
             >
-              <FormattedMessage id="Use model" />
+              <FormattedMessage id={`Use ${selectedModelName()}`} />
             </Button>
           </HStack>
-          <Grid {...gridCommonProps} paddingBottom={2} h={152}>
-            <ModelTrainRow
-              name={modelName}
-              setName={setModelName}
-              split={split}
-              setSplit={setSplit}
-              nameViewMode={ModelNameCardViewMode.Editable}
-              onTrain={() =>
-                trainModelFlowStart(handleSaveModel, {
-                  name: modelName,
-                  trainingSize: split / 100,
-                })
-              }
-              trainButtonRef={trainButtonRef}
-            />
-          </Grid>
+          <Flex>
+            <Grid {...trainRowGridCommonProps} paddingBottom={2} h={152}>
+              <ModelTrainRow
+                name={modelName}
+                setName={setModelName}
+                split={split}
+                setSplit={setSplit}
+                nameViewMode={ModelNameCardViewMode.Editable}
+                onTrain={() =>
+                  trainModelFlowStart(handleSaveModel, {
+                    name: modelName,
+                    trainingSize: split / 100,
+                  })
+                }
+                trainButtonRef={trainButtonRef}
+              />
+            </Grid>
+          </Flex>
         </VStack>
       </DefaultPageLayout>
     </>

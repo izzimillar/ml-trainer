@@ -6,7 +6,12 @@ import { Button, Menu, Text, VStack } from "@chakra-ui/react";
 interface DataAugmentationControlProps {
   action: ActionData;
   selected: boolean;
-  onAugment: (action: ActionData, repeats?: number, mean?: number, stddev?: number) => void;
+  onAugment: (
+    action: ActionData,
+    repeats?: number,
+    mean?: number,
+    stddev?: number
+  ) => void;
 }
 
 export const augmentButtonId = (action: ActionData) =>
@@ -18,8 +23,7 @@ const DataAugmentationControl = ({
   onAugment,
   ...props
 }: DataAugmentationControlProps) => {
-  const disabled: boolean = action.recordings.length < 3;
-  
+
   return (
     <VStack w="8.25rem" justifyContent="center" {...props}>
       <Menu>
@@ -27,7 +31,7 @@ const DataAugmentationControl = ({
         <Button
           id={augmentButtonId(action)}
           px={4}
-          variant={disabled ? "secondary-disabled" : selected ? "primary" : "secondary"}
+          variant={selected ? "primary" : "secondary"}
           onClick={() => onAugment(action, 1)}
         >
           <FormattedMessage id="Add data" />
@@ -38,25 +42,15 @@ const DataAugmentationControl = ({
           />
         </ButtonGroup> */}
       </Menu>
-      {disabled ? (
-        <Text
-          fontSize="xs"
-          textAlign="center"
-          fontWeight="bold"
-          userSelect="none"
-        >
-          <FormattedMessage id="data-samples-status-not-enough" />
-        </Text>
-      ) : (
-        <Text fontSize="xs" textAlign="center" userSelect="none">
-          <FormattedMessage
+
+      <Text fontSize="xs" textAlign="center" userSelect="none">
+        <FormattedMessage
           // TODO: localise this
-            // id="data-samples-status-count"
-            id="Double samples!"
-            values={{ numSamples: action.recordings.length }}
-          />
-        </Text>
-      )}
+          // id="data-samples-status-count"
+          id="Double samples!"
+          values={{ numSamples: action.recordings.length }}
+        />
+      </Text>
     </VStack>
   );
 };

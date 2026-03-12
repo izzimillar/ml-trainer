@@ -131,7 +131,7 @@ const ActionDataSamplesCard = ({
               />
             </DataSamplesRowCard>
           ))}
-          {onAugment && (
+          {onAugment && (value.recordings.length > 0) && (
             <DataSamplesRowCard selected={selected}>
               <DataAugmentationControl
                 action={value}
@@ -179,7 +179,7 @@ const ActionDataSamplesCard = ({
             />
           ))}
 
-          {onAugment && (
+          {onAugment && (value.recordings.length > 0) && (
             <DataAugmentationControl
               action={value}
               selected={selected}

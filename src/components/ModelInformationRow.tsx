@@ -131,17 +131,24 @@ const ModelInformationRow = ({
           {...cardCommonProps}
           borderColor={selected ? "brand.500" : "transparent"}
           onClick={onSelectRow}
-          // TODO: edit this for if there's no testing data
         >
-          <HStack w="100%" gap={5}>
-            <PercentageMeter
-              meterBarWidthPx={240}
-              value={accuracy}
-              colorScheme={"brand2.500"}
-            />
+          {details.testSampleIds.length > 0 && (
+            <HStack w="100%" gap={5}>
+              <PercentageMeter
+                meterBarWidthPx={240}
+                value={accuracy}
+                colorScheme={"brand2.500"}
+              />
 
-            <PercentageDisplay value={accuracy} colorScheme={"brand2.500"} />
-          </HStack>
+              <PercentageDisplay value={accuracy} colorScheme={"brand2.500"} />
+            </HStack>
+          )}
+
+          {details.testSampleIds.length === 0 && (
+            <HStack w="100%" gap={5}>
+              <FormattedMessage id="No testing data available." />
+            </HStack>
+          )}
         </Card>
       </GridItem>
 
