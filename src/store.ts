@@ -239,6 +239,7 @@ export interface Actions {
 
   setTrainingFeature(feature: Filter, isOn: boolean): void;
   saveModel(): void;
+  setModelForUse(id: ModelDetails["ID"]): void;
   setModelName(id: ModelDetails["ID"], name: string): void;
   deleteModel(id: ModelDetails["ID"]): void;
   deleteAllModels(): void;
@@ -897,8 +898,6 @@ const createMlStore = (logging: Logging) => {
               };
             }
 
-            console.log(modelDetails);
-
             set(
               ({ project, projectEdited }) => ({
                 model,
@@ -976,6 +975,34 @@ const createMlStore = (logging: Logging) => {
                 dataWindow
               ),
             });
+          },
+
+          setModelForUse(id: ModelDetails["ID"]) {
+            return set(
+              ({
+                project,
+                projectEdited,
+                actions,
+                dataWindow,
+                previousModels,
+              }) => {
+                const selectedModel = previousModels.find(
+                  (m) => m.ID === id
+                )?.model;
+
+                return {
+                  actions,
+                  model: selectedModel,
+                  ...updateProject(
+                    project,
+                    projectEdited,
+                    actions,
+                    selectedModel,
+                    dataWindow
+                  ),
+                };
+              }
+            );
           },
 
           setModelName(id: ModelDetails["ID"], name: string) {
@@ -1680,12 +1707,16 @@ const hasSufficientDataForTraining = (
 ): boolean => {
   return (
     actions.length >= 2 &&
-    actions.every((a) => Math.round(a.recordings.length * trainingSplit) >= 3) &&
+    actions.every(
+      (a) => Math.round(a.recordings.length * trainingSplit) >= 3
+    ) &&
     features.size > 0
   );
 };
 
-export const useHasSufficientDataForTraining = (trainingSplit?: number): boolean => {
+export const useHasSufficientDataForTraining = (
+  trainingSplit?: number
+): boolean => {
   const actions = useStore((s) => s.actions);
   const features = useStore((s) => s.trainingFeatures);
   return hasSufficientDataForTraining(actions, features, trainingSplit ?? 1);

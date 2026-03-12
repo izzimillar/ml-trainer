@@ -21,6 +21,7 @@ import HeadingGrid, {
 import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 import { ModelNameCardViewMode } from "../components/ModelNameCard";
 import ModelTrainRow from "../components/ModelTrainRow";
+import { ModelDetails } from "../model";
 
 const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "200px 240px 200px 200px 340px 150px",
@@ -61,10 +62,14 @@ const EvaluateModelPage = () => {
   const previousModels = useStore((s) => s.previousModels);
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
   const saveModel = useStore((s) => s.saveModel);
+  const setModel = useStore((s) => s.setModelForUse);
   const deleteModel = useStore((s) => s.deleteModel);
   const [modelName, setModelName] = useState<string>("New model!");
   const [split, setSplit] = useState<number>(80);
   const [selectedModelIdx, setSelectedModelIdx] = useState<number>(0);
+
+  const selectedModel: ModelDetails =
+    previousModels[selectedModelIdx] ?? previousModels[0];
 
   const trainButtonRef = useRef(null);
   const navigate = useNavigate();
@@ -77,12 +82,23 @@ const EvaluateModelPage = () => {
     }
   };
 
+  const handleDeleteModel = (id: ModelDetails["ID"]) => {
+    if (selectedModelIdx >= (previousModels.length - 1)) {
+      setSelectedModelIdx(previousModels.length - 2);
+    }
+
+    deleteModel(id);
+  };
+
   const handleNavigateToModel = useCallback(() => {
     if (previousModels.length === 0) {
       return;
     }
+    // set the model to the selected model idx for using it
+    setModel(previousModels[selectedModelIdx].ID);
+
     navigate(createTestingModelPageUrl());
-  }, [navigate, previousModels]);
+  }, [navigate, previousModels, setModel, selectedModelIdx]);
 
   const navigateToDataSamples = useCallback(() => {
     navigate(createDataSamplesPageUrl());
@@ -118,16 +134,18 @@ const EvaluateModelPage = () => {
               headings={headings}
             />
             <Grid {...gridCommonProps}>
-              {previousModels.map((details, idx) => (
-                <ModelInformationRow
-                  key={idx}
-                  details={details}
-                  nameViewMode={ModelNameCardViewMode.ReadOnly}
-                  onSelectRow={() => setSelectedModelIdx(idx)}
-                  selected={selectedModelIdx == idx}
-                  onDelete={() => deleteModel(details.ID)}
-                />
-              ))}
+              {previousModels.map((details, idx) => {
+                return (
+                  <ModelInformationRow
+                    key={details.ID}
+                    details={details}
+                    nameViewMode={ModelNameCardViewMode.ReadOnly}
+                    onSelectRow={() => setSelectedModelIdx(idx)}
+                    selected={selectedModel.ID == details.ID}
+                    onDelete={() => handleDeleteModel(details.ID)}
+                  />
+                );
+              })}
             </Grid>
           </VStack>
         </Flex>

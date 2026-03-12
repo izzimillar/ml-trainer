@@ -156,7 +156,6 @@ const ModelInformationRow = ({
         <Card
           {...cardCommonProps}
           borderColor={selected ? "brand.500" : "transparent"}
-          onClick={onSelectRow}
         >
           {onDelete && (
             <Button variant={"warning"} onClick={onDelete}>
