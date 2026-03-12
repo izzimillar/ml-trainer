@@ -24,11 +24,13 @@ const gridCommonProps: Partial<GridProps> = {
 
 const headings: GridColumnHeadingItemProps[] = [
   {
-    titleId: "Actions",
+    titleId: "Action",
+    descriptionId: "action-tooltip"
   },
   {
     // TODO: localise this
     titleId: "Features",
+    descriptionId: "The values that the model is trained on, calculated from the graphs. There is one number for each axis per data sample. Hover over the features below to find out more.",
     itemsRight: (
       <HStack>
         <ShowValuesCheckbox />

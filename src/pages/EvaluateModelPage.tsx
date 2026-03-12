@@ -40,20 +40,23 @@ const trainRowGridCommonProps: Partial<GridProps> = {
 const headings: GridColumnHeadingItemProps[] = [
   {
     titleId: "Model name",
-    // descriptionId: ""
+    descriptionId: "Give your model a name!"
   },
   {
     titleId: "Features",
-    // descriptionId: "action-tooltip"
+    descriptionId: "The data features that this model is trained on. To find out more about data features go to the \"Explore data\" page."
   },
   {
     titleId: "Training size",
+    descriptionId: "The number of recordings that the model was trained on."
   },
   {
     titleId: "Test size",
+    descriptionId: "The number of recordings that the model was tested on."
   },
   {
     titleId: "Accuracy",
+    descriptionId: "The accuracy of the model on the test data. A higher accuracy means the model is better at predicting your movement. We need the test size to be more than zero to calculate an accuracy."
   },
   {},
 ];

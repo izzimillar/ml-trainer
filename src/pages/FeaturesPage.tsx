@@ -15,7 +15,6 @@ import TrainModelDialogs from "../components/TrainModelFlowDialogs";
 
 const FeaturesPage = () => {
   // store
-  const model = useStore((s) => s.model);
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
 
   const trainingIsEnabled = useHasSufficientDataForTraining();
@@ -37,11 +36,9 @@ const FeaturesPage = () => {
     navigate(createDataSamplesPageUrl());
   }, [navigate]);
 
-
-// TODO: add headers to the top of this page with Actions and features plus make it look better?
+  // TODO: add headers to the top of this page with Actions and features plus make it look better?
   return (
     <>
-    
       <TrainModelDialogs finalFocusRef={trainButtonRef} />
       <DefaultPageLayout
         // localise this
@@ -75,25 +72,18 @@ const FeaturesPage = () => {
           alignItems="center"
         >
           <HStack>
-            {model ? (
-              <Button
-                onClick={handleNavigateToEvaluate}
-                // className={tourElClassname.trainModelButton}
-                variant="primary"
-                rightIcon={<RiArrowRightLine />}
-              >
-                <FormattedMessage id="Test model" />
-              </Button>
-            ) : (
-              <Button
-                ref={trainButtonRef}
-                // className={tourElClassname.trainModelButton}
-                onClick={() => trainModelFlowStart(handleNavigateToEvaluate, { trainingSize: 0.2 })}
-                variant={trainingIsEnabled ? "primary" : "secondary-disabled"}
-              >
-                <FormattedMessage id="Train and test" />
-              </Button>
-            )}
+            <Button
+              ref={trainButtonRef}
+              rightIcon={<RiArrowRightLine />}
+              onClick={() =>
+                trainModelFlowStart(handleNavigateToEvaluate, {
+                  trainingSize: 0.2,
+                })
+              }
+              variant={trainingIsEnabled ? "primary" : "secondary-disabled"}
+            >
+              <FormattedMessage id="Train and test" />
+            </Button>
           </HStack>
         </HStack>
       </DefaultPageLayout>
