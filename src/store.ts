@@ -986,18 +986,19 @@ const createMlStore = (logging: Logging) => {
                 dataWindow,
                 previousModels,
               }) => {
-                const selectedModel = previousModels.find(
+                const selectedDetails = previousModels.find(
                   (m) => m.ID === id
-                )?.model;
+                );
 
                 return {
                   actions,
-                  model: selectedModel,
+                  model: selectedDetails?.model,
+                  modelDetails: selectedDetails,
                   ...updateProject(
                     project,
                     projectEdited,
                     actions,
-                    selectedModel,
+                    selectedDetails?.model,
                     dataWindow
                   ),
                 };
@@ -1460,7 +1461,7 @@ const createMlStore = (logging: Logging) => {
           },
 
           startPredicting(buffer: BufferedData) {
-            const { actions, model, predictionInterval, dataWindow } = get();
+            const { actions, model, modelDetails, predictionInterval, dataWindow } = get();
             if (!model || predictionInterval) {
               return;
             }
@@ -1470,6 +1471,7 @@ const createMlStore = (logging: Logging) => {
                 model,
                 data: buffer.getSamples(startTime),
                 classificationIds: actions.map((a) => a.ID),
+                enabledFeatures: modelDetails?.trainingFeatures,
               };
               if (input.data.x.length > dataWindow.minSamples) {
                 const result = predict(input, dataWindow);

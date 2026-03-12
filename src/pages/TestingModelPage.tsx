@@ -36,24 +36,25 @@ import { useProject } from "../hooks/project-hooks";
 import { keyboardShortcuts, useShortcut } from "../keyboard-shortcut-hooks";
 import { useStore } from "../store";
 import { tourElClassname } from "../tours";
-import { createDataSamplesPageUrl } from "../urls";
+import { createTestAndTrainPageUrl } from "../urls";
 import { ButtonWithLoading } from "../components/ButtonWithLoading";
 
 const TestingModelPage = () => {
   const navigate = useNavigate();
   const model = useStore((s) => s.model);
+  const modelDetails = useStore((s) => s.modelDetails);
   const startPredicting = useStore((s) => s.startPredicting);
   const stopPredicting = useStore((s) => s.stopPredicting);
   const bufferedData = useBufferedData();
   const intl = useIntl();
 
-  const navigateToDataSamples = useCallback(() => {
-    navigate(createDataSamplesPageUrl());
+  const navigateToTestAndTrain = useCallback(() => {
+    navigate(createTestAndTrainPageUrl());
   }, [navigate]);
 
   useEffect(() => {
     if (!model) {
-      return navigateToDataSamples();
+      return navigateToTestAndTrain();
     }
     startPredicting(bufferedData);
 
@@ -63,7 +64,7 @@ const TestingModelPage = () => {
   }, [
     bufferedData,
     model,
-    navigateToDataSamples,
+    navigateToTestAndTrain,
     startPredicting,
     stopPredicting,
   ]);
@@ -113,7 +114,7 @@ const TestingModelPage = () => {
 
   return model ? (
     <DefaultPageLayout
-      titleId="Use model"
+      titleId={`Use ${modelDetails?.name}`}
       showPageTitle
       menuItems={<ProjectMenuItems />}
       toolbarItemsRight={<ProjectToolbarItems />}
@@ -121,9 +122,9 @@ const TestingModelPage = () => {
         <Button
           leftIcon={<BackArrow />}
           variant="toolbar"
-          onClick={navigateToDataSamples}
+          onClick={navigateToTestAndTrain}
         >
-          <FormattedMessage id="Back to data features" />
+          <FormattedMessage id="Back to training" />
         </Button>
       }
     >

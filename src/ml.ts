@@ -309,12 +309,7 @@ export const applyFilters = (
     throw new Error("Empty x/y/z data");
   }
 
-  opts.enabledFilters =
-    opts.enabledFilters === undefined
-      ? mlSettings.includedFilters
-      : opts.enabledFilters;
-
-  return Array.from(opts.enabledFilters).reduce((acc, filter) => {
+  return Array.from(opts.enabledFilters ?? mlSettings.includedFilters).reduce((acc, filter) => {
     const { x, y, z } = applyFilter(filter, data, dataWindow, {
       normalize: opts.normalize,
     });
@@ -356,6 +351,7 @@ interface PredictInput {
   model: tf.LayersModel;
   data: XYZData;
   classificationIds: number[];
+  enabledFeatures?: Set<Filter>;
 }
 
 export type Confidences = Record<ActionData["ID"], number>;
@@ -366,10 +362,10 @@ export type ConfidencesResult =
 
 // For predicting
 export const predict = (
-  { model, data, classificationIds }: PredictInput,
+  { model, data, classificationIds, enabledFeatures }: PredictInput,
   dataWindow: DataWindow
 ): ConfidencesResult => {
-  const input = Object.values(applyFilters(data, dataWindow));
+  const input = Object.values(applyFilters(data, dataWindow, { enabledFilters: enabledFeatures}));
   const prediction = model.predict(tf.tensor([input])) as tf.Tensor;
   try {
     const confidences = prediction.dataSync() as Float32Array;
