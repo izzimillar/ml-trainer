@@ -137,12 +137,6 @@ const EvaluateModelPage = () => {
               {...gridCommonProps}
               headings={headings}
             />
-            <FormattedMessage
-              id={`there are ${previousModels.length} values in previous models\n`}
-            />
-            <FormattedMessage
-              id={`model is ${typeof model === "undefined" ? 0 : 1}`}
-            />
             <Grid {...gridCommonProps}>
               {previousModels.map((details, idx) => {
                 return (
