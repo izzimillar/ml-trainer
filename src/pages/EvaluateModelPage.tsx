@@ -66,7 +66,7 @@ const headings: GridColumnHeadingItemProps[] = [
 const EvaluateModelPage = () => {
   const previousModels = useStore((s) => s.previousModels);
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
-  const saveModel = useStore((s) => s.saveModel);
+  const model = useStore((s) => s.model);
   const setModel = useStore((s) => s.setModelForUse);
   const deleteModel = useStore((s) => s.deleteModel);
   const [modelName, setModelName] = useState<string>("New model!");
@@ -109,13 +109,12 @@ const EvaluateModelPage = () => {
     navigate(createDataSamplesPageUrl());
   }, [navigate]);
 
-  const handleSaveModel = useCallback(() => {
-    saveModel();
-  }, [saveModel]);
-
   return (
     <>
-      <TrainModelDialogs finalFocusRef={trainButtonRef} />
+      <TrainModelDialogs
+        finalFocusRef={trainButtonRef}
+        modelDetails={{ name: modelName, trainingSize: split / 100 }}
+      />
       <DefaultPageLayout
         titleId="Train and test model"
         showPageTitle
@@ -137,6 +136,12 @@ const EvaluateModelPage = () => {
               px={5}
               {...gridCommonProps}
               headings={headings}
+            />
+            <FormattedMessage
+              id={`there are ${previousModels.length} values in previous models\n`}
+            />
+            <FormattedMessage
+              id={`model is ${typeof model === "undefined" ? 0 : 1}`}
             />
             <Grid {...gridCommonProps}>
               {previousModels.map((details, idx) => {
@@ -192,7 +197,7 @@ const EvaluateModelPage = () => {
                 setSplit={setSplit}
                 nameViewMode={ModelNameCardViewMode.Editable}
                 onTrain={() =>
-                  trainModelFlowStart(handleSaveModel, {
+                  trainModelFlowStart(undefined, {
                     name: modelName,
                     trainingSize: split / 100,
                   })

@@ -820,6 +820,7 @@ const createMlStore = (logging: Logging) => {
               trainingFeatures,
               trainModel,
             } = get();
+            console.log("starting train");
             if (
               !hasSufficientDataForTraining(
                 actions,
@@ -827,10 +828,12 @@ const createMlStore = (logging: Logging) => {
                 modelDetails?.trainingSize ?? 0
               )
             ) {
+              console.log("has training data");
               set({
                 trainModelDialogStage: TrainModelDialogStage.InsufficientData,
               });
             } else if (showPreTrainHelp) {
+              console.log("has training data");
               set({
                 trainModelDialogStage: TrainModelDialogStage.Help,
               });
@@ -841,7 +844,7 @@ const createMlStore = (logging: Logging) => {
           },
 
           async trainModel(modelDetails?) {
-            const { actions, dataWindow, trainingFeatures } = get();
+            const { actions, dataWindow, trainingFeatures, saveModel } = get();
             logging.event({
               type: "model-train",
               detail: {
@@ -916,6 +919,9 @@ const createMlStore = (logging: Logging) => {
               false,
               actionName
             );
+
+            saveModel();
+
             return !trainingResult.error;
           },
 
@@ -954,7 +960,6 @@ const createMlStore = (logging: Logging) => {
               model,
               dataWindow,
             } = get();
-
             if (!modelDetails) return;
             const currentID = modelDetails?.ID;
             const alreadySaved = previousModels.reduce(
@@ -964,7 +969,6 @@ const createMlStore = (logging: Logging) => {
             if (alreadySaved) return;
 
             const savedModels = [...previousModels, modelDetails];
-
             set({
               previousModels: savedModels,
               ...updateProject(
@@ -986,9 +990,7 @@ const createMlStore = (logging: Logging) => {
                 dataWindow,
                 previousModels,
               }) => {
-                const selectedDetails = previousModels.find(
-                  (m) => m.ID === id
-                );
+                const selectedDetails = previousModels.find((m) => m.ID === id);
 
                 return {
                   actions,
@@ -1461,7 +1463,13 @@ const createMlStore = (logging: Logging) => {
           },
 
           startPredicting(buffer: BufferedData) {
-            const { actions, model, modelDetails, predictionInterval, dataWindow } = get();
+            const {
+              actions,
+              model,
+              modelDetails,
+              predictionInterval,
+              dataWindow,
+            } = get();
             if (!model || predictionInterval) {
               return;
             }

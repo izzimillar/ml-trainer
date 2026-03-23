@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 import { useCallback } from "react";
-import { useNavigate } from "react-router";
-import { TrainModelDialogStage } from "../model";
+// import { useNavigate } from "react-router";
+import { ModelDetails, TrainModelDialogStage } from "../model";
 import { useSettings, useStore } from "../store";
-import { createTestAndTrainPageUrl } from "../urls";
+// import { createTestAndTrainPageUrl } from "../urls";
 import TrainingErrorDialog from "./TrainingErrorDialog";
 import TrainingModelProgressDialog from "./TrainingModelProgressDialog";
 import TrainModelIntroDialog from "./TrainModelHelpDialog";
@@ -15,12 +15,13 @@ import TrainModelInsufficientDataDialog from "./TrainModelInsufficientDataDialog
 
 interface TrainModelDialogsProps {
   finalFocusRef?: React.RefObject<HTMLButtonElement>;
+  modelDetails?: Partial<ModelDetails>;
 }
 
-const TrainModelDialogs = ({ finalFocusRef }: TrainModelDialogsProps) => {
+const TrainModelDialogs = ({ finalFocusRef, modelDetails }: TrainModelDialogsProps) => {
   const stage = useStore((s) => s.trainModelDialogStage);
   const closeTrainModelDialogs = useStore((s) => s.closeTrainModelDialogs);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const trainModel = useStore((s) => s.trainModel);
   const trainModelProgress = useStore((s) => s.trainModelProgress);
   const [, setSettings] = useSettings();
@@ -28,12 +29,12 @@ const TrainModelDialogs = ({ finalFocusRef }: TrainModelDialogsProps) => {
   const handleHelpNext = useCallback(
     async (isSkipNextTime: boolean) => {
       setSettings({ showPreTrainHelp: !isSkipNextTime });
-      const result = await trainModel({ trainingSize: 0.2 });
-      if (result) {
-        navigate(createTestAndTrainPageUrl());
-      }
+      await trainModel(modelDetails);
+      // if (result) {
+      //   navigate(createTestAndTrainPageUrl());
+      // }
     },
-    [navigate, setSettings, trainModel]
+    [setSettings, trainModel, modelDetails]
   );
   return (
     <>
