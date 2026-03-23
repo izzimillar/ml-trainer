@@ -41,6 +41,10 @@ const DataSamplesPage = () => {
 
   const hasSufficientData = useHasSufficientDataForTraining();
   const isAddNewActionDisabled = actions.some((a) => a.name.length === 0);
+  const totalNumRecordings = actions.reduce(
+    (acc, action) => acc + action.recordings.length,
+    0
+  );
 
   const handleNavigateToFeatures = useCallback(() => {
     navigate(createFeaturesPageUrl());
@@ -107,7 +111,13 @@ const DataSamplesPage = () => {
 
             <HStack>
               {/* navigate to features page button */}
-              <Button onClick={handleNavigateToFeatures} variant="primary">
+              <Button
+                onClick={handleNavigateToFeatures}
+                isDisabled={totalNumRecordings === 0}
+                variant={
+                  totalNumRecordings === 0 ? "secondary-disabled" : "primary"
+                }
+              >
                 <FormattedMessage id="Explore data" />
               </Button>
 

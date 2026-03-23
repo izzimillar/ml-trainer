@@ -40,23 +40,25 @@ const trainRowGridCommonProps: Partial<GridProps> = {
 const headings: GridColumnHeadingItemProps[] = [
   {
     titleId: "Model name",
-    descriptionId: "Give your model a name!"
+    descriptionId: "Give your model a name!",
   },
   {
     titleId: "Features",
-    descriptionId: "The data features that this model is trained on. To find out more about data features go to the \"Explore data\" page."
+    descriptionId:
+      'The data features that this model is trained on. To find out more about data features go to the "Explore data" page.',
   },
   {
     titleId: "Training size",
-    descriptionId: "The number of recordings that the model was trained on."
+    descriptionId: "The number of recordings that the model was trained on.",
   },
   {
     titleId: "Test size",
-    descriptionId: "The number of recordings that the model was tested on."
+    descriptionId: "The number of recordings that the model was tested on.",
   },
   {
     titleId: "Accuracy",
-    descriptionId: "The accuracy of the model on the test data. A higher accuracy means the model is better at predicting your movement. We need the test size to be more than zero to calculate an accuracy."
+    descriptionId:
+      "The accuracy of the model on the test data. A higher accuracy means the model is better at predicting your movement. We need the test size to be more than zero to calculate an accuracy.",
   },
   {},
 ];
@@ -86,7 +88,7 @@ const EvaluateModelPage = () => {
   };
 
   const handleDeleteModel = (id: ModelDetails["ID"]) => {
-    if (selectedModelIdx >= (previousModels.length - 1)) {
+    if (selectedModelIdx >= previousModels.length - 1) {
       setSelectedModelIdx(previousModels.length - 2);
     }
 
@@ -177,7 +179,12 @@ const EvaluateModelPage = () => {
             </Button>
           </HStack>
           <Flex>
-            <Grid {...trainRowGridCommonProps} paddingBottom={2} h={152}>
+            <Grid
+              {...trainRowGridCommonProps}
+              paddingBottom={2}
+              h={152}
+              alignContent={"center"}
+            >
               <ModelTrainRow
                 name={modelName}
                 setName={setModelName}

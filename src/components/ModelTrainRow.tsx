@@ -169,22 +169,22 @@ const ModelTrainRow = ({
         </Card>
       </GridItem> */}
 
-      <GridItem>
-        <Card
+      <GridItem h="100%" w="100%">
+        {/* <Card
           {...cardCommonProps}
           borderColor={selected ? "brand.500" : "transparent"}
           onClick={onSelectRow}
-        >
+        > */}
           {onTrain && (
             <Button
               ref={trainButtonRef}
               variant={hasSufficientData(split/100) ? "primary" : "secondary-disabled"}
               onClick={onTrain}
             >
-              <FormattedMessage id="Train model" />
+              <FormattedMessage id="train-model" />
             </Button>
           )}
-        </Card>
+        {/* </Card> */}
       </GridItem>
     </Box>
   );
