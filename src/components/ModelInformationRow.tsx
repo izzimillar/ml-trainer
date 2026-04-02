@@ -140,7 +140,7 @@ const ModelInformationRow = ({
             <HStack w="100%" gap={5}>
               <PercentageMeter
                 meterBarWidthPx={240}
-                value={accuracy}
+                value={accuracy()}
                 colorScheme={"brand2.500"}
               />
 
