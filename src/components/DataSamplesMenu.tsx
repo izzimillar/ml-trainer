@@ -19,7 +19,10 @@ import { MdMoreVert } from "react-icons/md";
 import {
   RiDeleteBin2Line,
   RiDownload2Line,
+  RiSchoolFill,
+  RiShakeHandsFill,
   RiUpload2Line,
+  RiWalkFill,
 } from "react-icons/ri";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLogging } from "../logging/logging-hooks";
@@ -29,7 +32,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import LoadProjectMenuItem from "./LoadProjectMenuItem";
 import { NameProjectDialog } from "./NameProjectDialog";
 import ViewDataFeaturesMenuItem from "./ViewDataFeaturesMenuItem";
-import { useProjectIsUntitled } from "../hooks/project-hooks";
+import { useProject, useProjectIsUntitled } from "../hooks/project-hooks";
 
 const DataSamplesMenu = () => {
   const intl = useIntl();
@@ -47,6 +50,7 @@ const DataSamplesMenu = () => {
   const nameProjectDialogOnOpen = useStore((s) => s.nameProjectDialogOnOpen);
   const isUntitled = useProjectIsUntitled();
   const setProjectName = useStore((s) => s.setProjectName);
+  const { loadFile } = useProject();
 
   const download = useCallback(() => {
     logging.event({
@@ -86,6 +90,16 @@ const DataSamplesMenu = () => {
     }
   }, [download, isUntitled, nameProjectDialogOnOpen]);
 
+  const handleOpenDataset = useCallback(
+    async (filename: string) => {
+      const response = await fetch(filename);
+      const f = await response.blob();
+      const file = new File([f], filename);
+      loadFile(file, "file-upload");
+    },
+    [loadFile]
+  );
+
   return (
     <>
       <NameProjectDialog
@@ -119,9 +133,33 @@ const DataSamplesMenu = () => {
         />
         <Portal>
           <MenuList>
-            <LoadProjectMenuItem icon={<RiUpload2Line />} accept=".json">
+            <MenuItem
+              icon={<RiWalkFill />}
+              onClick={() =>
+                handleOpenDataset("data/activity-data-samples.json")
+              }
+            >
+              <FormattedMessage id="Activity data" />
+            </MenuItem>
+            <MenuItem
+              icon={<RiSchoolFill />}
+              onClick={() =>
+                handleOpenDataset("data/lesson-movement-data-samples.json")
+              }
+            >
+              <FormattedMessage id="School movements data" />
+            </MenuItem>
+            <MenuItem
+              icon={<RiShakeHandsFill />}
+              onClick={() =>
+                handleOpenDataset("data/hand-movements-data-samples.json")
+              }
+            >
+              <FormattedMessage id="Hand movements data" />
+            </MenuItem>
+            {/* <LoadProjectMenuItem icon={<RiUpload2Line />} accept=".json">
               <FormattedMessage id="import-data-samples-action" />
-            </LoadProjectMenuItem>
+            </LoadProjectMenuItem> */}
             <MenuItem
               icon={<RiDownload2Line />}
               onClick={handleDownloadDataset}
