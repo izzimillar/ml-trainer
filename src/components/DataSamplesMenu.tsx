@@ -21,7 +21,7 @@ import {
   RiDownload2Line,
   RiSchoolFill,
   RiShakeHandsFill,
-  RiUpload2Line,
+  // RiUpload2Line,
   RiWalkFill,
 } from "react-icons/ri";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -29,7 +29,7 @@ import { useLogging } from "../logging/logging-hooks";
 import { useStore } from "../store";
 import { getTotalNumSamples } from "../utils/actions";
 import { ConfirmDialog } from "./ConfirmDialog";
-import LoadProjectMenuItem from "./LoadProjectMenuItem";
+// import LoadProjectMenuItem from "./LoadProjectMenuItem";
 import { NameProjectDialog } from "./NameProjectDialog";
 import ViewDataFeaturesMenuItem from "./ViewDataFeaturesMenuItem";
 import { useProject, useProjectIsUntitled } from "../hooks/project-hooks";

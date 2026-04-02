@@ -1,6 +1,6 @@
 [
   {
-    "icon": "House",
+    "icon": "StickFigure",
     "ID": 1775129323336,
     "name": "Walking",
     "recordings": [
@@ -3440,7 +3440,7 @@
     ]
   },
   {
-    "icon": "Duck",
+    "icon": "Rabbit",
     "ID": 1775129381137,
     "name": "Jumping",
     "recordings": [
@@ -6883,7 +6883,7 @@
     ]
   },
   {
-    "icon": "Tortoise",
+    "icon": "Chessboard",
     "ID": 1775129560902,
     "name": "Still",
     "recordings": [

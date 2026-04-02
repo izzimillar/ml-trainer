@@ -1,6 +1,6 @@
 [
   {
-    "icon": "House",
+    "icon": "Chessboard",
     "ID": 1775130567068,
     "name": "Still",
     "recordings": [
@@ -3389,7 +3389,7 @@
     ]
   },
   {
-    "icon": "Duck",
+    "icon": "Heart",
     "ID": 1775130601235,
     "name": "Hand up",
     "recordings": [
@@ -6826,7 +6826,7 @@
     ]
   },
   {
-    "icon": "Tortoise",
+    "icon": "LeftTriangle",
     "ID": 1775130624318,
     "name": "Writing",
     "recordings": [

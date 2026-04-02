@@ -1,6 +1,6 @@
 [
   {
-    "icon": "House",
+    "icon": "Happy",
     "ID": 1775130868134,
     "name": "Waving",
     "recordings": [
@@ -3386,7 +3386,7 @@
     ]
   },
   {
-    "icon": "Duck",
+    "icon": "Heart",
     "ID": 1775130887185,
     "name": "Clapping",
     "recordings": [
@@ -6835,7 +6835,7 @@
     ]
   },
   {
-    "icon": "Tortoise",
+    "icon": "Diamond",
     "ID": 1775130959467,
     "name": "Handshake",
     "recordings": [
