@@ -57,13 +57,17 @@ const ModelInformationRow = ({
     return 0;
   };
 
-  const accuracy = details
-    ? details.testResults
-      ? details.testResults.error
-        ? 0
-        : details.testResults.accuracy * 100
-      : 0
-    : 0;
+  const accuracy = () => {
+    const value = details
+      ? details.testResults
+        ? details.testResults.error
+          ? 0
+          : details.testResults.accuracy
+        : 0
+      : 0;
+
+    return Math.round(value * 1000) / 10;
+  };
 
   return (
     <Box role="region" display="contents" h="100%">
@@ -140,7 +144,7 @@ const ModelInformationRow = ({
                 colorScheme={"brand2.500"}
               />
 
-              <PercentageDisplay value={accuracy} colorScheme={"brand2.500"} />
+              <PercentageDisplay value={accuracy()} colorScheme={"brand2.500"} />
             </HStack>
           )}
 

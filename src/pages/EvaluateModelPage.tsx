@@ -66,7 +66,6 @@ const headings: GridColumnHeadingItemProps[] = [
 const EvaluateModelPage = () => {
   const previousModels = useStore((s) => s.previousModels);
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
-  const model = useStore((s) => s.model);
   const setModel = useStore((s) => s.setModelForUse);
   const deleteModel = useStore((s) => s.deleteModel);
   const [modelName, setModelName] = useState<string>("New model!");
