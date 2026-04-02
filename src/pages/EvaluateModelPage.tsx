@@ -26,15 +26,15 @@ import { ModelDetails } from "../model";
 const gridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "200px 240px 200px 200px 340px 150px",
   gap: 3,
-  w: "100%",
   px: 5,
+  w: "100%",
 };
 
 const trainRowGridCommonProps: Partial<GridProps> = {
   gridTemplateColumns: "200px 240px 200px 200px 150px",
   gap: 3,
-  w: "100%",
   px: 5,
+  w: "100%",
 };
 
 const headings: GridColumnHeadingItemProps[] = [
@@ -127,30 +127,35 @@ const EvaluateModelPage = () => {
           </Button>
         }
       >
-        <Flex as="main" flexGrow={1} flexDir="column">
-          <VStack>
-            <HeadingGrid
-              position="sticky"
-              top={0}
-              px={5}
-              {...gridCommonProps}
-              headings={headings}
-            />
-            <Grid {...gridCommonProps}>
-              {previousModels.map((details, idx) => {
-                return (
-                  <ModelInformationRow
-                    key={details.ID}
-                    details={details}
-                    nameViewMode={ModelNameCardViewMode.ReadOnly}
-                    onSelectRow={() => setSelectedModelIdx(idx)}
-                    selected={selectedModel.ID == details.ID}
-                    onDelete={() => handleDeleteModel(details.ID)}
-                  />
-                );
-              })}
-            </Grid>
-          </VStack>
+        <Flex as="main" flexGrow={1} flexDir="column" overflow="hidden">
+          <HeadingGrid
+            position="sticky"
+            top={0}
+            {...gridCommonProps}
+            headings={headings}
+          />
+          <Grid
+            {...gridCommonProps}
+            py={2}
+            alignItems="stretch"
+            autoRows="max-content"
+            overflow="auto"
+            flexGrow={1}
+            h={0}
+          >
+            {previousModels.map((details, idx) => {
+              return (
+                <ModelInformationRow
+                  key={details.ID}
+                  details={details}
+                  nameViewMode={ModelNameCardViewMode.ReadOnly}
+                  onSelectRow={() => setSelectedModelIdx(idx)}
+                  selected={selectedModel.ID == details.ID}
+                  onDelete={() => handleDeleteModel(details.ID)}
+                />
+              );
+            })}
+          </Grid>
         </Flex>
 
         <VStack>
@@ -176,12 +181,14 @@ const EvaluateModelPage = () => {
               <FormattedMessage id={`Use ${selectedModelName()}`} />
             </Button>
           </HStack>
-          <Flex>
+
+          <Flex as="main" flexGrow={1} flexDir="column">
             <Grid
               {...trainRowGridCommonProps}
               paddingBottom={2}
               h={152}
-              alignContent={"center"}
+              alignItems="stretch"
+              autoRows="max-content"
             >
               <ModelTrainRow
                 name={modelName}

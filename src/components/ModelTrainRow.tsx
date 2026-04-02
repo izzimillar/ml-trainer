@@ -151,40 +151,27 @@ const ModelTrainRow = ({
         </Card>
       </GridItem>
 
-      {/* <GridItem>
-        <Card
-          {...cardCommonProps}
-          borderColor={selected ? "brand.500" : "transparent"}
-          onClick={onSelectRow}
-        >
-          <HStack w="100%" gap={5}>
-            <PercentageMeter
-              meterBarWidthPx={240}
-              value={69}
-              colorScheme={"brand2.500"}
-            />
-
-            <PercentageDisplay value={69} colorScheme={"brand2.500"} />
-          </HStack>
-        </Card>
-      </GridItem> */}
-
       <GridItem h="100%" w="100%">
-        {/* <Card
+        <Box
           {...cardCommonProps}
-          borderColor={selected ? "brand.500" : "transparent"}
-          onClick={onSelectRow}
-        > */}
+          borderWidth={0}
+          // borderColor={selected ? "brand.500" : "transparent"}
+          // onClick={onSelectRow}
+        >
           {onTrain && (
             <Button
               ref={trainButtonRef}
-              variant={hasSufficientData(split/100) ? "primary" : "secondary-disabled"}
+              variant={
+                hasSufficientData(split / 100)
+                  ? "primary"
+                  : "secondary-disabled"
+              }
               onClick={onTrain}
             >
               <FormattedMessage id="train-model" />
             </Button>
           )}
-        {/* </Card> */}
+        </Box>
       </GridItem>
     </Box>
   );
