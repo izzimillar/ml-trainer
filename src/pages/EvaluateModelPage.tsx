@@ -9,6 +9,7 @@ import {
   GridProps,
   HStack,
   VStack,
+  Text,
 } from "@chakra-ui/react";
 import { RiArrowRightLine } from "react-icons/ri";
 import { FormattedMessage } from "react-intl";
@@ -134,28 +135,44 @@ const EvaluateModelPage = () => {
             {...gridCommonProps}
             headings={headings}
           />
-          <Grid
-            {...gridCommonProps}
-            py={2}
-            alignItems="stretch"
-            autoRows="max-content"
-            overflow="auto"
-            flexGrow={1}
-            h={0}
-          >
-            {previousModels.map((details, idx) => {
-              return (
-                <ModelInformationRow
-                  key={details.ID}
-                  details={details}
-                  nameViewMode={ModelNameCardViewMode.ReadOnly}
-                  onSelectRow={() => setSelectedModelIdx(idx)}
-                  selected={selectedModel.ID == details.ID}
-                  onDelete={() => handleDeleteModel(details.ID)}
-                />
-              );
-            })}
-          </Grid>
+          {previousModels.length === 0 ? (
+            <VStack
+              gap={5}
+              flexGrow={1}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text fontSize="lg">
+                <FormattedMessage id="No models trained!" />
+              </Text>
+              <Text fontSize="md">
+                <FormattedMessage id="Choose options and train a model below." />
+              </Text>
+            </VStack>
+          ) : (
+            <Grid
+              {...gridCommonProps}
+              py={2}
+              alignItems="stretch"
+              autoRows="max-content"
+              overflow="auto"
+              flexGrow={1}
+              h={0}
+            >
+              {previousModels.map((details, idx) => {
+                return (
+                  <ModelInformationRow
+                    key={details.ID}
+                    details={details}
+                    nameViewMode={ModelNameCardViewMode.ReadOnly}
+                    onSelectRow={() => setSelectedModelIdx(idx)}
+                    selected={selectedModel.ID == details.ID}
+                    onDelete={() => handleDeleteModel(details.ID)}
+                  />
+                );
+              })}
+            </Grid>
+          )}
         </Flex>
 
         <VStack>
