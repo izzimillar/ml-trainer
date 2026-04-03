@@ -36,7 +36,6 @@ const FeaturesPage = () => {
     navigate(createDataSamplesPageUrl());
   }, [navigate]);
 
-  // TODO: add headers to the top of this page with Actions and features plus make it look better?
   return (
     <>
       <TrainModelDialogs finalFocusRef={trainButtonRef} />

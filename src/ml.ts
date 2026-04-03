@@ -40,7 +40,7 @@ export const trainModel = async (
   // get the recording data for the training set.
   const trainingData = getDataFromIDs(data, trainIds);
 
-  // Gets a set of 24 values for each recording. Each set of features is labelled with a one-hot encoding
+  // Gets a set of values for each recording. Each set of features is labelled with a one-hot encoding.
   const { features, labels } = prepareFeaturesAndLabels(
     trainingData,
     dataWindow,
@@ -274,7 +274,9 @@ const createModel = (
   const inputShape = [filters.size * mlSettings.includedAxes.length];
 
   const input = tf.input({ shape: inputShape });
-  const normalizer = tf.layers.batchNormalization().apply(input);
+  const normalizer = tf.layers
+    .batchNormalization()
+    .apply(input);
   const dense = tf.layers
     .dense({ units: 16, activation: "relu" })
     .apply(normalizer);

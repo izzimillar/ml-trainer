@@ -10,12 +10,14 @@ import { Filter, mlSettings } from "../mlConfig";
 interface FeaturesTableRowProps {
   action: ActionData;
   expanded: boolean;
+  expandedFeatures: Set<Filter>;
   onClick?: (rowID: number) => void;
 }
 
 const FeatureTableRow = ({
   action,
   expanded,
+  expandedFeatures,
   onClick,
 }: FeaturesTableRowProps) => {
   const { featuresView } = useStore((s) => s.settings);
@@ -23,11 +25,7 @@ const FeatureTableRow = ({
   const filters = mlSettings.includedFilters;
 
   return (
-    <
-      // height={expanded ? ref.current?.scrollHeight : "100px"}
-      // transition={"height 0.3s ease"}
-      // overflow={"hidden"}
-    >
+    <>
       <GridItem h="100%" w="100%">
         <ActionHeaderRow
           action={action}
@@ -39,12 +37,12 @@ const FeatureTableRow = ({
 
       {Array.from(filters).map((filter, idx) => (
         <GridItem key={idx}>
-          <FeatureCard
+          {expandedFeatures.has(filter) && <FeatureCard
             action={action}
             filter={filter}
             view={featuresView}
             expanded={expanded}
-          />
+          />}
         </GridItem>
       ))}
     </>
