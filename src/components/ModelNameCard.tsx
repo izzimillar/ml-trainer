@@ -1,16 +1,17 @@
 import {
   Card,
   CardBody,
-  CloseButton,
   HStack,
   Input,
   useBreakpointValue,
   useToast,
 } from "@chakra-ui/react";
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
 import { ModelDetails } from "../model";
 import { tourElClassname } from "../tours";
+import debounce from "lodash.debounce";
+import { useStore } from "../store";
 
 export enum ModelNameCardViewMode {
   Editable = "Editable", // Interaction, color, depth
@@ -19,9 +20,8 @@ export enum ModelNameCardViewMode {
 }
 
 interface ModelNameCardProps {
-  name: ModelDetails["name"];
-  setName: (name: string) => void;
-  onDeleteAction?: () => void;
+  model?: ModelDetails
+  onSave?: (name: string) => void;
   onSelectRow?: () => void;
   selected?: boolean;
   viewMode: ModelNameCardViewMode;
@@ -31,9 +31,8 @@ interface ModelNameCardProps {
 const modelNameMaxLength = 18;
 
 const ModelNameCard = ({
-  name,
-  setName,
-  onDeleteAction,
+  model,
+  onSave,
   onSelectRow,
   selected = false,
   viewMode,
@@ -42,8 +41,23 @@ const ModelNameCard = ({
   const intl = useIntl();
   const toast = useToast();
   const toastId = "name-too-long-toast";
+  const setModelName = useStore((s) => s.setModelName);
+  const [localName, setLocalName] = useState<string>(model?.name ?? "New model!");
   // Avoid autofocus on mobile as it triggers the keyboard
   const allowAutoFocus = useBreakpointValue({ base: false, md: true });
+
+    const debouncedSetModelName = useMemo(
+    () =>
+      debounce(
+        (id: ModelDetails["ID"], name: string) => {
+          setModelName(id, name);
+        },
+        400,
+        { leading: true }
+      ),
+    [setModelName]
+  );
+
 
   const onChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
@@ -63,9 +77,17 @@ const ModelNameCard = ({
         });
         return;
       }
-      setName(name);
+      setLocalName(name);
+      
+      if (model) {
+        debouncedSetModelName(model.ID, name);
+      }
+      if (onSave) {
+        onSave(name);
+      }
+
     },
-    [setName, intl, toast]
+    [setLocalName, onSave, debouncedSetModelName, model, intl, toast]
   );
 
   return (
@@ -83,24 +105,15 @@ const ModelNameCard = ({
         viewMode === ModelNameCardViewMode.Preview ? "outline" : undefined
       }
     >
-      {viewMode === ModelNameCardViewMode.Editable && onDeleteAction && (
-        <CloseButton
-          position="absolute"
-          right={1}
-          top={1}
-          onClick={onDeleteAction}
-          size="sm"
-          borderRadius="sm"
-        />
-      )}
+
       <CardBody p={0} alignContent="center">
         <HStack>
           <Input
-            id={name}
-            autoFocus={allowAutoFocus && name.length === 0}
+            id={localName}
+            autoFocus={allowAutoFocus && localName.length === 0}
             isTruncated
             readOnly={viewMode !== ModelNameCardViewMode.Editable}
-            value={name}
+            value={localName}
             borderWidth={0}
             maxLength={18}
             {...(viewMode !== ModelNameCardViewMode.Editable

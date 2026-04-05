@@ -38,13 +38,6 @@ const ModelInformationRow = ({
   onSelectRow,
   onDelete,
 }: ModelInformationRowProps) => {
-  // const handleIncludeOnChange = useCallback(
-  //   (feature: Filter, e: React.ChangeEvent<HTMLInputElement>) => {
-  //     setFeatures(feature, e.target.checked);
-  //   },
-  //   [setFeatures]
-  // );
-
   const numberOfTrainingSamples = () => {
     if (details) {
       return (
@@ -73,8 +66,7 @@ const ModelInformationRow = ({
     <Box role="region" display="contents" h="100%">
       <GridItem>
         <ModelNameCard
-          name={details.name}
-          setName={(_) => {}}
+          model={details}
           viewMode={nameViewMode}
           onSelectRow={onSelectRow}
           selected={selected}
@@ -144,7 +136,10 @@ const ModelInformationRow = ({
                 colorScheme={"brand2.500"}
               />
 
-              <PercentageDisplay value={accuracy()} colorScheme={"brand2.500"} />
+              <PercentageDisplay
+                value={accuracy()}
+                colorScheme={"brand2.500"}
+              />
             </HStack>
           )}
 

@@ -28,10 +28,9 @@ const cardCommonProps: Partial<CardProps> = {
 };
 
 interface ModelTrainRowProps {
-  name: string;
-  setName: (name: string) => void;
   split: number;
   setSplit: (value: number) => void;
+  setModelName: (name: string) => void;
   nameViewMode: ModelNameCardViewMode;
   selected?: boolean;
   onSelectRow?: () => void;
@@ -40,10 +39,9 @@ interface ModelTrainRowProps {
 }
 
 const ModelTrainRow = ({
-  name,
-  setName,
   split,
   setSplit,
+  setModelName,
   nameViewMode,
   selected,
   onSelectRow,
@@ -81,7 +79,7 @@ const ModelTrainRow = ({
   return (
     <Box role="region" display="contents" h="100%">
       <GridItem>
-        <ModelNameCard name={name} setName={setName} viewMode={nameViewMode} />
+        <ModelNameCard viewMode={nameViewMode} onSave={setModelName} />
       </GridItem>
 
       <GridItem>

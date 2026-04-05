@@ -69,9 +69,9 @@ const EvaluateModelPage = () => {
   const trainModelFlowStart = useStore((s) => s.trainModelFlowStart);
   const setModel = useStore((s) => s.setModelForUse);
   const deleteModel = useStore((s) => s.deleteModel);
-  const [modelName, setModelName] = useState<string>("New model!");
   const [split, setSplit] = useState<number>(80);
   const [selectedModelIdx, setSelectedModelIdx] = useState<number>(0);
+  const [newModelName, setNewModelName] = useState<string>("New model!");
 
   const selectedModel: ModelDetails =
     previousModels[selectedModelIdx] ?? previousModels[0];
@@ -113,7 +113,8 @@ const EvaluateModelPage = () => {
     <>
       <TrainModelDialogs
         finalFocusRef={trainButtonRef}
-        modelDetails={{ name: modelName, trainingSize: split / 100 }}
+        // FIX THIS ! CHANGE TO MODEL NAME
+        modelDetails={{ name: newModelName, trainingSize: split / 100 }}
       />
       <DefaultPageLayout
         titleId="Train and test model"
@@ -164,7 +165,7 @@ const EvaluateModelPage = () => {
                   <ModelInformationRow
                     key={details.ID}
                     details={details}
-                    nameViewMode={ModelNameCardViewMode.ReadOnly}
+                    nameViewMode={ModelNameCardViewMode.Editable}
                     onSelectRow={() => setSelectedModelIdx(idx)}
                     selected={selectedModel.ID == details.ID}
                     onDelete={() => handleDeleteModel(details.ID)}
@@ -208,14 +209,13 @@ const EvaluateModelPage = () => {
               autoRows="max-content"
             >
               <ModelTrainRow
-                name={modelName}
-                setName={setModelName}
                 split={split}
                 setSplit={setSplit}
+                setModelName={setNewModelName}
                 nameViewMode={ModelNameCardViewMode.Editable}
                 onTrain={() =>
                   trainModelFlowStart(undefined, {
-                    name: modelName,
+                    name: newModelName,
                     trainingSize: split / 100,
                   })
                 }
